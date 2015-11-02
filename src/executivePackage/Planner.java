@@ -1,4 +1,4 @@
-package basicPackage;
+package executivePackage;
 
 public class Planner {
 

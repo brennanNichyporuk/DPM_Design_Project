@@ -1,4 +1,4 @@
-package basicPackage;
+package modulePackage;
 
 public class UltrasonicModule {
 
