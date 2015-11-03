@@ -11,8 +11,8 @@ import basicPackage.*;
  */
 public class LocateObject extends Thread
 {
-	private ArrayList nonFlagLoco; 
-	private Block currentObjLoco; 
+	private ArrayList<double[]> nonFlagLoco; 
+	private double[] currentObjLoco; 
 	
 	private Navigation nav;	
 	private Odometer odo;
@@ -24,7 +24,7 @@ public class LocateObject extends Thread
 	 *@param navigator contains methods which navigates the robot 
 	 *@param odometer keeps track of the robot's position 
 	 *@param usm access to the ultrasonic sensor 
-	 *@param lsm access to the light sensor 
+	 *@param cd access to the light sensor. color detection feature. 
 	 */
 	public LocateObject(Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd)
 	{
@@ -44,10 +44,12 @@ public class LocateObject extends Thread
 	}
 
 	/**
-	 *@return location of the current object found
+	 *Gets the location of the current object being analyzed.
+	 *@return location of the current object found.
 	 */
-	public Block getCurrentObjLoco()
+	public double[] getCurrentObjLoco()
 	{
-		return new Block();
+		//temporary return
+		return new double[]{-1};
 	}
 }

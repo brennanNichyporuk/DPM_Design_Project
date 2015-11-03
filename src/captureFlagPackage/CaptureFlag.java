@@ -29,7 +29,7 @@ public class CaptureFlag extends Thread implements IObserver
 	 *@param navigator contains methods which navigates the robot 
 	 *@param odometer keeps track of the robot's position 
 	 *@param usm access to the ultrasonic sensor 
-	 *@param lsm access to the light sensor 
+	 *@param cd access to the light sensor. color detection feature. 
 	 *@param robotArmMotor is the motor that controls the robot's arm
 	 */
 	public CaptureFlag(int objectID, Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd, EV3MediumRegulatedMotor robotArmMotor)
@@ -53,14 +53,6 @@ public class CaptureFlag extends Thread implements IObserver
 	public void run()
 	{
 
-	}
-
-	/**
-	 *@return location of any object found by LocateObject
-	 */
-	private double[] findObjects()
-	{
-		return new double[]{0.0}; 
 	}
 
 	/**
