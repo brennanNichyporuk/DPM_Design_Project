@@ -20,7 +20,7 @@ public class IdentifyObject extends Thread
 	 *Constructor. Requires user to specify colorID value of the target flag
 	 *@param objectID color value of flag 
 	 *@param usm access to the ultrasonic sensor 
-	 *@param lsm access to the light sensor 
+	 *@param cd access to the light sensor. color detection feature. 
 	 */
 	public IdentifyObject(int objectID, UltrasonicModule usm, ColorDetection cd)
 	{
@@ -46,6 +46,7 @@ public class IdentifyObject extends Thread
 	 */
 	public int getObjectID()
 	{
+		//temporary return
 		return -1;
 	}
 }
