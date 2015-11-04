@@ -28,8 +28,9 @@ public class ColorDetection {
 		this.colorData = sampleDataColor;
 		this.sampleGetColor = sampleProvideColor;
 	}
-	/*
+	/**
 	 * returns true or false if the object is a block or not a block based on the threshold.
+	 * @return boolean determines if the object being viewed is a block or not.
 	 */
 	public boolean determineBlock(){
 		float intensity = 0;
