@@ -1,5 +1,19 @@
 package executivePackage;
 
-public class Planner {
+import basicPackage.IObserver;
 
+public class Planner extends Thread implements IObserver {
+	
+	/**
+	 * 
+	 */
+	public Planner() {
+		
+	}
+
+	public void run() {
+		
+	}
+	
+	
 }
