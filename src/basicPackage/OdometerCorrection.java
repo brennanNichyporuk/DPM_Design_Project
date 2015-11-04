@@ -23,19 +23,7 @@ public class OdometerCorrection extends Thread {
 	 */
 	private static final Port colorPort = LocalEV3.get().getPort("S1");
 
-	/*
-	 * Set sensor mode of the color sensor with this object.
-	 */
-	SensorModes colorSensor;
-	/*
-	 * Provides samples from the color sensor.
-	 */
-	SampleProvider colorSensorColor;
-	/*
-	 * Array to store color data from the light sensor.
-	 */
-	float[] colorData;
-	
+
 	/*
 	 * Low value threshold for detecting a line
 	 */
@@ -60,16 +48,14 @@ public class OdometerCorrection extends Thread {
 	public OdometerCorrection(Odometer odometer) {
 		this.odometer = odometer;
 
-		this.colorSensor = new EV3ColorSensor(colorPort);
-		this.colorSensorColor = colorSensor.getMode("Red");
-		this.colorData = new float[colorSensorColor.sampleSize()];
+		
 
-		colorSensorColor.fetchSample(colorData,0);
-		lastValue = (int)(colorData[0]*100.0);
-		colorSensorColor.fetchSample(colorData,0);
-		lastValue = (int)(colorData[0]*100.0);
-		colorSensorColor.fetchSample(colorData,0);
-		lastValue = (int)(colorData[0]*100.0);
+		//colorSensorColor.fetchSample(colorData,0);
+		//lastValue = (int)(colorData[0]*100.0);
+		//colorSensorColor.fetchSample(colorData,0);
+		//lastValue = (int)(colorData[0]*100.0);
+		//colorSensorColor.fetchSample(colorData,0);
+		//lastValue = (int)(colorData[0]*100.0);
 		
 		lowValue = 0;
 		highValue = 0;
@@ -83,8 +69,8 @@ public class OdometerCorrection extends Thread {
 			correctionStart = System.currentTimeMillis();
 
 			// put your correction code here
-			colorSensorColor.fetchSample(colorData,0);
-			int currentValue = (int)(colorData[0]*100.0);
+			//colorSensorColor.fetchSample(colorData,0);
+			int currentValue = 0;   /* (int)(colorData[0]*100.0);*/
 			int currentDerivative = currentValue - lastValue;
 
 			// if the derivative is increasing...
