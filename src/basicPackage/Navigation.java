@@ -164,7 +164,7 @@ public class Navigation {
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean input controls whether or not to stop themotors when the turn is complete.
 	 * @param angle The angle you want to turn to
-	 * @param boolean Stop the motors after having completed the turn or not.
+	 * @param stop Stop the motors after having completed the turn or not. If true the motors will stop.
 	 */
 	public void turnTo(double angle, boolean stop) {
 
@@ -194,6 +194,7 @@ public class Navigation {
 	 *  Method to help calculate the right angle that we want to turn to given a x and y.
 	 *  @param x The relative x position.
 	 *  @param y The relative y position.
+	 *  @return Angle between the current point from the odometer and the destination point.
 	 */
 	public double calculateAngle(double x, double y){
 		// Get Current Position

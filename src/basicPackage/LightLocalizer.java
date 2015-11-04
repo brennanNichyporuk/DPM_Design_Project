@@ -119,6 +119,7 @@ public class LightLocalizer {
 	}
 	/**
 	 * Helper method to cause the current thread to sleep.
+	 * @param t Length of time in ms that the thread will sleep for.
 	 */
 	public void sleep(long t) {
 		try {
@@ -169,6 +170,7 @@ public class LightLocalizer {
 	}
 	/**
 	 * Finds a line based on what update type we are executing.
+	 * @param uT The particular actions that occur based on which line is being read.
 	 */
 	public void findLine(UpdateType uT) {
 		//colorSensor.fetchSample(colorData, 0);
@@ -182,6 +184,7 @@ public class LightLocalizer {
 	 * When a line is found, this method calls update() -- which updates a variable based on
 	 * the UpdateType passed into the function. The method then returns ... at which point it can be called
 	 * again.
+	 * @param uT determine which update type procedures to excecute. 
 	 */
 	public void detectLine(UpdateType uT) {
 		long correctionStart, correctionEnd;

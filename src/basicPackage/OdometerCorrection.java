@@ -18,10 +18,6 @@ public class OdometerCorrection extends Thread {
 	 * Odometer Instance
 	 */
 	private Odometer odometer;
-	/**
-	 * Color sensor instance to get light readings
-	 */
-	private static final Port colorPort = LocalEV3.get().getPort("S1");
 
 
 	/**
