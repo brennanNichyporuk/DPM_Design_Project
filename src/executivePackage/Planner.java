@@ -14,6 +14,8 @@ public class Planner extends Thread implements IObserver {
 	public void run() {
 		
 	}
-	
+	public void update(int x){
+		
+	}
 	
 }
