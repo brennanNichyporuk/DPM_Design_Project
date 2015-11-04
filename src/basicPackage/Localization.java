@@ -5,7 +5,7 @@ import modulePackage.UltrasonicModule;
 
 public class Localization {
 	
-	/*
+	/**
 	 * How fast the robot is allowed to rotate while localizing
 	 */
 	public static double ROTATION_SPEED = 30;
@@ -22,7 +22,7 @@ public class Localization {
 		this.lightLocalizer = new LightLocalizer(this.odo, this.nav, lineModule);
 	}
 	
-	/*
+	/**
 	 * Executes both ultrasonic and light localization routines in order to get robot's
 	 * initial position.
 	 */

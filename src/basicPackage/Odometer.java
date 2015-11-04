@@ -36,40 +36,40 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Odometer implements TimerListener {
 	
-	/*
+	/**
 	 * Acts as the clock for the odometer. 
 	 * Defaults to 20ms if if the timeout interval is given as <= 0.
 	 */
 	private Timer timer;
 	
-	/*
+	/**
 	 * Left and right motors. Both must not be null and can be initialized using 
 	 * constructor.
 	 */
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
 	
 	
-	/*
+	/**
 	 * Timeout being for the clock in ms.
 	 */
 	private final int DEFAULT_TIMEOUT_PERIOD = 20;
 	
-	/*
+	/**
 	 * Instance variables for car dimensions.
 	 */
 	private double leftRadius, rightRadius, width;
 	
-	/*
+	/**
 	 * Current x, y and orientation of the car.
 	 */
 	private double x, y, theta;
 	
-	/*
+	/**
 	 * array to store old position and new position estimate from motors.
 	 */
 	private double[] oldDH, dDH;
 	
-	/*
+	/**
 	 * @param leftMotor instance of left motor
 	 * @param rightMotor instance of right motor
 	 * @param interval timer period
@@ -99,14 +99,14 @@ public class Odometer implements TimerListener {
 			this.timer = null;
 	}
 	
-	/*
+	/**
 	 *  Starts the TimerListener
 	 */
 	public void stop() {
 		if (this.timer != null)
 			this.timer.stop();
 	}
-	/*
+	/**
 	 * Stops the TimerListener
 	 */
 	public void start() {
@@ -114,7 +114,7 @@ public class Odometer implements TimerListener {
 			this.timer.start();
 	}
 	
-	/*
+	/**
 	 * Calculates the displacement and heading.
 	 * @param data The array where you want to store displacement and heading.
 	 */
@@ -127,7 +127,7 @@ public class Odometer implements TimerListener {
 		data[1] = (rightTacho * rightRadius - leftTacho * leftRadius) / width;
 	}
 	
-	/*
+	/**
 	 * Recompute the odometer values using the displacement and heading changes
 	 */
 	public void timedOut() {
@@ -148,7 +148,7 @@ public class Odometer implements TimerListener {
 		oldDH[1] += dDH[1];
 	}
 
-	/*
+	/**
 	 * returns the X value
 	 * @return double
 	 */
@@ -158,7 +158,8 @@ public class Odometer implements TimerListener {
 		}
 	}
 
-	/*returns the Y value
+	/**
+	 * returns the Y value
 	 * @return double
 	 */
 	public double getY() {
@@ -167,7 +168,7 @@ public class Odometer implements TimerListener {
 		}
 	}
 
-	/*
+	/**
 	 * return theta value
 	 * @return double
 	 */
@@ -177,7 +178,7 @@ public class Odometer implements TimerListener {
 		}
 	}
 
-	/*
+	/**
 	 * set the position of the robot
 	 * @param position provide an array with three arguments, x, y and theta values.
 	 * @param update determines if the corresponding parameter in position is updaed.
@@ -197,7 +198,7 @@ public class Odometer implements TimerListener {
 	}
 
 	
-	/*
+	/**
 	 * get the current position reported on the odometer
 	 * @return double[]
 	 */
@@ -207,26 +208,26 @@ public class Odometer implements TimerListener {
 		}
 	}
 	
-	/*
+	/**
 	 * accessors for both motors
 	 */
 	public EV3LargeRegulatedMotor [] getMotors() {
 		return new EV3LargeRegulatedMotor[] {this.leftMotor, this.rightMotor};
 	}
-	/*
+	/**
 	 * asscessors for left motor
 	 */
 	public EV3LargeRegulatedMotor getLeftMotor() {
 		return this.leftMotor;
 	}
-	/*
+	/**
 	 * accessors for right motor
 	 */
 	public EV3LargeRegulatedMotor getRightMotor() {
 		return this.rightMotor;
 	}
 
-	/*
+	/**
 	 * Helper method to fix a degree angle (ensure we never pass a negative value)
 	 */
 	public static double fixDegAngle(double angle) {
@@ -235,7 +236,7 @@ public class Odometer implements TimerListener {
 
 		return angle % 360.0;
 	}
-	/*
+	/**
 	 * Calculate the minimum angle based on the difference between the two angles
 	 * */
 	public static double minimumAngleFromTo(double a, double b) {

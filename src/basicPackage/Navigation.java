@@ -13,56 +13,56 @@ package basicPackage;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation {
-	/*
+	/**
 	 * Constant to determine the fast speed of the robot. Set to 200
 	 */
 	final static int FAST = 200;
-	/*
+	/**
 	 * Constant to determine the slow speed of the robot. Set to 80
 	 */
 	final static int SLOW = 80;
-	/*
+	/**
 	 * Constant to determine acceleration. Set to 4000
 	 */
 	final static int ACCELERATION = 4000;
 	
-	/*
+	/**
 	 * Set degree error in navigation.
 	 */
 	final static double DEG_ERR = 3.0;
-	/*
+	/**
 	 * Set distance error in navigation
 	 */
 	final static double  CM_ERR = 1.0;
-	/*
+	/**
 	 * Odometer to allow for navigator to make calls to odometer 
 	 * to determine where to navigate to.
 	 */
 	private Odometer odometer;
-	/*
+	/**
 	 * Left Motor instance
 	 */
 	private EV3LargeRegulatedMotor leftMotor;
-	/*
+	/**
 	 * Right Motor instance
 	 */
 	private EV3LargeRegulatedMotor rightMotor;
 	
-	/*
+	/**
 	 * Constant to set the wheelbase of the robot (cm)
 	 */
 	public static final double WB=12.0; 
-	/*
+	/**
 	 * Constant to set the wheel radius of the robot(cm)
 	 */
 	public static final double WR=2.2; 
 	
-	/*
+	/**
 	 * Error margin in distance calculations
 	 */
 	private static final double ERR_MARGIN = 0.5;
 
-	/*
+	/**
 	 * Constructor for Navigation
 	 * @param odo the Odometer instance which must not be null and allows for the robot
 	 * to navigate.
@@ -79,7 +79,7 @@ public class Navigation {
 		this.rightMotor.setAcceleration(ACCELERATION);
 	}
 
-	/*
+	/**
 	 * Function to set the motor speeds jointly
 	 * @param lSpd left motor speed for float
 	 * @param rSpd right motor speed for float
@@ -97,7 +97,7 @@ public class Navigation {
 			this.rightMotor.forward();
 	}
 	
-	/*
+	/**
 	 * Function to set the motor speeds jointly
 	 * @param lSpd left motor speed for int
 	 * @param rSpd right motor speed for int
@@ -115,7 +115,7 @@ public class Navigation {
 			this.rightMotor.forward();
 	}
 
-	/*
+	/**
 	 * Float the two motors jointly
 	 */
 	public void setFloat() {
@@ -125,7 +125,7 @@ public class Navigation {
 		this.rightMotor.flt(true);
 	}
 
-	/*
+	/**
 	 * TravelTo function will travel to designated position, while constantly updating it's heading
 	 * @param x The x position to travel to.
 	 * @param y The y position to travel to.
@@ -143,7 +143,7 @@ public class Navigation {
 		}
 		this.setSpeeds(0, 0);
 	}
-	/*
+	/**
 	 * Travels to designated position but backwards. MUST IMPLEMENT
 	 * @param x The x position to travel to
 	 * @param y The y position to travel to
@@ -161,7 +161,7 @@ public class Navigation {
 		this.setSpeeds(0, 0);
 	}
 
-	/*
+	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean input controls whether or not to stop themotors when the turn is complete.
 	 * @param angle The angle you want to turn to
 	 * @param boolean Stop the motors after having completed the turn or not.
@@ -190,7 +190,7 @@ public class Navigation {
 		}
 	}
 	
-	/*
+	/**
 	 *  Method to help calculate the right angle that we want to turn to given a x and y.
 	 *  @param x The relative x position.
 	 *  @param y The relative y position.
@@ -236,7 +236,7 @@ public class Navigation {
 		return angle;
 	}
 
-	/*
+	/**
 	 * Go foward a set distance in cm.
 	 * @param distance The distance you want to go forward in cm. If distance > 0 then move forward,
 	 * else move backward
@@ -253,7 +253,7 @@ public class Navigation {
 		this.setSpeeds(0, 0);
 	}
 	
-	/*
+	/**
 	 * Helper methods to convert distance into a distance that works with the wheels.
 	 * convertDistance to travel to value that corresponds to wheel rotations.
 	 * @param radius  radius of the wheels
@@ -264,7 +264,7 @@ public class Navigation {
 	}
 
 	
-	/*
+	/**
 	 * Helper method to convert the angle to a distance that works with the wheels.
 	 * @param radius the radius of the wheels
 	 * @param width the width of the car
@@ -274,7 +274,7 @@ public class Navigation {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-	/*
+	/**
 	 * Tells if a value is in range.
 	 * @param val the value you want to see if it is in range
 	 * @param target the target value

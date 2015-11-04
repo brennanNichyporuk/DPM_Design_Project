@@ -4,51 +4,51 @@ import lejos.robotics.SampleProvider;
 import modulePackage.LineDetection;
 
 public class LightLocalizer {
-	/*
+	/**
 	 * Constants that determine what procedures to run upon finding a line.
 	 */
 	private enum UpdateType {XUpdate, YUpdate, Theta1Set, Theta2Set, Theta3Set, Theta4Set};
-	/*
+	/**
 	 *  Four angles read from odometer in light localization routine.
 	 */
 	private double theta1, theta2, theta3, theta4 = 0;
-	/*
+	/**
 	 * Base width of robot measured on the axes.
 	 */
 	private double BASE_WIDTH = 17.25;
 	private Odometer odo;
 	private Navigation nav;
 	private LineDetection lineDetector;
-	/*
+	/**
 	 * The previous value from the light sensor
 	 * that the odometer recorded when odometry correction occured.
 	 */
 	private int lastValue;
-	/*
+	/**
 	 * The previous change in the light sensor.
 	 */
 	private int lastDerivative;
 	
-	/*
+	/**
 	 * The most negative change in the value coming in from the light sensor.
 	 */
 	private int lowValue; 
-	/*
+	/**
 	 * The most positive change in the value coming in from the light sensor
 	 */
 	private int highValue;
-	/*
+	/**
 	 * Threshold to determine the minimum change in the derivative for a line to be
 	 * considered detected.
 	 */
 	private int minDerivativeChange;
 	
-	/*
+	/**
 	 * Frequency in ms at which odometry correction routine's will be run.
 	 */
 	private long CORRECTION_PERIOD = 50;
 
-	/*
+	/**
 	 * @params odo The Odometer instance in charge of detemrining the robot's position
 	 * @params nav The Navigation instance in charge of navigating the robot.
 	 * @params colorSensor SampleProvider provides samples from the light sensor.
@@ -60,7 +60,7 @@ public class LightLocalizer {
 		this.lineDetector= lineDetector;
 	}
 	
-	/*
+	/**
 	 * Localization routine. Determines the initial position and then instructs
 	 * the navigator to travel to (0.0,0.0) and turn to 0.0 degrees
 	 */
@@ -75,7 +75,7 @@ public class LightLocalizer {
 		this.nav.turnTo(0.0, true);
 
 	}
-	/*
+	/**
 	 * Rotates in a circle and seeks to find four lines on the grid in order to localize.
 	 */
 	public void refineOdometer() {
@@ -98,7 +98,7 @@ public class LightLocalizer {
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
 	}
-	/*
+	/**
 	 * Routine to determine how far the robot was placed from the edges of the initial square. 
 	 * Using in determining the initial position of the robot assuming correct orientation.
 	 */
@@ -117,7 +117,7 @@ public class LightLocalizer {
 		nav.travelTo(-6.0, -6.0);
 		nav.turnTo(90, true);
 	}
-	/*
+	/**
 	 * Helper method to cause the current thread to sleep.
 	 */
 	public void sleep(long t) {
@@ -128,7 +128,7 @@ public class LightLocalizer {
 			e.printStackTrace();
 		}
 	}
-	/*
+	/**
 	 * update the position based on passed updatetype
 	 */
 	void update(UpdateType uT) {
@@ -167,7 +167,7 @@ public class LightLocalizer {
 			theta4 = odo.getAng();
 		}
 	}
-	/*
+	/**
 	 * Finds a line based on what update type we are executing.
 	 */
 	public void findLine(UpdateType uT) {
@@ -177,7 +177,7 @@ public class LightLocalizer {
 		this.detectLine(uT);
 	}
 
-	/*
+	/**
 	 * This method does not return until a line is found.
 	 * When a line is found, this method calls update() -- which updates a variable based on
 	 * the UpdateType passed into the function. The method then returns ... at which point it can be called
@@ -240,7 +240,7 @@ public class LightLocalizer {
 			}
 		}
 	}
-	/*
+	/**
 	 * correct the angle if an angle is less than zero
 	 * @param angle in degrees
 	 */

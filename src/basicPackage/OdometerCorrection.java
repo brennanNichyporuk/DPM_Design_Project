@@ -10,38 +10,38 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class OdometerCorrection extends Thread {
-	/*
+	/**
 	 * Clock constant
 	 */
 	private static final long CORRECTION_PERIOD = 10;
-	/*
+	/**
 	 * Odometer Instance
 	 */
 	private Odometer odometer;
-	/*
+	/**
 	 * Color sensor instance to get light readings
 	 */
 	private static final Port colorPort = LocalEV3.get().getPort("S1");
 
 
-	/*
+	/**
 	 * Low value threshold for detecting a line
 	 */
 	private int lowValue;
-	/*
+	/**
 	 * High value threshold for detecting a line
 	 */
 	private int highValue;
-	/*
+	/**
 	 * lastValue detected by the color Sensor
 	 */
 	private int lastValue; 
-	/*
+	/**
 	 * The change in the color sensor from the last value
 	 */
 	private int lastDerivative;
 
-	/*
+	/**
 	 * Constructor for the Odometer correction
 	 * @param odometer Instance of the odometer that Odometer Correction will correct
 	 */
@@ -62,6 +62,9 @@ public class OdometerCorrection extends Thread {
 		lastDerivative = 0;
 
 	}
+	/**
+	 * run odometer correction thread.
+	 */
 	public void run() {
 		long correctionStart, correctionEnd;
 
@@ -116,7 +119,7 @@ public class OdometerCorrection extends Thread {
 			}
 		}
 	}
-	/*
+	/**
 	 * calls get position and correcs the odometer heading.
 	 */
 	public void correctOdometer () {

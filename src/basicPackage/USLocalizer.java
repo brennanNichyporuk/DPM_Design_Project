@@ -5,11 +5,11 @@ import lejos.robotics.SampleProvider;
 import modulePackage.UltrasonicModule;
 
 public class USLocalizer {
-	/*
+	/**
 	 * Stores possible localization types (Falling Edge and Rising Edge)
 	 */
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
-	/*
+	/**
 	 * How fast the robot is allowed to rotate while localizing
 	 */
 	public static double ROTATION_SPEED = 30;
@@ -17,20 +17,20 @@ public class USLocalizer {
 	private Navigation nav;
 	private UltrasonicModule usModule;
 	
-	/*
+	/**
 	 * instantiated localization type of the USLocalizer.
 	 */
 	private LocalizationType locType;
 	
-	/*
+	/**
 	 * Standard threshold from the wall.
 	 */
 	private double distanceStandard = 50;
-	/*
+	/**
 	 * Error margin to account for erroneous readings at the edges.
 	 */
 	private double errorMargin = 5;
-	/*
+	/**
 	 * @param odo Odometer instance must not be null.
 	 * @param nav Navigation instance must not be null.
 	 * @param usSensor SampleProvider instance must not be null
@@ -42,7 +42,7 @@ public class USLocalizer {
 		this.usModule = usModule;
 		this.locType = locType;
 	}
-	/*
+	/**
 	 * Ultrasonic Localization routine based off of localization type set in the particular object.
 	 */
 	public void doLocalization() {
@@ -169,7 +169,7 @@ public class USLocalizer {
 
 
 
-	/*
+	/**
 	 * Corrects angle slightly to account for false readings at wall edges. 
 	 */
 	void turn(double degrees, boolean stop) {
@@ -177,7 +177,7 @@ public class USLocalizer {
 		angle = this.correctAngle(angle + degrees);
 		nav.turnTo(angle, stop);
 	}
-	/*
+	/**
 	 * Correct Angle based off of localization results.
 	 */
 	double correctAngle(double angle){
@@ -187,7 +187,7 @@ public class USLocalizer {
 			angle -= 360;
 		return angle;
 	}
-	/*
+	/**
 	 * Average angle between input angle and the odometer instance angle.
 	 */
 	double averageAngle(double angle1){
