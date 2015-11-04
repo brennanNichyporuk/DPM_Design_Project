@@ -29,21 +29,6 @@ public class ColorDetection {
 		this.sampleGetColor = sampleProvideColor;
 	}
 	/**
-	 * returns true or false if the object is a block or not a block based on the threshold.
-	 * @return boolean determines if the object being viewed is a block or not.
-	 */
-	public boolean determineBlock(){
-		float intensity = 0;
-		intensity = this.getData(sampleGetColor, colorData);
-		if(intensity > THRESHOLD){
-			return false;
-		}
-		else if(intensity <= THRESHOLD && intensity > 0){
-			return true;
-		}
-		return false;
-	}
-	/**
 	 * @param provider
 	 * @param destination
 	 * @return returns the average value depending on the SAMPLESIZE constant in ColorDetection.
