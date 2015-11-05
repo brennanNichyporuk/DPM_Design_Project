@@ -74,8 +74,10 @@ public class Odometer implements TimerListener {
 	 * @param rightMotor instance of right motor
 	 * @param interval timer period
 	 * @param boolean Determines if the odometer thread will start running immedietly after the constructor has been created.
+	 * @param INTERVAL Determines the frequency of the odometer in MS.
+	 * @param autoStart Set to true if you want the odometer thread to be called after the constructor is completed.
 	 */
-	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autostart) {
+	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autoStart) {
 		
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -91,7 +93,7 @@ public class Odometer implements TimerListener {
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
 
-		if (autostart) {
+		if (autoStart) {
 			// if the timeout interval is given as <= 0, default to 20ms timeout 
 			this.timer = new Timer((INTERVAL <= 0) ? INTERVAL : DEFAULT_TIMEOUT_PERIOD, this);
 			this.timer.start();
@@ -210,6 +212,7 @@ public class Odometer implements TimerListener {
 	
 	/**
 	 * accessors for both motors
+	 * @return a two dimensional array of left and right motors.
 	 */
 	public EV3LargeRegulatedMotor [] getMotors() {
 		return new EV3LargeRegulatedMotor[] {this.leftMotor, this.rightMotor};
@@ -229,6 +232,8 @@ public class Odometer implements TimerListener {
 
 	/**
 	 * Helper method to fix a degree angle (ensure we never pass a negative value)
+	 * @param Fix the degree angle to ensure that it is not less than zero.
+	 * @return Returns the fixed angle.
 	 */
 	public static double fixDegAngle(double angle) {
 		if (angle < 0.0)
@@ -238,6 +243,9 @@ public class Odometer implements TimerListener {
 	}
 	/**
 	 * Calculate the minimum angle based on the difference between the two angles
+	 * @param a The first angle.
+	 * @param b The second angle.
+	 * @return The minimum travel distance between two angles in degrees.
 	 * */
 	public static double minimumAngleFromTo(double a, double b) {
 		double d = fixDegAngle(b - a);
