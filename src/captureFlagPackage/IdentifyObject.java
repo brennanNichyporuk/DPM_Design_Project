@@ -6,27 +6,40 @@ import basicPackage.*;
 /**
  *A class which uses the robot's sensors to identify an object.
  *This class distinguishes between the target block and all the other robjects.
- *@author Fred Glozman & Abdel Kader Gaye
+ *@author Fred Glozman, Abdel Kader Gaye
  */
 public class IdentifyObject extends Thread
-{
-	
+{	
+	/**
+	 * a value of -1 signifies that the light sensor failed to get a reading.
+	 * acceptable values are in the range [0, 13].
+	 */
 	private int objectID;
 	
 	private UltrasonicModule us; 
 	private ColorDetection cd; 
+	
+	//activity state variables
+	private boolean isActive;
+	private boolean isPaused;
+
 
 	/**
 	 *Constructor. Requires user to specify colorID value of the target flag
-	 *@param objectID color value of flag 
 	 *@param usm access to the ultrasonic sensor 
 	 *@param cd access to the light sensor. color detection feature. 
 	 */
-	public IdentifyObject(int objectID, UltrasonicModule usm, ColorDetection cd)
+	public IdentifyObject(UltrasonicModule usm, ColorDetection cd)
 	{
-		this.objectID = objectID;
 		this.us = usm; 
 		this.cd = cd;
+		
+		//initialize objectID
+		objectID = -1;
+		
+		//initialized to active and paused (i.e. thread will be idle)
+		this.isActive = true;
+		this.isPaused = false;
 	}
 	
 
@@ -36,7 +49,14 @@ public class IdentifyObject extends Thread
 	@Override
 	public void run()
 	{
+		while(isActive)
+		{
+			while(!isPaused)
+			{
 
+			}
+			try {Thread.sleep(500);} catch (InterruptedException e){}
+		}
 	}
 	
 	/**
@@ -44,9 +64,32 @@ public class IdentifyObject extends Thread
 	 *determine the colorID value of the object directly in front of the light sensor
 	 *@return returns the colorID value of the object being analyzed
 	 */
-	public int getObjectID()
+	int getObjectID()
 	{
-		//temporary return
-		return -1;
+		return objectID;
+	}
+	
+	/**
+	 *pauses the execution of this thread
+	 */
+	void pauseThread()
+	{
+		this.isPaused = true;
+	}
+	
+	/**
+	 *resumes the execution of this thread
+	 */
+	void resumeThread()
+	{
+		this.isPaused = false;
+	}
+	
+	/**
+	 *stops the execution of this thread
+	 */
+	void deactivateThread()
+	{
+		this.isActive = false;
 	}
 }

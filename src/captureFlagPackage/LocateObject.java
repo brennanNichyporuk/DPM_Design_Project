@@ -7,17 +7,23 @@ import basicPackage.*;
 
 /**
  *A class which searches the environment in order to locate the target flag
- *@author Fred Glozman & Abdel Kader Gaye
+ *@author Fred Glozman, Abdel Kader Gaye
  */
 public class LocateObject extends Thread
 {
+	//[ [x,y] ]
 	private ArrayList<double[]> nonFlagLoco; 
+	//[x.y]
 	private double[] currentObjLoco; 
 	
 	private Navigation nav;	
 	private Odometer odo;
 	private UltrasonicModule us;
 	private ColorDetection cd;
+	
+	//activity state variables
+	private boolean isActive;
+	private boolean isPaused;
 
 	/**
 	 *Constructor
@@ -32,6 +38,10 @@ public class LocateObject extends Thread
 		this.odo = odometer;
 		this.us = usm; 
 		this.cd = cd;
+		
+		//initialized to active and not paused (i.e. thread will run)
+		this.isActive = true;
+		this.isPaused = false;
 	}
 	
 	/**
@@ -40,16 +50,46 @@ public class LocateObject extends Thread
 	@Override
 	public void run()
 	{
-
+		while(isActive)
+		{
+			while(!isPaused)
+			{
+				
+			}
+			try {Thread.sleep(500);} catch (InterruptedException e){}
+		}
 	}
 
 	/**
 	 *Gets the location of the current object being analyzed.
 	 *@return location of the current object found.
 	 */
-	public double[] getCurrentObjLoco()
+	double[] getCurrentObjLoco()
 	{
-		//temporary return
-		return new double[]{-1};
+		return currentObjLoco;
+	}
+	
+	/**
+	 *pauses the execution of this thread
+	 */
+	void pauseThread()
+	{
+		this.isPaused = true;
+	}
+	
+	/**
+	 *resumes the execution of this thread
+	 */
+	void resumeThread()
+	{
+		this.isPaused = false;
+	}
+	
+	/**
+	 *stops the execution of this thread
+	 */
+	void deactivateThread()
+	{
+		this.isActive = false;
 	}
 }

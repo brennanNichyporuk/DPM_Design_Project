@@ -4,7 +4,7 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 /**
  *A class which instructs the robot to pick up an object using its arm  
- *@author Fred Glozman & Abdel Kader Gaye
+ *@author Fred Glozman, Abdel Kader Gaye
  */
 public class PickupObject 
 {	
@@ -27,7 +27,7 @@ public class PickupObject
  	 *It is called when the ID of any object found matches the one of the 
  	 *candidate object.
 	 */
-	public void doPickup()
+	void doPickup()
 	{
 
 	}
