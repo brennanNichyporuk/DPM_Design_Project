@@ -1,6 +1,6 @@
 package captureFlagPackage;
 
-import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import modulePackage.*;
 import basicPackage.*;
 
@@ -27,10 +27,7 @@ public class CaptureFlag extends Thread implements IObserver
 	private Odometer odo;
 	private UltrasonicModule us; 
 	private ColorDetection cd; 
-	
-	//motor which control's robot's arm
-	private EV3MediumRegulatedMotor armMotor;
-	
+		
 	//stores the location of the robot prior to navigating towards a located block
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
@@ -44,18 +41,17 @@ public class CaptureFlag extends Thread implements IObserver
 	 *@param cd access to the light sensor. color detection feature. 
 	 *@param robotArmMotor is the motor that controls the robot's arm
 	 */
-	public CaptureFlag(int objectID, Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd, EV3MediumRegulatedMotor robotArmMotor)
+	public CaptureFlag(int objectID, Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd, EV3LargeRegulatedMotor robotArmMotor)
 	{
 		this.targetFlagColorID = objectID;
 		this.nav = navigator; 
 		this.odo = odometer;
 		this.us = usm; 
 		this.cd = cd;
-		this.armMotor = robotArmMotor;
 		
 		locator = new LocateObject(nav, odo, us, this.cd);
 		identifier = new IdentifyObject(us, this.cd);
-		grabber = new PickupObject(armMotor);	
+		grabber = new PickupObject(robotArmMotor, navigator);	
 		
 		this.locationPreIdentifier = null;
 	}
@@ -76,9 +72,6 @@ public class CaptureFlag extends Thread implements IObserver
 	/**
 	 *Method required by the IObserver interface.
 	 *LocateObject and IdentifyObject call this method in order to notify CaptureFlag of an event.
-	 *LocateObject ID = 1. IdentifyObject ID = 2.
-	 *When LocateObject (1) finds a new object, it calls this method.
-	 *When IdentifyObject (2) successfully identifies an object, it calls this method
 	 *This method then reacts to the event.
 	 *@param x caller class unique identifier
 	 *@throws InvalidCallerID if update is called with an invalid class caller ID
