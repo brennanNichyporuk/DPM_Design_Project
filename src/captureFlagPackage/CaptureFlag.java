@@ -1,5 +1,7 @@
 package captureFlagPackage;
 
+import java.util.ArrayList;
+
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import modulePackage.*;
 import basicPackage.*;
@@ -31,6 +33,9 @@ public class CaptureFlag extends Thread implements IObserver
 	//stores the location of the robot prior to navigating towards a located block
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
+	
+	ArrayList<double[]> objectsLocation;
+
 
 	/**
 	 *Constructor
@@ -49,8 +54,8 @@ public class CaptureFlag extends Thread implements IObserver
 		this.us = usm; 
 		this.cd = cd;
 		
-		locator = new LocateObject(nav, odo, us, this.cd);
-		identifier = new IdentifyObject(us, this.cd);
+		locator = new LocateObject(this, nav, odo, us, this.cd);
+		identifier = new IdentifyObject(this, us, this.cd);
 		grabber = new PickupObject(robotArmMotor, navigator);	
 		
 		this.locationPreIdentifier = null;
@@ -86,10 +91,11 @@ public class CaptureFlag extends Thread implements IObserver
 			case LOCATEOBJECT:
 				
 				//get the location of the found object
-				double[] objectLocation = locator.getCurrentObjLoco().clone();
+				objectsLocation = locator.getCurrentObjLoco();
+				double[] currentObject = objectsLocation.remove(0);
 				
 				//if the location is not null (just being careful...)
-				if(objectLocation!=null)
+				if(currentObject!=null)
 				{
 					//pause locator
 					locator.pauseThread();
@@ -98,12 +104,12 @@ public class CaptureFlag extends Thread implements IObserver
 					locationPreIdentifier = odo.getPosition();
 					
 					//navigate towards object
-					nav.travelTo(objectLocation[0], objectLocation[1]);
+					nav.travelTo(currentObject[0], currentObject[1]);
 					
 					//identify object
 					identifier.resumeThread();
 				}
-								
+												
 				break;
 				
 			//caller is IdentifyObject 
@@ -133,12 +139,21 @@ public class CaptureFlag extends Thread implements IObserver
 						nav.travelTo(locationPreIdentifier[0], locationPreIdentifier[1]);
 						nav.turnTo(locationPreIdentifier[2], true);
 						
-						//reset saved location for next itteration
+						//reset saved location for next iteration
 						locationPreIdentifier = null;
 					}
 					
-					//resume locator
-					locator.resumeThread();
+					//if there are more objects to identify. 
+					//call update again with LOCATEOBJECT
+					if(!objectsLocation.isEmpty())
+					{
+						update(ClassID.LOCATEOBJECT);
+					}
+					else
+					{
+						//resume locator
+						locator.resumeThread();
+					}
 				}
 												
 				break;	

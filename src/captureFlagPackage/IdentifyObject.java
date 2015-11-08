@@ -16,6 +16,9 @@ public class IdentifyObject extends Thread
 	 */
 	private int objectID;
 	
+	//reference to the observer of this class
+	private CaptureFlag captureFlag;
+	
 	private UltrasonicModule us; 
 	private ColorDetection cd; 
 	
@@ -29,8 +32,9 @@ public class IdentifyObject extends Thread
 	 *@param usm access to the ultrasonic sensor 
 	 *@param cd access to the light sensor. color detection feature. 
 	 */
-	public IdentifyObject(UltrasonicModule usm, ColorDetection cd)
+	public IdentifyObject(CaptureFlag captureFlag, UltrasonicModule usm, ColorDetection cd)
 	{
+		this.captureFlag = captureFlag;
 		this.us = usm; 
 		this.cd = cd;
 		
@@ -53,7 +57,16 @@ public class IdentifyObject extends Thread
 		{
 			while(!isPaused)
 			{
-
+				//objectID = cd.getColor();
+				
+				if(objectID!=-1)
+				{
+					//notify CaptureFlag class
+					captureFlag.update(ClassID.IDENTIFYOBJECT);
+					try {Thread.sleep(500);} catch (InterruptedException e){}
+				}
+				
+				try {Thread.sleep(500);} catch (InterruptedException e){}
 			}
 			try {Thread.sleep(500);} catch (InterruptedException e){}
 		}

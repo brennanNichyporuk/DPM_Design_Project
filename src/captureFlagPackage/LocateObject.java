@@ -1,6 +1,7 @@
 package captureFlagPackage;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import modulePackage.*;
 import basicPackage.*;
@@ -11,11 +12,13 @@ import basicPackage.*;
  */
 public class LocateObject extends Thread
 {
-	//[ [x,y] ]
-	private ArrayList<double[]> nonFlagLoco; 
-	//[x.y]
-	private double[] currentObjLoco; 
+	//reference to the observer of this class
+	private CaptureFlag captureFlag;
 	
+	private ArrayList<double[]> objectsLoco; 
+	private Stack<double[]> blankSpaceLoco;
+	private Stack<double[]> previousLocation;
+			
 	private Navigation nav;	
 	private Odometer odo;
 	private UltrasonicModule us;
@@ -32,8 +35,10 @@ public class LocateObject extends Thread
 	 *@param usm access to the ultrasonic sensor 
 	 *@param cd access to the light sensor. color detection feature. 
 	 */
-	public LocateObject(Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd)
+	public LocateObject(CaptureFlag captureFlag, Navigation navigator, Odometer odometer, UltrasonicModule usm, ColorDetection cd)
 	{
+		this.captureFlag = captureFlag;
+		
 		this.nav = navigator; 
 		this.odo = odometer;
 		this.us = usm; 
@@ -54,19 +59,57 @@ public class LocateObject extends Thread
 		{
 			while(!isPaused)
 			{
+				//scan area. find objects and blank spaces
+				scanArea();
 				
+				//if there are object to be identified. notify CaptureFlag and continue
+				if(!objectsLoco.isEmpty())
+				{
+					captureFlag.update(ClassID.LOCATEOBJECT);
+					
+					try {Thread.sleep(500);} catch (InterruptedException e){}
+				}
+				//if there are not objects to identify and if there are blank spaces to visit. visit first blank space
+				else if(objectsLoco.isEmpty() && !blankSpaceLoco.isEmpty())
+				{
+					//get first blank space
+					double[] blankSpace = blankSpaceLoco.pop();
+					
+					//record current location
+					previousLocation.push(odo.getPosition());
+					
+					//navigate to blank space
+					nav.travelTo(blankSpace[0], blankSpace[1]);
+					
+					continue;
+				}
+				//no objects to identify and not blank spaces to visit. backup to previous spot
+				else if (objectsLoco.isEmpty() && !blankSpaceLoco.isEmpty()){
+					//get the location of the previous spot and navigate to it
+					double[] previousSpot = previousLocation.pop();
+					nav.travelTo(previousSpot[0], previousSpot[1]);
+				}
 			}
 			try {Thread.sleep(500);} catch (InterruptedException e){}
 		}
+	}
+	
+	
+	
+	private void scanArea()
+	{
+		//sweep 180? 
+		
+		
 	}
 
 	/**
 	 *Gets the location of the current object being analyzed.
 	 *@return location of the current object found.
 	 */
-	double[] getCurrentObjLoco()
+	ArrayList<double[]> getCurrentObjLoco()
 	{
-		return currentObjLoco;
+		return objectsLoco;
 	}
 	
 	/**
