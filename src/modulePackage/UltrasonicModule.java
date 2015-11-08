@@ -3,31 +3,39 @@ package modulePackage;
 
 import java.util.Collections;
 import java.util.LinkedList;
+
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 
 
-public class UltrasonicModule extends Thread
+public class UltrasonicModule
 {
 	private LinkedList<Integer> window = new LinkedList<Integer>();
 	private int windowSize;
 	
 	private int distance;
 	
+	private EV3MediumRegulatedMotor neck;
 	private SampleProvider us;
 	private float[] usData;
 	private boolean active;
+	private int sensorAngle = 0;
+	
+	private final int ROTATE_SPEED = 100;
 
 	
 	// Constructor
 	
 	/**
 	 * 
-	 * @param us : Ultrasonic Sensor to read values
+	 * @param us: Ultrasonic Sensor to read distance
+	 * @param neck: Medium Motor used to turn US Sensor
 	 */
-	public UltrasonicModule(SampleProvider us)
+	public UltrasonicModule(SampleProvider us,EV3MediumRegulatedMotor neck)
 	{
 		this.us = us;
+		this.neck = neck;
 		
 		this.windowSize = 5; // Size of window used in Median Filter
 		
@@ -39,23 +47,6 @@ public class UltrasonicModule extends Thread
 		}
 	}
 	
-	/**
-	 * Starts Polling thread
-	 */
-	public void run() 
-	{
-		int distance;
-		
-		while (true) 
-		{
-			if (active) 
-			{
-				distance = this.fetchDistance();
-				this.setDistance(this.filterDistance(distance));
-			}
-			try { Thread.sleep(50); } catch(Exception e){}
-		}
-	}
 	
 	/**
 	 * 
@@ -147,6 +138,9 @@ public class UltrasonicModule extends Thread
 	 */
 	public int getDistance() 
 	{
+		distance = this.fetchDistance();
+		this.setDistance(this.filterDistance(distance));
+		
 		return distance;
 	}
 	
@@ -157,6 +151,37 @@ public class UltrasonicModule extends Thread
 	public void setDistance(int distance) 
 	{
 		this.distance = distance;
+	}
+	
+	/**
+	 * 
+	 * @param angle: angle to turn Sensor
+	 */
+	public void rotateSensor(double angle)
+	{
+		this.sensorAngle += angle; 
+		
+		if(angle>0)
+		{
+			this.neck.setSpeed(ROTATE_SPEED);
+			this.neck.rotate(this.convertAngle(angle),true);
+		}
+		
+		else
+		{
+			this.neck.setSpeed(ROTATE_SPEED);
+			this.neck.rotate(-this.convertAngle(angle),true);
+		}
+	}
+	
+	private int convertAngle(double angle) 
+	{
+		return this.convertDistance( Math.PI * angle / 360.0);
+	}
+	
+	private int convertDistance(double distance) 
+	{
+		return (int) ((180.0 * distance) / (Math.PI));
 	}
 
 }
