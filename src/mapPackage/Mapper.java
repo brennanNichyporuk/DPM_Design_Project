@@ -3,15 +3,21 @@ package mapPackage;
 import basicPackage.Odometer;
 import modulePackage.UltrasonicModule;
 
+/**
+ * This class is responsible for generating the map used by the Pilot Thread to 
+ * navigate to its destination.
+ * @author brennanNichyporuk
+ *
+ */
 public class Mapper {
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private Node[][] map;
 	
 	/**
-	 * 
-	 * @param odo
-	 * @param uM
+	 * Instantiates a map.
+	 * @param odo - reference to the Odometer thread.
+	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
 	public Mapper(Odometer odo, UltrasonicModule uM) {
 		this.odo = odo;
@@ -23,7 +29,7 @@ public class Mapper {
 	/**
 	 * This method uses the ULtrasonic sensor to scan its environment and update 
 	 * the favorability of each node based on the presence or absence of obstacles.
-	 * @return
+	 * @return - updated map.
 	 */
 	public Node[][] updateAndReturnMap() {
 		

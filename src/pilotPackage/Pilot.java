@@ -6,6 +6,12 @@ import basicPackage.IObserver;
 import basicPackage.Navigation;
 import basicPackage.Odometer;
 
+/**
+ * This class is is responsible for navigating to the opponents home zone while
+ * avoiding obstacles.
+ * @author brennanNichyporuk
+ *
+ */
 public class Pilot extends Thread {
 	private IObserver observer;
 	private Navigation nav;
@@ -16,10 +22,10 @@ public class Pilot extends Thread {
 	
 	/**
 	 * Instantiates an instance of Mapper.
-	 * @param observer
-	 * @param nav
-	 * @param odo
-	 * @param uM
+	 * @param observer - reference to Planner Thread
+	 * @param nav - reference to instance of Navigation 
+	 * @param odo - reference to Odometer Thread
+	 * @param uM - reference to instance of Ultrasonic Module
 	 */
 	public Pilot(IObserver observer, Navigation nav, Odometer odo, UltrasonicModule uM) {
 		this.observer = observer;

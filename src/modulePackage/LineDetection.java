@@ -1,7 +1,5 @@
 package modulePackage;
 
-import java.util.LinkedList;
-
 import lejos.robotics.SampleProvider;
 
 public class LineDetection 
@@ -15,12 +13,10 @@ public class LineDetection
 	private int high_value;
 	private int deriv_threshhold;
 	
-	private LinkedList<Integer> prev = new LinkedList<Integer>();
-	
 	/**
 	 * 
-	 * @param colorSensor: Light Sensor to read values from
-	 * @param colorData: Array of values
+	 * @param colorSensor: Light Sensor to read values
+	 * @param colorData: array of values
 	 */
 	public LineDetection(SampleProvider colorSensor, float[] colorData) 
 	{
