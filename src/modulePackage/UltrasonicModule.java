@@ -37,7 +37,7 @@ public class UltrasonicModule
 	 * @param us: Ultrasonic Sensor to read distance
 	 * @param neck: Medium Motor used to turn US Sensor
 	 */
-	public UltrasonicModule(SampleProvider us, float[] UsData, EV3MediumRegulatedMotor neck)
+	public UltrasonicModule(SampleProvider us, float[] usData, EV3MediumRegulatedMotor neck)
 	{
 		this.us = us;
 		this.usData = usData;
@@ -59,8 +59,8 @@ public class UltrasonicModule
 	private int fetchDistance() 
 	{
 		us.fetchSample(usData,0);
-		int distance=(int)(usData[0]*100.0);
-		return distance;
+		int dist=(int)(usData[0]*100.0);
+		return dist;
 	}
 
 	
@@ -142,10 +142,10 @@ public class UltrasonicModule
 	 */
 	public int getDistance() 
 	{
-		distance = this.fetchDistance();
-		this.setDistance(this.filterDistance(distance));
+		int un_fliltered = this.fetchDistance();
+		this.setDistance(this.filterDistance(un_fliltered));
 		
-		return distance;
+		return this.distance;
 	}
 	
 	/**
