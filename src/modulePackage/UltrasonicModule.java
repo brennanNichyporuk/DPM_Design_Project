@@ -95,8 +95,16 @@ public class UltrasonicModule
 	
 	private void addValue(int UsData)
 	{	
-		this.window.addLast(UsData);
-		this.window.removeFirst();
+		if(this.window.size()<this.windowSize)
+		{
+			this.window.add(UsData);
+		}
+		
+		else
+		{
+			this.window.addLast(UsData);
+			this.window.removeFirst();
+		}
 	}
 	
 	/**
@@ -109,6 +117,16 @@ public class UltrasonicModule
 		LinkedList<Integer> temp = this.window;
 		
 		Collections.sort(temp);
+		
+		if(temp.size()==1)
+		{
+			return temp.get(0);
+		}
+		
+		else if(temp.size()==2)
+		{
+			return (temp.get(0)+temp.get(1))/2;
+		}
 		
 		if(this.windowSize%2==1) return temp.get(this.windowSize/2).intValue();
 		
@@ -142,8 +160,8 @@ public class UltrasonicModule
 	 */
 	public int getDistance() 
 	{
-		int un_fliltered = this.fetchDistance();
-		this.setDistance(this.filterDistance(un_fliltered));
+		int un_filtered = this.fetchDistance();
+		this.setDistance(this.filterDistance(un_filtered));
 		
 		return this.distance;
 	}
