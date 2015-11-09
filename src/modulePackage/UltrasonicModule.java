@@ -8,6 +8,12 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 
+/**
+ * 
+ * @author thomaskaratzas
+ *
+ */
+
 
 public class UltrasonicModule
 {
@@ -19,7 +25,6 @@ public class UltrasonicModule
 	private EV3MediumRegulatedMotor neck;
 	private SampleProvider us;
 	private float[] usData;
-	private boolean active;
 	private int sensorAngle = 0;
 	
 	private final int ROTATE_SPEED = 100;
@@ -32,14 +37,13 @@ public class UltrasonicModule
 	 * @param us: Ultrasonic Sensor to read distance
 	 * @param neck: Medium Motor used to turn US Sensor
 	 */
-	public UltrasonicModule(SampleProvider us,EV3MediumRegulatedMotor neck)
+	public UltrasonicModule(SampleProvider us, float[] UsData, EV3MediumRegulatedMotor neck)
 	{
 		this.us = us;
+		this.usData = usData;
 		this.neck = neck;
 		
 		this.windowSize = 5; // Size of window used in Median Filter
-		
-		this.active = true;
 	
 		for(int i =0 ; i< this.windowSize; i++)
 		{
@@ -160,8 +164,6 @@ public class UltrasonicModule
 	public void rotateSensorTo(double angle)
 	{
 		int adj = (int)angle - this.getSensorAngle();
-		
-		int new_angle = (int)adj;
 		
 		if(adj>0)
 		{
