@@ -24,6 +24,9 @@ public class LineDetection
 		this.colorSensor = colorSensor;
 		this.colorData = colorData;
 		
+		
+		colorSensor.fetchSample(colorData,0);
+		this.last_value = (int)(colorData[0]*100.0);	
 		this.last_value = 0;
 		this.last_derivative = 0;
 		this.low_value = 0;

@@ -30,6 +30,7 @@ public class USLocalizer {
 	 * Error margin to account for erroneous readings at the edges.
 	 */
 	private double errorMargin = 5;
+	
 	/**
 	 * @param odo Odometer instance must not be null.
 	 * @param nav Navigation instance must not be null.
@@ -54,11 +55,10 @@ public class USLocalizer {
 		if (locType == LocalizationType.FALLING_EDGE) {
 
 			// rotate the robot until it sees no wall
-			double distance =0; /*CHANGEEE*/
-			//= this.getFilteredData();
+			double distance = usModule.getDistance();
 			while (distance < distanceStandard + errorMargin) {
 				this.turn(-5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 
 			// keep rotating until the robot sees a wall, then latch the angle
@@ -67,16 +67,16 @@ public class USLocalizer {
 				if (distance >= distanceStandard + errorMargin)
 					angleA = angle;
 				this.turn(-5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
 			angleA = this.averageAngle(angleA);
 
 			// switch direction and wait until it sees no wall
-			//distance = this.getFilteredData();
+			distance = usModule.getDistance();
 			while (distance < distanceStandard + errorMargin) {
 				this.turn(5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 
 			// keep rotating until the robot sees a wall, then latch the angle
@@ -86,7 +86,7 @@ public class USLocalizer {
 				if (distance >= distanceStandard + errorMargin)
 					angleB = angle;
 				this.turn(5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
 			angleB = this.averageAngle(angleB);
@@ -113,12 +113,11 @@ public class USLocalizer {
 			 */
 
 			// rotate the robot until it sees a wall
-
-			double distance=0; /*MUST CHANGE*/
-			//= this.getFilteredData();
+			double distance = usModule.getDistance();
+			
 			while (distance > distanceStandard - errorMargin) {
 				this.turn(-5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 
 			// keep rotating until the robot does not see a wall, then latch the angle
@@ -127,7 +126,7 @@ public class USLocalizer {
 				if (distance <= distanceStandard - errorMargin)
 					angleA = angle;
 				this.turn(-5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
 			angleA = this.averageAngle(angleA);
@@ -136,7 +135,7 @@ public class USLocalizer {
 			//distance = this.getFilteredData();
 			while (distance > distanceStandard - errorMargin) {
 				this.turn(5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 
 			// keep rotating until the robot does not see a wall, then latch the angle
@@ -146,7 +145,7 @@ public class USLocalizer {
 				if (distance <= distanceStandard - errorMargin)
 					angleB = angle;
 				this.turn(5.0, false);
-				//distance = this.getFilteredData();
+				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
 			angleB = this.averageAngle(angleB);
