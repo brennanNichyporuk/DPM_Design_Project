@@ -7,11 +7,12 @@ public class LineDetection
 	private SampleProvider colorSensor;
 	private float[] colorData;
 	
-	private int last_value;
-	private int last_derivative;
-	private int low_value;
-	private int high_value;
-	private int deriv_threshhold;
+	private int lastValue;
+	private int lastDerivative;
+	private int lowValue;
+	private int highValue;
+	private int minDerivativeChange = 5;
+	private int	CORRECTION_PERIOD= 50;
 	
 	/**
 	 * 
@@ -26,63 +27,73 @@ public class LineDetection
 		
 		
 		colorSensor.fetchSample(colorData,0);
-		this.last_value = (int)(colorData[0]*100.0);	
-		this.last_value = 0;
-		this.last_derivative = 0;
-		this.low_value = 0;
-		this.high_value = 0;
+		this.lastValue = (int)(colorData[0]*100.0);	
+		this.lastValue = 0;
+		this.lastDerivative = 0;
+		this.lowValue = 0;
+		this.highValue = 0;
 		
 	}
 	
 	/**
 	 * 
-	 * @return : Boolean that returns true of a line is detecting and false otherwise
+	 * returns when a line is detected
 	 */
-	public boolean detectLine()
-	{
-		// Retrieve Value from Sensor And calculate new derivative
-		
-		colorSensor.fetchSample(colorData, 0);
-		int new_value = (int)(colorData[0]*100);
-		int derivative = new_value - this.last_value;
-		
-		// If we have an increasing derivative we are going from light to Dark
-		// We want to find the highest value during this increase and the lowest as well
-		
-		if (derivative >= this.last_derivative) 
-		{
-			
-			if (derivative < this.low_value) 
-			{
-				this.low_value = this.last_derivative;
-			}
-			
-			if (derivative > this.high_value) 
-			{
-				this.high_value = derivative;
-			}
-		}
-		
-		// If we have a decreasing derivative we are going form dark to light
-		// We want to compare the values of low and high to check of we have detected a line
-		
-		else	
-		{
-			if(this.high_value - this.low_value > this.deriv_threshhold)
-			{
-				this.high_value = 0;
-				this.low_value = 0;
-				return true;
-			}
-			
-			this.high_value = 0;
-			this.low_value = 0;
-		}
-		
-		this.last_derivative = derivative;
-		this.last_value = new_value;
-		
-		return false;
-	}
+	public void detectLine() {
+		long correctionStart, correctionEnd;
 
+		while (true) {
+			correctionStart = System.currentTimeMillis();
+
+			colorSensor.fetchSample(colorData,0);
+			int currentValue = (int)(colorData[0]*100.0);
+			int currentDerivative = currentValue - lastValue;
+
+			// if the derivative is increasing...
+			if (currentDerivative >= lastDerivative) {
+				// set the lowValue to the minimum value of the derivative (lastDerivative)
+				if (currentDerivative < lowValue) {
+					lowValue = lastDerivative;
+				}
+				// similarly... set highValue to the maximum value of the derivative...
+				if (currentDerivative > highValue) {
+					highValue = currentDerivative;
+				}
+			} else {
+
+				// if the magnitude of the change in the derivative is greater than 4... we have detected a line
+				if (highValue - lowValue > minDerivativeChange) {
+					// if we have detected a line ... we run update() which performs 
+					
+					lowValue = 0;
+					highValue = 0;
+					break;
+				}
+
+				/*
+				 * if the magnitude of the change in the derivative was great enough, then update()
+				 * was run and highValue and lowValue was reset... otherwise it was noise and lowValue 
+				 * and highValue should be reset anyway...
+				 */
+				lowValue = 0;
+				highValue = 0;
+			}
+
+			lastDerivative = currentDerivative;
+			lastValue = currentValue;
+			// this ensure the odometry correction occurs only once every period
+
+			correctionEnd = System.currentTimeMillis();
+			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
+				try {
+					Thread.sleep(CORRECTION_PERIOD
+							- (correctionEnd - correctionStart));
+				} catch (InterruptedException e) {
+					// there is nothing to be done here because it is not
+					// expected that the odometry correction will be
+					// interrupted by another thread
+				}
+			}
+		}
+	}
 }

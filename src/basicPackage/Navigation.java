@@ -130,23 +130,7 @@ public class Navigation {
 		this.setSpeeds(0, 0);
 	}
 	
-	/**
-	 * traveltoWait function will travel to designated position, while constantly updating it's heading. It will return true when it has reached the destination.
-	 * @param x The x position to travel to.
-	 * @param y The y position to travel to.
-	 */
-	public boolean travelToWait(double x, double y) {
-		double minAng;
-		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
-			if(Math.abs(minAng-this.odometer.getAng()) > DEG_ERR){
-				this.turnTo(Odometer.fixDegAngle(minAng), false);
-			}
-			this.setSpeeds(-FAST, -FAST);
-		}
-		this.setSpeeds(0, 0);
-		return true;
-	}
+
 	
 	
 	
@@ -198,36 +182,6 @@ public class Navigation {
 			this.setSpeeds(0, 0);
 		}
 	}
-	/**
-	 * Turns the robot angle and will only return when the robot is done turning.
-	 * @param angle the angle that the robot should turn.
-	 * @param stop if the robot should set the speed of the robot to zero
-	 * @return returns when the robot is done turning
-	 */
-	public boolean turnToWait(double angle, boolean stop){
-		double error = angle - this.odometer.getAng();
-
-		while (Math.abs(error) > DEG_ERR) {
-
-			error = angle - this.odometer.getAng();
-
-			if (error < -180.0) {
-				this.setSpeeds(-SLOW, SLOW);
-			} else if (error < 0.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else if (error > 180.0) {
-				this.setSpeeds(SLOW, -SLOW);
-			} else {
-				this.setSpeeds(-SLOW, SLOW);
-			}
-		}
-
-		if (stop) {
-			this.setSpeeds(0, 0);
-		}
-		return true;
-	}
-	
 	/**
 	 * Go foward a set distance in cm.
 	 * @param distance The distance you want to go forward in cm. If distance > 0 then move forward,

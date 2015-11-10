@@ -26,22 +26,6 @@ public class OdometerCorrection extends Thread {
 	private LineDetection lineDetector;
 
 
-	/**
-	 * Low value threshold for detecting a line
-	 */
-	private int lowValue;
-	/**
-	 * High value threshold for detecting a line
-	 */
-	private int highValue;
-	/**
-	 * lastValue detected by the color Sensor
-	 */
-	private int lastValue; 
-	/**
-	 * The change in the color sensor from the last value
-	 */
-	private int lastDerivative;
 
 	/**
 	 * Constructor for the Odometer correction
@@ -60,9 +44,8 @@ public class OdometerCorrection extends Thread {
 		while (true) {
 			correctionStart = System.currentTimeMillis();
 			
-			if(this.lineDetector.detectLine()){
-				this.correctOdometer();
-			}
+			this.lineDetector.detectLine();
+			this.correctOdometer();
 			
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {

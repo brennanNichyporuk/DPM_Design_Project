@@ -5,9 +5,11 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
+import modulePackage.LineDetection;
 import modulePackage.UltrasonicModule;
 
 public class DesignProject {
@@ -24,14 +26,21 @@ public class DesignProject {
 		//setting up the ultrasonic sensor for localization
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
-		float[] usData = new float[usValue.sampleSize()];	
+		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 		
+		//setting up the color sensor for object identification and localization
+		SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
+		SampleProvider colorValue = lineSensor.getMode("Red");			// colorValue provides samples from this instance
+		float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
+		LineDetection lineDetector = new LineDetection(lineSensor, colorData);
 		
-		Localization localizer = new Localization(odo, navigator, ultrasonicMod, null, LocalizationType.FALLING_EDGE);
+		
+		//initiating localization routine. Includes ultrasonic localization and light sensor localization
+		Localization localizer = new Localization(odo, navigator, ultrasonicMod, lineDetector, LocalizationType.FALLING_EDGE);
 		localizer.doLocalization();
-		navigator.travelToBackwards(30, 30);
-		//navigator.turnTo(0, true);
+		navigator.travelTo(30, 30);
+		navigator.turnTo(0, true);
 		
 	}
 	public static void sleep(int sleepTime){
