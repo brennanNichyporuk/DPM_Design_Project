@@ -105,8 +105,6 @@ public class UltrasonicModule
 
 		// calculate the average
 		average /= filterWidth;
-
-		System.out.println(average);
 		
 		return average;
 	}

@@ -176,6 +176,7 @@ public class USLocalizer {
 		angle = this.correctAngle(angle + degrees);
 		nav.turnTo(angle, stop);
 	}
+	
 	/**
 	 * Correct Angle based off of localization results.
 	 */

@@ -75,13 +75,13 @@ public class Navigation {
 		this.leftMotor.setSpeed(lSpd);
 		this.rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.forward();
-		else
 			this.leftMotor.backward();
-		if (rSpd < 0)
-			this.rightMotor.forward();
 		else
+			this.leftMotor.forward();
+		if (rSpd < 0)
 			this.rightMotor.backward();
+		else
+			this.rightMotor.forward();
 	}
 	/**
 	 * Function to set the motor speeds jointly
@@ -92,13 +92,13 @@ public class Navigation {
 		this.leftMotor.setSpeed(lSpd);
 		this.rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.forward();
-		else
 			this.leftMotor.backward();
-		if (rSpd < 0)
-			this.rightMotor.forward();
 		else
+			this.leftMotor.forward();
+		if (rSpd < 0)
 			this.rightMotor.backward();
+		else
+			this.rightMotor.forward();
 	}
 
 	/**
@@ -175,8 +175,10 @@ public class Navigation {
 	 * @param stop Stop the motors after having completed the turn or not. If true the motors will stop.
 	 */
 	public void turnTo(double angle, boolean stop) {
+		if(angle<0){
+			angle=Odometer.fixDegAngle(angle);
+		}
 		double error = angle - this.odometer.getAng();
-
 		while (Math.abs(error) > DEG_ERR) {
 
 			error = angle - this.odometer.getAng();

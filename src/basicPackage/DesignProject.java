@@ -30,7 +30,7 @@ public class DesignProject {
 		
 		Localization localizer = new Localization(odo, navigator, ultrasonicMod, null, LocalizationType.FALLING_EDGE);
 		localizer.doLocalization();
-		//navigator.travelTo(30, 30);
+		navigator.travelToBackwards(30, 30);
 		//navigator.turnTo(0, true);
 		
 	}
