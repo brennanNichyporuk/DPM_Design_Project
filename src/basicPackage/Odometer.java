@@ -1,4 +1,13 @@
+/* 
+ * Odometer.java
+ * Group #: 61
+ * Names: Fred Glozman (260635610) & Abdel Kader Gaye (260637736) 
+ * 
+ * This class keeps track of the robots position (in x,y) and orientation (theta)
+ */
+
 package basicPackage;
+
 /*
  * File: Odometer.java
  * Written by: Sean Lawlor
@@ -29,36 +38,26 @@ package basicPackage;
 
 import lejos.utility.Timer;
 import lejos.utility.TimerListener;
-
-import java.util.Arrays;
-
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Odometer implements TimerListener {
-	
 	/**
 	 * Acts as the clock for the odometer. 
 	 * Defaults to 20ms if if the timeout interval is given as <= 0.
 	 */
 	private Timer timer;
-	
-	/**
-	 * Left and right motors. Both must not be null and can be initialized using 
-	 * constructor.
-	 */
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-	
-	
+
 	/**
 	 * Timeout being for the clock in ms.
 	 */
 	private final int DEFAULT_TIMEOUT_PERIOD = 20;
-	
 	/**
 	 * Instance variables for car dimensions.
 	 */
-	private double leftRadius, rightRadius, width;
-	
+	private double leftRadius, rightRadius;
+	public static double width;
+
 	/**
 	 * Current x, y and orientation of the car.
 	 */
@@ -77,23 +76,22 @@ public class Odometer implements TimerListener {
 	 * @param INTERVAL Determines the frequency of the odometer in MS.
 	 * @param autoStart Set to true if you want the odometer thread to be called after the constructor is completed.
 	 */
-	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autoStart) {
+	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autostart) {
 		
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		
 		// default values, modify for your robot
-		this.rightRadius = 2.0;
-		this.leftRadius = 2.0;
-		this.width = 12.1;
-		
+		this.rightRadius = 2.00;
+		this.leftRadius = 1.98;
+		width = 11.7;
 		this.x = 0.0;
 		this.y = 0.0;
 		this.theta = 90.0;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
 
-		if (autoStart) {
+		if (autostart) {
 			// if the timeout interval is given as <= 0, default to 20ms timeout 
 			this.timer = new Timer((INTERVAL <= 0) ? INTERVAL : DEFAULT_TIMEOUT_PERIOD, this);
 			this.timer.start();
@@ -108,6 +106,7 @@ public class Odometer implements TimerListener {
 		if (this.timer != null)
 			this.timer.stop();
 	}
+	
 	/**
 	 * Stops the TimerListener
 	 */
@@ -141,9 +140,10 @@ public class Odometer implements TimerListener {
 		synchronized (this) {
 			theta += dDH[1];
 			theta = fixDegAngle(theta);
-
-			x += dDH[0] * Math.cos(Math.toRadians(theta));
-			y += dDH[0] * Math.sin(Math.toRadians(theta));
+			x -= dDH[0] * Math.cos(Math.toRadians(theta));
+			y -= dDH[0] * Math.sin(Math.toRadians(theta));
+			//System.out.println("Value of x "+x);
+			//System.out.println("Value of y "+y);
 		}
 
 		oldDH[0] += dDH[0];
@@ -187,7 +187,6 @@ public class Odometer implements TimerListener {
 	 */
 	public void setPosition(double[] position, boolean[] update) {
 		synchronized (this) {
-			//System.out.println(Arrays.toString(position));
 			if (update[0])
 				x = position[0];
 			if (update[1])
@@ -195,11 +194,8 @@ public class Odometer implements TimerListener {
 			if (update[2])
 				theta = position[2];
 		}
-		
-		//System.out.println(Arrays.toString(this.getPosition()));
 	}
 
-	
 	/**
 	 * get the current position reported on the odometer
 	 * @return double[]
@@ -210,22 +206,13 @@ public class Odometer implements TimerListener {
 		}
 	}
 	
-	/**
-	 * accessors for both motors
-	 * @return a two dimensional array of left and right motors.
-	 */
+	// accessors to motors
 	public EV3LargeRegulatedMotor [] getMotors() {
 		return new EV3LargeRegulatedMotor[] {this.leftMotor, this.rightMotor};
 	}
-	/**
-	 * asscessors for left motor
-	 */
 	public EV3LargeRegulatedMotor getLeftMotor() {
 		return this.leftMotor;
 	}
-	/**
-	 * accessors for right motor
-	 */
 	public EV3LargeRegulatedMotor getRightMotor() {
 		return this.rightMotor;
 	}
@@ -241,6 +228,7 @@ public class Odometer implements TimerListener {
 
 		return angle % 360.0;
 	}
+	
 	/**
 	 * Calculate the minimum angle based on the difference between the two angles
 	 * @param a The first angle.

@@ -1,3 +1,10 @@
+/* 
+ * Navigation.java
+ * Group #: 61
+ * Names: Fred Glozman (260635610) & Abdel Kader Gaye (260637736) 
+ * 
+ * This class contains methods which make the robot drive and turn to a specified location or direction
+ */
 package basicPackage;
 
 /*
@@ -13,54 +20,36 @@ package basicPackage;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation {
+	
 	/**
 	 * Constant to determine the fast speed of the robot. Set to 200
 	 */
-	final static int FAST = 200;
+	public final static int FAST = 150;
+	
 	/**
 	 * Constant to determine the slow speed of the robot. Set to 80
 	 */
-	final static int SLOW = 80;
+	public final static int SLOW = 90;
+	
 	/**
 	 * Constant to determine acceleration. Set to 4000
 	 */
-	final static int ACCELERATION = 4000;
+	public final static int ACCELERATION = 2000;
 	
 	/**
 	 * Set degree error in navigation.
 	 */
-	final static double DEG_ERR = 3.0;
+	private final static double DEG_ERR = 4.5;
+	
 	/**
 	 * Set distance error in navigation
 	 */
-	final static double  CM_ERR = 1.0;
-	/**
-	 * Odometer to allow for navigator to make calls to odometer 
-	 * to determine where to navigate to.
-	 */
+	private final static double CM_ERR = 1.0;
+	
 	private Odometer odometer;
-	/**
-	 * Left Motor instance
-	 */
-	private EV3LargeRegulatedMotor leftMotor;
-	/**
-	 * Right Motor instance
-	 */
-	private EV3LargeRegulatedMotor rightMotor;
+	private EV3LargeRegulatedMotor leftMotor, rightMotor;
+
 	
-	/**
-	 * Constant to set the wheelbase of the robot (cm)
-	 */
-	public static final double WB=12.0; 
-	/**
-	 * Constant to set the wheel radius of the robot(cm)
-	 */
-	public static final double WR=2.2; 
-	
-	/**
-	 * Error margin in distance calculations
-	 */
-	private static final double ERR_MARGIN = 0.5;
 
 	/**
 	 * Constructor for Navigation
@@ -79,10 +68,8 @@ public class Navigation {
 		this.rightMotor.setAcceleration(ACCELERATION);
 	}
 
-	/**
-	 * Function to set the motor speeds jointly
-	 * @param lSpd left motor speed for float
-	 * @param rSpd right motor speed for float
+	/*
+	 * Functions to set the motor speeds jointly
 	 */
 	public void setSpeeds(float lSpd, float rSpd) {
 		this.leftMotor.setSpeed(lSpd);
@@ -96,11 +83,10 @@ public class Navigation {
 		else
 			this.rightMotor.forward();
 	}
-	
 	/**
 	 * Function to set the motor speeds jointly
-	 * @param lSpd left motor speed for int
-	 * @param rSpd right motor speed for int
+	 * @param lSpd left motor speed for float
+	 * @param rSpd right motor speed for float
 	 */
 	public void setSpeeds(int lSpd, int rSpd) {
 		this.leftMotor.setSpeed(lSpd);
@@ -116,7 +102,9 @@ public class Navigation {
 	}
 
 	/**
-	 * Float the two motors jointly
+	 * Function to set the motor speeds jointly
+	 * @param lSpd left motor speed for int
+	 * @param rSpd right motor speed for int
 	 */
 	public void setFloat() {
 		this.leftMotor.stop();
@@ -132,34 +120,54 @@ public class Navigation {
 	 */
 	public void travelTo(double x, double y) {
 		double minAng;
-		//System.out.println("Traveling to x: "+x +" y: "+y);
-		//System.out.println("Traveling from x: "+Math.round(odometer.getX()) +" y: "+Math.round(odometer.getY()) + " theta: "+ Math.round(this.odometer.getAng()));
-		minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
-		if (minAng < 0) minAng += 360.0;
-		this.turnTo(minAng, false);
 		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-			
-			this.setSpeeds(SLOW, SLOW);
+			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
+			if(Math.abs(minAng-this.odometer.getAng()) > DEG_ERR){
+				this.turnTo(Odometer.fixDegAngle(minAng), false);
+			}
+			this.setSpeeds(-FAST, -FAST);
 		}
 		this.setSpeeds(0, 0);
 	}
+	
 	/**
-	 * Travels to designated position but backwards. MUST IMPLEMENT
-	 * @param x The x position to travel to
-	 * @param y The y position to travel to
-	 * 
+	 * traveltoWait function will travel to designated position, while constantly updating it's heading. It will return true when it has reached the destination.
+	 * @param x The x position to travel to.
+	 * @param y The y position to travel to.
 	 */
-	public void travelToBackwards(double x, double y) {
+	public boolean travelToWait(double x, double y) {
 		double minAng;
-		minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
-		if (minAng < 0) minAng += 360.0;
-		this.turnTo(minAng, false);
 		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-			
-			this.setSpeeds(SLOW, SLOW);
+			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
+			if(Math.abs(minAng-this.odometer.getAng()) > DEG_ERR){
+				this.turnTo(Odometer.fixDegAngle(minAng), false);
+			}
+			this.setSpeeds(-FAST, -FAST);
+		}
+		this.setSpeeds(0, 0);
+		return true;
+	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * TravelTo function will travel to designated position, while constantly updating it's heading but will travel backwards
+	 * @param x The x position to travel to.
+	 * @param y The y position to travel to.
+	 */
+	public void travelToBackwards(double x, double y){
+		double minAng;
+		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
+			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI)+180;
+			this.turnTo(Odometer.fixDegAngle(minAng), false);
+			this.setSpeeds(FAST, FAST);
 		}
 		this.setSpeeds(0, 0);
 	}
+	
 
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean input controls whether or not to stop themotors when the turn is complete.
@@ -167,7 +175,36 @@ public class Navigation {
 	 * @param stop Stop the motors after having completed the turn or not. If true the motors will stop.
 	 */
 	public void turnTo(double angle, boolean stop) {
+		if(angle<0){
+			angle=Odometer.fixDegAngle(angle);
+		}
+		double error = angle - this.odometer.getAng();
+		while (Math.abs(error) > DEG_ERR) {
 
+			error = angle - this.odometer.getAng();
+
+			if (error < -180.0) {
+				this.setSpeeds(-SLOW, SLOW);
+			} else if (error < 0.0) {
+				this.setSpeeds(SLOW, -SLOW);
+			} else if (error > 180.0) {
+				this.setSpeeds(SLOW, -SLOW);
+			} else {
+				this.setSpeeds(-SLOW, SLOW);
+			}
+		}
+
+		if (stop) {
+			this.setSpeeds(0, 0);
+		}
+	}
+	/**
+	 * Turns the robot angle and will only return when the robot is done turning.
+	 * @param angle the angle that the robot should turn.
+	 * @param stop if the robot should set the speed of the robot to zero
+	 * @return returns when the robot is done turning
+	 */
+	public boolean turnToWait(double angle, boolean stop){
 		double error = angle - this.odometer.getAng();
 
 		while (Math.abs(error) > DEG_ERR) {
@@ -188,55 +225,9 @@ public class Navigation {
 		if (stop) {
 			this.setSpeeds(0, 0);
 		}
+		return true;
 	}
 	
-	/**
-	 *  Method to help calculate the right angle that we want to turn to given a x and y.
-	 *  @param x The relative x position.
-	 *  @param y The relative y position.
-	 *  @return Angle between the current point from the odometer and the destination point.
-	 */
-	public double calculateAngle(double x, double y){
-		// Get Current Position
-		double currentX = this.odometer.getX();
-		double currentY = this.odometer.getY();
-		// Make Vector
-		double vector[] = new double[2];
-		
-		vector[0] = Math.round(x - currentX);
-		vector[1] = Math.round(y - currentY);
-		
-		// Calculate Vector's angle relative to origin
-		
-		double angle=0;
-		
-		// 
-		if(vector[0]==0 && vector[1]==0) angle = 0;
-		
-		else if(this.inRange(vector[1], 0, ERR_MARGIN))
-		{
-			if(vector[0]>0) angle = 90;
-			
-			else angle = -90;
-		}
-		
-		else if(vector[1]<0 && vector[0]>0)
-		{
-			angle = Math.toDegrees( Math.atan(vector[0]/vector[1]) ) + 180;
-		}
-		
-		else if(vector[0]<0 && vector[1]<0)
-		{
-			angle = Math.toDegrees( Math.atan(vector[1]/vector[0]) ) - 180;
-		}
-		
-		else if(vector[0]>0)
-		{
-			angle = Math.toDegrees( Math.atan(vector[0]/vector[1]) );
-		}
-		return angle;
-	}
-
 	/**
 	 * Go foward a set distance in cm.
 	 * @param distance The distance you want to go forward in cm. If distance > 0 then move forward,
@@ -249,10 +240,12 @@ public class Navigation {
 		else{
 			this.setSpeeds(-FAST, -FAST);
 		}
-		leftMotor.rotate(convertDistance(WR, distance), true);
-		rightMotor.rotate(convertDistance(WR, distance), false);
+		leftMotor.rotate(convertDistance(Odometer.width, distance), true);
+		rightMotor.rotate(convertDistance(Odometer.width, distance), false);
 		this.setSpeeds(0, 0);
 	}
+	
+	
 	
 	/**
 	 * Helper methods to convert distance into a distance that works with the wheels.
@@ -263,33 +256,36 @@ public class Navigation {
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
-
+	
 	
 	/**
-	 * Helper method to convert the angle to a distance that works with the wheels.
-	 * @param radius the radius of the wheels
-	 * @param width the width of the car
-	 * @param angle the angle that you want to turn to.
+	 * causes the robot to turn left continously.
 	 */
-	private static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	public void turnLeft(){
+		this.setSpeeds(-SLOW,SLOW);
 	}
-	
 	/**
-	 * Tells if a value is in range.
-	 * @param val the value you want to see if it is in range
-	 * @param target the target value
-	 * @param absRange the greatest absolute difference between your target value and the actual value.
+	 * causes the robot to turn right continously.
 	 */
-	private boolean inRange(double val, double target, double absRange){
-		if(Math.abs(val-target)< absRange){
-			return true;
-		}
-		
-		else{	
-			return false;
-		}
+	public void turnRight(){
+		this.setSpeeds(SLOW,-SLOW);
 	}
-		
+	/**
+	 * causes the robot to move forward
+	 */
+	public void moveForward(){
+		this.setSpeeds(SLOW, SLOW);
+	}
+	/**
+	 * causes the robot to move backwards
+	 */
+	public void moveBackward(){
+		this.setSpeeds(-SLOW, -SLOW);
+	}
+	/**
+	 * stops the motors
+	 */
+	public void stop(){
+		this.setSpeeds(0,0);
+	}
 }
-

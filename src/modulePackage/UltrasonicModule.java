@@ -1,6 +1,5 @@
 package modulePackage;
-
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -17,7 +16,7 @@ import lejos.robotics.SampleProvider;
 
 public class UltrasonicModule
 {
-	private LinkedList<Integer> window = new LinkedList<Integer>();
+	public LinkedList<Integer> window = new LinkedList<Integer>();
 	private int windowSize;
 	
 	private int distance;
@@ -212,3 +211,4 @@ public class UltrasonicModule
 		this.sensorAngle = sensorAngle;
 	}
 }
+

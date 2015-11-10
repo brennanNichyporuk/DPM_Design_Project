@@ -1,5 +1,6 @@
 package executivePackage;
 
+import captureFlagPackage.ClassID;
 import basicPackage.IObserver;
 
 /**
@@ -23,7 +24,7 @@ public class Planner extends Thread implements IObserver {
 	/**
 	 * Called by observed classes to notify Planner of changes.
 	 */
-	public void update(int x){
+	public void update(ClassID x){
 		
 	}
 	
