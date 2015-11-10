@@ -44,22 +44,21 @@ public class UltrasonicModule
 		this.neck = neck;
 		
 		this.windowSize = 5; // Size of window used in Median Filter
-	
-		for(int i =0 ; i< this.windowSize; i++)
-		{
-			this.window.add(0);
-		}
 	}
 	
 	
+	
+
 	/**
 	 * 
 	 * @return un-filtered Distance
 	 */
-	private int fetchDistance() 
+	public int fetchDistance() 
 	{
-		us.fetchSample(usData,0);
-		int dist=(int)(usData[0]*100.0);
+		us.fetchSample(this.usData,0);
+		int dist=(int)(this.usData[0]*100.0);
+		
+		if(dist>255) return 255;
 		return dist;
 	}
 
@@ -74,7 +73,8 @@ public class UltrasonicModule
 		this.addValue(UsData);
 		int median = this.getMedian();
 		
-		LinkedList<Integer> temp = this.window;
+		@SuppressWarnings("unchecked")
+		LinkedList<Integer> temp = (LinkedList<Integer>) this.window.clone();
 		
 		for(int i = 0; i<temp.size(); i++)
 		{
@@ -99,12 +99,12 @@ public class UltrasonicModule
 		{
 			this.window.add(UsData);
 		}
-		
 		else
 		{
-			this.window.addLast(UsData);
 			this.window.removeFirst();
+			this.window.addLast(UsData);
 		}
+		
 	}
 	
 	/**
@@ -112,9 +112,10 @@ public class UltrasonicModule
 	 * @return: median of values in List
 	 */
 	
-	private int getMedian()
+	public int getMedian()
 	{
-		LinkedList<Integer> temp = this.window;
+		@SuppressWarnings("unchecked")
+		LinkedList<Integer> temp = (LinkedList<Integer>) this.window.clone();
 		
 		Collections.sort(temp);
 		
@@ -128,7 +129,7 @@ public class UltrasonicModule
 			return (temp.get(0)+temp.get(1))/2;
 		}
 		
-		if(this.windowSize%2==1) return temp.get(this.windowSize/2).intValue();
+		else if(this.windowSize%2==1) return temp.get(this.windowSize/2).intValue();
 		
 		else return (temp.get(this.windowSize/2).intValue() + temp.get( (this.windowSize/2)+1 ).intValue() ) / 2;
 	}
@@ -174,6 +175,7 @@ public class UltrasonicModule
 	{
 		this.distance = distance;
 	}
+
 	
 	/**
 	 * 
@@ -183,16 +185,16 @@ public class UltrasonicModule
 	{
 		int adj = (int)angle - this.getSensorAngle();
 		
-		if(adj>0)
+		if(adj<0)
 		{
 			this.neck.setSpeed(ROTATE_SPEED);
-			this.neck.rotate(adj,true);
+			this.neck.rotate(adj,false);
 		} 
 		
 		else
 		{	
 			this.neck.setSpeed(-ROTATE_SPEED);
-			this.neck.rotate(adj, true);
+			this.neck.rotate(adj, false);
 		}
 		
 		this.setSensorAngle((int)angle); 
