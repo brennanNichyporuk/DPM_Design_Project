@@ -75,13 +75,13 @@ public class Navigation {
 		this.leftMotor.setSpeed(lSpd);
 		this.rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
 			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
 		else
+			this.leftMotor.backward();
+		if (rSpd < 0)
 			this.rightMotor.forward();
+		else
+			this.rightMotor.backward();
 	}
 	/**
 	 * Function to set the motor speeds jointly
@@ -92,13 +92,13 @@ public class Navigation {
 		this.leftMotor.setSpeed(lSpd);
 		this.rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
 			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
 		else
+			this.leftMotor.backward();
+		if (rSpd < 0)
 			this.rightMotor.forward();
+		else
+			this.rightMotor.backward();
 	}
 
 	/**
