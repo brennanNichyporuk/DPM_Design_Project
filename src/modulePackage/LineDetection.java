@@ -1,5 +1,6 @@
 package modulePackage;
 
+import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class LineDetection 
@@ -19,11 +20,10 @@ public class LineDetection
 	 * @param colorSensor: Light Sensor to read values
 	 * @param colorData: array of values
 	 */
-	public LineDetection(SampleProvider colorSensor, float[] colorData) 
+	public LineDetection(SensorModes lineSensor) 
 	{
-		
-		this.colorSensor = colorSensor;
-		this.colorData = colorData;
+		this.colorSensor = lineSensor.getMode("Red");
+		this.colorData = new float[colorSensor.sampleSize()];	
 		
 		
 		colorSensor.fetchSample(colorData,0);
@@ -39,12 +39,11 @@ public class LineDetection
 	 * 
 	 * returns when a line is detected
 	 */
-	public void detectLine() {
+	public boolean detectLine() {
 		long correctionStart, correctionEnd;
 
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-
 			colorSensor.fetchSample(colorData,0);
 			int currentValue = (int)(colorData[0]*100.0);
 			int currentDerivative = currentValue - lastValue;
@@ -67,7 +66,7 @@ public class LineDetection
 					
 					lowValue = 0;
 					highValue = 0;
-					break;
+					return true;
 				}
 
 				/*
@@ -94,6 +93,7 @@ public class LineDetection
 					// interrupted by another thread
 				}
 			}
+			return false;
 		}
 	}
 }

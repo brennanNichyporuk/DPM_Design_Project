@@ -1,6 +1,7 @@
 package basicPackage;
 
 import basicPackage.USLocalizer.LocalizationType;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -23,24 +24,31 @@ public class DesignProject {
 		//LCDInfo lcd = new LCDInfo(odo);
 		
 		
-		//setting up the ultrasonic sensor for localization
-		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
-		SampleProvider usValue = usSensor.getMode("Distance");
-		float[] usData = new float[usValue.sampleSize()];
-		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
+		//ssetting up the ultrasonic sensor for localization
+		//SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		//SampleProvider usValue = usSensor.getMode("Distance");
+		//float[] usData = new float[usValue.sampleSize()];
+		//UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 		
 		//setting up the color sensor for object identification and localization
-		SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
-		SampleProvider colorValue = lineSensor.getMode("Red");			// colorValue provides samples from this instance
-		float[] colorData = new float[colorValue.sampleSize()];			// colorData is the buffer in which data are returned
-		LineDetection lineDetector = new LineDetection(lineSensor, colorData);
-		
-		
-		//initiating localization routine. Includes ultrasonic localization and light sensor localization
-		Localization localizer = new Localization(odo, navigator, ultrasonicMod, lineDetector, LocalizationType.FALLING_EDGE);
-		localizer.doLocalization();
-		navigator.travelTo(30, 30);
+		//SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
+		//LineDetection lineDetector = new LineDetection(lineSensor);
+		navigator.moveStraight(30);
+		sleep(3000);
+		navigator.moveStraight(-30);
+		sleep(3000);
+		navigator.turnLeft();
+		sleep(3000);
+		navigator.turnRight();
+		sleep(3000);
+		navigator.setSpeeds(-80, -80);
+		sleep(3000);
+		navigator.setSpeeds(80, 80);
+		sleep(3000);
+		navigator.travelTo(30,30);
+		sleep(3000);
 		navigator.turnTo(0, true);
+		
 		
 	}
 	public static void sleep(int sleepTime){

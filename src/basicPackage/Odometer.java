@@ -55,7 +55,7 @@ public class Odometer implements TimerListener {
 	/**
 	 * Instance variables for car dimensions.
 	 */
-	private double leftRadius, rightRadius;
+	public static double leftRadius, rightRadius;
 	public static double width;
 
 	/**
@@ -82,8 +82,8 @@ public class Odometer implements TimerListener {
 		this.rightMotor = rightMotor;
 		
 		// default values, modify for your robot
-		this.rightRadius = 2.00;
-		this.leftRadius = 1.98;
+		rightRadius = 2.00;
+		leftRadius = 1.98;
 		width = 11.7;
 		this.x = 0.0;
 		this.y = 0.0;

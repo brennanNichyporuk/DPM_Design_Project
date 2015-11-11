@@ -21,6 +21,7 @@ public class Localization {
 		//doing ultrasonic localization
 		this.usLocalizer.doLocalization();
 		nav.turnTo(0, true);
+		
 		//doing light localization as well
 		this.lightLocalizer.doLocalization();
 	}

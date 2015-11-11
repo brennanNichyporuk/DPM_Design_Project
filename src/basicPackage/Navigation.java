@@ -6,17 +6,6 @@
  * This class contains methods which make the robot drive and turn to a specified location or direction
  */
 package basicPackage;
-
-/*
- * File: Navigation.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * 
- * Movement control class (turnTo, travelTo, flt, localize)
- */
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation {
@@ -67,28 +56,18 @@ public class Navigation {
 		this.leftMotor.setAcceleration(ACCELERATION);
 		this.rightMotor.setAcceleration(ACCELERATION);
 	}
-
-	/*
-	 * Functions to set the motor speeds jointly
-	 */
-	public void setSpeeds(float lSpd, float rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
-		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
-			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
-		else
-			this.rightMotor.forward();
-	}
+	
 	/**
 	 * Function to set the motor speeds jointly
 	 * @param lSpd left motor speed for float
 	 * @param rSpd right motor speed for float
 	 */
 	public void setSpeeds(int lSpd, int rSpd) {
+		this.setWheels(-lSpd, -rSpd);
+	}
+	
+	
+	private void setWheels(int lSpd, int rSpd) {
 		this.leftMotor.setSpeed(lSpd);
 		this.rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
@@ -106,7 +85,7 @@ public class Navigation {
 	 * @param lSpd left motor speed for int
 	 * @param rSpd right motor speed for int
 	 */
-	public void setFloat() {
+	private void setFloat() {
 		this.leftMotor.stop();
 		this.rightMotor.stop();
 		this.leftMotor.flt(true);
@@ -125,9 +104,9 @@ public class Navigation {
 			if(Math.abs(minAng-this.odometer.getAng()) > DEG_ERR){
 				this.turnTo(Odometer.fixDegAngle(minAng), false);
 			}
-			this.setSpeeds(-FAST, -FAST);
+			this.setWheels(-FAST, -FAST);
 		}
-		this.setSpeeds(0, 0);
+		this.setWheels(0, 0);
 	}
 	
 
@@ -147,9 +126,9 @@ public class Navigation {
 		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
 			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI)+180;
 			this.turnTo(Odometer.fixDegAngle(minAng), false);
-			this.setSpeeds(FAST, FAST);
+			this.setWheels(FAST, FAST);
 		}
-		this.setSpeeds(0, 0);
+		this.setWheels(0, 0);
 	}
 	
 
@@ -168,18 +147,18 @@ public class Navigation {
 			error = angle - this.odometer.getAng();
 
 			if (error < -180.0) {
-				this.setSpeeds(-SLOW, SLOW);
+				this.setWheels(-SLOW, SLOW);
 			} else if (error < 0.0) {
-				this.setSpeeds(SLOW, -SLOW);
+				this.setWheels(SLOW, -SLOW);
 			} else if (error > 180.0) {
-				this.setSpeeds(SLOW, -SLOW);
+				this.setWheels(SLOW, -SLOW);
 			} else {
-				this.setSpeeds(-SLOW, SLOW);
+				this.setWheels(-SLOW, SLOW);
 			}
 		}
 
 		if (stop) {
-			this.setSpeeds(0, 0);
+			this.setWheels(0, 0);
 		}
 	}
 	/**
@@ -188,15 +167,19 @@ public class Navigation {
 	 * else move backward
 	 */
 	public void moveStraight(double distance) {
+		
 		if(distance>=0){
-			this.setSpeeds(FAST, FAST);
+			this.setWheels(-FAST, -FAST);
+			leftMotor.rotate(-convertDistance(Odometer.leftRadius, distance), true);
+			rightMotor.rotate(-convertDistance(Odometer.rightRadius, distance), false);
 		}
 		else{
-			this.setSpeeds(-FAST, -FAST);
+			this.setWheels(FAST, FAST);
+			leftMotor.rotate(-convertDistance(Odometer.leftRadius, distance), true);
+			rightMotor.rotate(-convertDistance(Odometer.rightRadius, distance), false);
 		}
-		leftMotor.rotate(convertDistance(Odometer.width, distance), true);
-		rightMotor.rotate(convertDistance(Odometer.width, distance), false);
-		this.setSpeeds(0, 0);
+		
+		this.setWheels(0, 0);
 	}
 	
 	
@@ -216,30 +199,30 @@ public class Navigation {
 	 * causes the robot to turn left continously.
 	 */
 	public void turnLeft(){
-		this.setSpeeds(-SLOW,SLOW);
+		this.setWheels(-SLOW,SLOW);
 	}
 	/**
 	 * causes the robot to turn right continously.
 	 */
 	public void turnRight(){
-		this.setSpeeds(SLOW,-SLOW);
+		this.setWheels(SLOW,-SLOW);
 	}
 	/**
 	 * causes the robot to move forward
 	 */
 	public void moveForward(){
-		this.setSpeeds(SLOW, SLOW);
+		this.setWheels(-SLOW, -SLOW);
 	}
 	/**
 	 * causes the robot to move backwards
 	 */
 	public void moveBackward(){
-		this.setSpeeds(-SLOW, -SLOW);
+		this.setWheels(SLOW, SLOW);
 	}
 	/**
 	 * stops the motors
 	 */
 	public void stop(){
-		this.setSpeeds(0,0);
+		this.setWheels(0,0);
 	}
 }
