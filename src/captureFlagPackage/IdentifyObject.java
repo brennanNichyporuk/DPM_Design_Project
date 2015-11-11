@@ -5,7 +5,7 @@ import basicPackage.*;
 
 /**
  *A class which uses the robot's sensors to identify an object.
- *This class distinguishes between the target block and all the other robjects.
+ *This class distinguishes between the target block and all the other objects.
  *@author Fred Glozman, Abdel Kader Gaye
  */
 public class IdentifyObject extends Thread

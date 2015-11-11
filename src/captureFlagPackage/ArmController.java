@@ -29,7 +29,7 @@ public class ArmController {
 		this.degreesOfRotation = degreesOfRotation;
 		
 		this.aMotor.setAcceleration(1000);
-		this.aMotor.setSpeed(100);
+		this.aMotor.setSpeed(200);
 	}
 	
 	
@@ -48,6 +48,25 @@ public class ArmController {
 	 */	public void bringArmUp(){
 		if(!isUp){
 			aMotor.rotate(degreesOfRotation);
+			isUp = true;
+		}
+	}
+	 
+	/**
+	 * Lowers the robotic arm
+	 */
+	public void bringArmDown(int x){
+		if(isUp){
+			aMotor.rotate(-x);
+			isUp = false;
+		}
+	}
+	
+	/**
+	 * Raises the robotic arm
+	 */	public void bringArmUp(int x){
+		if(!isUp){
+			aMotor.rotate(x);
 			isUp = true;
 		}
 	}

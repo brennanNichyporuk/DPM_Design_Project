@@ -34,8 +34,6 @@ public class CaptureFlag extends Thread implements IObserver
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
 	
-	ArrayList<double[]> objectsLocation;
-
 
 	/**
 	 *Constructor
@@ -85,17 +83,15 @@ public class CaptureFlag extends Thread implements IObserver
 	{
 		//switch on the caller class ID
 		switch (x)
-		{
-		
+		{	
 			//caller is LocateObject 
 			case LOCATEOBJECT:
 				
 				//get the location of the found object
-				objectsLocation = locator.getCurrentObjLoco();
-				double[] currentObject = objectsLocation.remove(0);
+				double[] objectsLocation = locator.getCurrentObjLoco();
 				
 				//if the location is not null (just being careful...)
-				if(currentObject!=null)
+				if(objectsLocation!=null)
 				{
 					//pause locator
 					locator.pauseThread();
@@ -104,7 +100,7 @@ public class CaptureFlag extends Thread implements IObserver
 					locationPreIdentifier = odo.getPosition();
 					
 					//navigate towards object
-					nav.travelTo(currentObject[0], currentObject[1]);
+					nav.travelTo(objectsLocation[0], objectsLocation[1]);
 					
 					//identify object
 					identifier.resumeThread();
@@ -133,27 +129,20 @@ public class CaptureFlag extends Thread implements IObserver
 					//pause identifier
 					identifier.pauseThread();
 					
+					grabber.doPickup();
+					grabber.discardBlock();
+					
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
 						nav.travelTo(locationPreIdentifier[0], locationPreIdentifier[1]);
-						nav.turnTo(locationPreIdentifier[2], true);
+						nav.turnTo(0, true);
 						
 						//reset saved location for next iteration
 						locationPreIdentifier = null;
 					}
-					
-					//if there are more objects to identify. 
-					//call update again with LOCATEOBJECT
-					if(!objectsLocation.isEmpty())
-					{
-						update(ClassID.LOCATEOBJECT);
-					}
-					else
-					{
-						//resume locator
-						locator.resumeThread();
-					}
+				
+					locator.resumeThread();
 				}
 												
 				break;	

@@ -18,7 +18,7 @@ public class PickupObject
 	private Navigation nav;
 	
 	//length of the arm. 
-	private final double armLength = 15.0;
+	private final double armLength = 100.0;
 	
 	//how many degrees the arm motor should rotate
 	private final int armMotorDegreesOfRotation = 490;
@@ -41,16 +41,31 @@ public class PickupObject
 	 */
 	void doPickup()
 	{
-		//move backwards to allow the arm to drop
-		nav.moveStraight(-armLength);
+		//move backward 14cm
+		nav.moveStraight(armLength);
 		
 		//drop arm
 		armController.bringArmDown();
 		
-		//move forward to allow the arm grab the block
-		nav.moveStraight(armLength);
+		//move forward 14cm
+		nav.moveStraight(-armLength);
+
+		//bring arm up (capture block)
+		armController.bringArmUp();		
+	}
+	
+	/**
+	 * 
+	 */
+	void discardBlock()
+	{
+		//navigate to drop zone
+		nav.travelTo(0, -20);
 		
-		//raise arm
-		armController.bringArmUp();
+		//bring arm down (release block)
+		armController.bringArmDown(350);
+		
+		//bring arm back up
+		armController.bringArmUp(350);
 	}
 }
