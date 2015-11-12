@@ -16,20 +16,22 @@ public class Mapper {
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
-
-	private int detectionThreshold = 5;
-	private int scanBand = 30;
-	private int scanIncrement = 5;
+	private int sensorAxleOffset;
+	
+	private int detectionThreshold = 30;
+	private int scanBand = 25;
+	private int scanIncrement = 25;
 
 	/**
 	 * Instantiates a map.
 	 * @param odo - reference to the Odometer thread.
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
-	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite) {
+	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
+		this.sensorAxleOffset = sensorAxleOffset;
 	}
 
 	/**
@@ -46,32 +48,22 @@ public class Mapper {
 	private boolean scan() {
 
 		double distance;
-		double lastDistance = uM.getDistance();
-		double edgeABSAngle = 0;
-		double edgeDistance = 0;
+		double ABSAngle = 0;
 		boolean objectDetected = false;
-		boolean detectionThresholdExceeded = false;
 
-		for (int i = -scanBand; i < scanBand; i += scanIncrement) {
+		for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
 			uM.rotateSensorTo(i);
-			distance = uM.getDistance();
-
-			if (Math.abs(distance - lastDistance) >= detectionThreshold) { // Distance Change
-				edgeABSAngle = this.wrapDatAngle(i + odo.getAng());
-				edgeDistance = distance;
-				detectionThresholdExceeded = true;
-			}
-			else if (detectionThresholdExceeded) {
+			distance = this.cycleUSsensor();
+			if (distance < detectionThreshold) {
+				ABSAngle = this.wrapDatAngle(i + odo.getAng());
 				try {
-					int[] nodeID = this.locateDatObjectNode(edgeABSAngle, edgeDistance);
+					int[] nodeID = this.locateDatObjectNode(ABSAngle, distance);
 					dStarLite.updateCell(nodeID[0], nodeID[1], -1);
-					objectDetected = true;
+					objectDetected = true; // Skipped if there is an Exception
 				} catch (FalseObjectException fOE) {
-
+					System.out.println("FalseObjectE");
 				}
-				detectionThresholdExceeded = false;
 			}
-			lastDistance = distance;
 		}
 		return objectDetected;
 	}
@@ -84,22 +76,49 @@ public class Mapper {
 		return angle;
 	}
 
-	private int[] locateDatObjectNode(double edgeABSAngle, double edgeDistance) throws FalseObjectException {
-		double objectX = odo.getX() + edgeDistance * Math.cos(Math.toRadians(edgeABSAngle));
-		double objectY = odo.getY() + edgeDistance * Math.sin(Math.toRadians(edgeABSAngle));
+	private int[] locateDatObjectNode(double angle, double distance) throws FalseObjectException {
+		double sensorX = odo.getX() + this.sensorAxleOffset * Math.cos(Math.toRadians(odo.getAng()));
+		double sensorY = odo.getY() + this.sensorAxleOffset * Math.sin(Math.toRadians(odo.getAng()));
+		
+		double objectX = sensorX + distance * Math.cos(Math.toRadians(angle));
+		double objectY = sensorY + distance * Math.sin(Math.toRadians(angle));
 
 		int nodeX = (int) (objectX / 30.48);
 		int nodeY = (int) (objectY / 30.48);
 		int[] nodeID = {nodeX, nodeY};
-		
+
 		int currentNodeX = (int) (odo.getX() / 30.48);
 		int currentNodeY = (int) (odo.getY() / 30.48);
 
+		// If the object is off the map or the object detected is the wall, raise FalseObjectException.
 		if (nodeX > 11 || nodeY > 11 || nodeX < 0 || nodeY < 0 || (nodeX == currentNodeX && nodeY == currentNodeY)) {
 			throw new FalseObjectException();
 		}
 
+		// If the object is not on an adjacent node, ignore...
+		if (!((nodeX == currentNodeX + 1 && nodeY == currentNodeY) || (nodeX == currentNodeX - 1 && nodeY == currentNodeY)
+				|| (nodeX == currentNodeX && nodeY == currentNodeY + 1) || (nodeX == currentNodeX && nodeY == currentNodeY - 1)))
+			throw new FalseObjectException();
+		
+		System.out.println("Ox:" + (int) objectX + "Oy:" + (int) objectY);
+
 		return nodeID;
+	}
+	
+	private int cycleUSsensor() {
+		
+		int distance = 0;
+		for (int i = 0; i < 5; i++) {
+			distance = uM.getDistance();
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return distance;
 	}
 
 }

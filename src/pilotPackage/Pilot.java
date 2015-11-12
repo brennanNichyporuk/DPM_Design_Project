@@ -42,7 +42,8 @@ public class Pilot extends Thread {
 		this.dStarLite.init(startX, startY, goalX, goalY);
 		this.dStarLite.replan();
 		this.path = this.dStarLite.getPath();
-		this.mapper = new Mapper(odo, uM, this.dStarLite);
+		int sensorAxleOffset = 18;
+		this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
 	}
 
 	public void run() {
@@ -51,15 +52,21 @@ public class Pilot extends Thread {
 			int currentNodeY = (int) (this.odometer.getY() / 30.48);
 			this.dStarLite.updateStart(currentNodeX, currentNodeY);
 			this.dStarLite.replan();
-			
+
 			pilotPackage.State currentState = this.path.get(0);
 			pilotPackage.State nextState = this.path.get(1);
 			int deltaX = nextState.x - currentState.x;
 			int deltaY = nextState.y - currentState.y;
 			this.faceNextBlock(deltaX, deltaY);
-			
-			if (this.mapper.updateAndReturnMap())
+
+			while (this.mapper.updateAndReturnMap()) {
 				this.dStarLite.replan();
+				currentState = this.path.get(0);
+				nextState = this.path.get(1);
+				deltaX = nextState.x - currentState.x;
+				deltaY = nextState.y - currentState.y;
+				this.faceNextBlock(deltaX, deltaY);
+			}
 
 			nextState = this.path.get(1);
 			this.travelToNode(nextState);
@@ -78,7 +85,7 @@ public class Pilot extends Thread {
 		this.dStarLite.updateGoal(x, y);
 		this.dStarLite.replan();
 	}
-	
+
 	private void faceNextBlock(int deltaX, int deltaY) {
 		if (deltaX == 0) {
 			if (deltaY < 0)
@@ -93,14 +100,13 @@ public class Pilot extends Thread {
 				this.navigation.turnTo(0, true);
 		}
 	}
-	
+
 	private void travelToNode(pilotPackage.State nextState) {
 		int nodeX = nextState.x;
 		int nodeY = nextState.y;
-		System.out.println("Nx: " + nodeX + ", Ny: " + nodeY);
 		double actualX = nodeX * 30.48 + 15.24;
 		double actualY = nodeY * 30.48 + 15.24;
-		
+
 		this.navigation.travelTo(actualX, actualY);
 	}
 }
