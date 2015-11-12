@@ -28,7 +28,7 @@ public class Navigation {
 	/**
 	 * Set degree error in navigation.
 	 */
-	private final static double DEG_ERR = 4.5;
+	private final static double DEG_ERR = 4.8;
 	
 	/**
 	 * Set distance error in navigation
@@ -63,7 +63,7 @@ public class Navigation {
 	 * @param rSpd right motor speed for float
 	 */
 	public void setSpeeds(int lSpd, int rSpd) {
-		this.setWheels(-lSpd, -rSpd);
+		this.setWheels(lSpd, rSpd);
 	}
 	
 	
@@ -104,7 +104,7 @@ public class Navigation {
 			if(Math.abs(minAng-this.odometer.getAng()) > DEG_ERR){
 				this.turnTo(Odometer.fixDegAngle(minAng), false);
 			}
-			this.setWheels(-FAST, -FAST);
+			this.setWheels(FAST, FAST);
 		}
 		this.setWheels(0, 0);
 	}
@@ -126,7 +126,7 @@ public class Navigation {
 		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
 			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI)+180;
 			this.turnTo(Odometer.fixDegAngle(minAng), false);
-			this.setWheels(FAST, FAST);
+			this.setWheels(-FAST, -FAST);
 		}
 		this.setWheels(0, 0);
 	}
@@ -147,13 +147,13 @@ public class Navigation {
 			error = angle - this.odometer.getAng();
 
 			if (error < -180.0) {
-				this.setWheels(-SLOW, SLOW);
+				this.setSpeeds(-SLOW, SLOW);
 			} else if (error < 0.0) {
-				this.setWheels(SLOW, -SLOW);
+				this.setSpeeds(SLOW, -SLOW);
 			} else if (error > 180.0) {
-				this.setWheels(SLOW, -SLOW);
+				this.setSpeeds(SLOW, -SLOW);
 			} else {
-				this.setWheels(-SLOW, SLOW);
+				this.setSpeeds(-SLOW, SLOW);
 			}
 		}
 
@@ -169,14 +169,14 @@ public class Navigation {
 	public void moveStraight(double distance) {
 		
 		if(distance>=0){
-			this.setWheels(-FAST, -FAST);
-			leftMotor.rotate(-convertDistance(Odometer.leftRadius, distance), true);
-			rightMotor.rotate(-convertDistance(Odometer.rightRadius, distance), false);
+			this.setWheels(FAST, FAST);
+			leftMotor.rotate(convertDistance(Odometer.leftRadius, distance), true);
+			rightMotor.rotate(convertDistance(Odometer.rightRadius, distance), false);
 		}
 		else{
-			this.setWheels(FAST, FAST);
-			leftMotor.rotate(-convertDistance(Odometer.leftRadius, distance), true);
-			rightMotor.rotate(-convertDistance(Odometer.rightRadius, distance), false);
+			this.setWheels(-FAST, -FAST);
+			leftMotor.rotate(convertDistance(Odometer.leftRadius, distance), true);
+			rightMotor.rotate(convertDistance(Odometer.rightRadius, distance), false);
 		}
 		
 		this.setWheels(0, 0);
@@ -211,18 +211,26 @@ public class Navigation {
 	 * causes the robot to move forward
 	 */
 	public void moveForward(){
-		this.setWheels(-SLOW, -SLOW);
+		this.setWheels(SLOW, SLOW);
 	}
 	/**
 	 * causes the robot to move backwards
 	 */
 	public void moveBackward(){
-		this.setWheels(SLOW, SLOW);
+		this.setWheels(-SLOW, -SLOW);
 	}
 	/**
 	 * stops the motors
 	 */
 	public void stop(){
 		this.setWheels(0,0);
+	}
+	private static boolean inRange(double target, double value, double error){
+		if(Math.abs(target-value)>error){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 }

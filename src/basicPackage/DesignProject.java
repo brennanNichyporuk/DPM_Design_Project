@@ -21,7 +21,7 @@ public class DesignProject {
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
-		//LCDInfo lcd = new LCDInfo(odo);
+		LCDInfo lcd = new LCDInfo(odo);
 		
 		
 		//ssetting up the ultrasonic sensor for localization
@@ -33,21 +33,14 @@ public class DesignProject {
 		//setting up the color sensor for object identification and localization
 		//SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
 		//LineDetection lineDetector = new LineDetection(lineSensor);
-		navigator.moveStraight(30);
-		sleep(3000);
-		navigator.moveStraight(-30);
-		sleep(3000);
-		navigator.turnLeft();
-		sleep(3000);
-		navigator.turnRight();
-		sleep(3000);
-		navigator.setSpeeds(-80, -80);
-		sleep(3000);
-		navigator.setSpeeds(80, 80);
-		sleep(3000);
 		navigator.travelTo(30,30);
+		navigator.travelTo(-30,-30);
+		navigator.travelToBackwards(-30,-30);
+		navigator.moveBackward();
 		sleep(3000);
-		navigator.turnTo(0, true);
+		navigator.moveForward();
+		sleep(3000);
+		
 		
 		
 	}
