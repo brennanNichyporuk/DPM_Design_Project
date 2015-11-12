@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import pilotPackage.DStarLite;
 import basicPackage.Odometer;
+import basicPackage.Odometer2;
 import modulePackage.UltrasonicModule;
 
 /**
@@ -13,12 +14,12 @@ import modulePackage.UltrasonicModule;
  *
  */
 public class Mapper {
-	private Odometer odo;
+	private Odometer2 odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
 	private int sensorAxleOffset;
 	
-	private int detectionThreshold = 30;
+	private int detectionThreshold = 38;
 	private int scanBand = 25;
 	private int scanIncrement = 25;
 
@@ -27,11 +28,12 @@ public class Mapper {
 	 * @param odo - reference to the Odometer thread.
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
-	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
+	public Mapper(Odometer2 odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
 		this.sensorAxleOffset = sensorAxleOffset;
+		this.cycleUSsensor();
 	}
 
 	/**
@@ -82,6 +84,9 @@ public class Mapper {
 		
 		double objectX = sensorX + distance * Math.cos(Math.toRadians(angle));
 		double objectY = sensorY + distance * Math.sin(Math.toRadians(angle));
+		
+		if (objectX < 10 || objectY < 10)
+			throw new FalseObjectException();
 
 		int nodeX = (int) (objectX / 30.48);
 		int nodeY = (int) (objectY / 30.48);
@@ -111,7 +116,7 @@ public class Mapper {
 		for (int i = 0; i < 5; i++) {
 			distance = uM.getDistance();
 			try {
-				Thread.sleep(50);
+				Thread.sleep(25);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

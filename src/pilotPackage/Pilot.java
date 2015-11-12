@@ -6,7 +6,9 @@ import mapPackage.Mapper;
 import modulePackage.UltrasonicModule;
 import basicPackage.IObserver;
 import basicPackage.Navigation;
+import basicPackage.Navigation2;
 import basicPackage.Odometer;
+import basicPackage.Odometer2;
 
 /**
  * This class is is responsible for navigating to the opponents home zone while
@@ -16,8 +18,8 @@ import basicPackage.Odometer;
  */
 public class Pilot extends Thread {
 	private IObserver observer;
-	private Navigation navigation;
-	private Odometer odometer;
+	private Navigation2 navigation;
+	private Odometer2 odometer;
 	private Mapper mapper;
 	private DStarLite dStarLite;
 	private List<pilotPackage.State> path;
@@ -33,7 +35,7 @@ public class Pilot extends Thread {
 	 * @param goalX - goal nodeX
 	 * @param goalY - goal nodeY
 	 */
-	public Pilot(IObserver observer, Navigation nav, Odometer odo, UltrasonicModule uM, 
+	public Pilot(IObserver observer, Navigation2 nav, Odometer2 odo, UltrasonicModule uM, 
 			int startX, int startY, int goalX, int goalY) {
 		this.observer = observer;
 		this.navigation = nav;
@@ -42,7 +44,7 @@ public class Pilot extends Thread {
 		this.dStarLite.init(startX, startY, goalX, goalY);
 		this.dStarLite.replan();
 		this.path = this.dStarLite.getPath();
-		int sensorAxleOffset = 18;
+		int sensorAxleOffset = 12;
 		this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
 	}
 
