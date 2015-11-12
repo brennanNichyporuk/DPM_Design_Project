@@ -82,11 +82,11 @@ public class Odometer implements TimerListener {
 		this.rightMotor = rightMotor;
 		
 		// default values, modify for your robot
-		rightRadius = 2.00; // original: 2.00
-		leftRadius = 1.98; // original: 1.98
-		width = 11.7; // original: 11.7
-		this.x = 30.48 * 2.5;
-		this.y = 30.48 * 0.5;
+		rightRadius = 2.065;
+		leftRadius = this.rightRadius * 0.99;
+		width = 11.35;
+		this.x = 0.0;
+		this.y = 0.0;
 		this.theta = 90.0;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
@@ -140,8 +140,8 @@ public class Odometer implements TimerListener {
 		synchronized (this) {
 			theta += dDH[1];
 			theta = fixDegAngle(theta);
-			x -= dDH[0] * Math.cos(Math.toRadians(theta));
-			y -= dDH[0] * Math.sin(Math.toRadians(theta));
+			x += dDH[0] * Math.cos(Math.toRadians(theta));
+			y += dDH[0] * Math.sin(Math.toRadians(theta));
 			//System.out.println("Value of x "+x);
 			//System.out.println("Value of y "+y);
 		}

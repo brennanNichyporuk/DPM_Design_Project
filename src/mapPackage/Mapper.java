@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import pilotPackage.DStarLite;
 import basicPackage.Odometer;
-import basicPackage.Odometer2;
 import modulePackage.UltrasonicModule;
 
 /**
@@ -14,7 +13,7 @@ import modulePackage.UltrasonicModule;
  *
  */
 public class Mapper {
-	private Odometer2 odo;
+	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
 	private int sensorAxleOffset;
@@ -28,7 +27,7 @@ public class Mapper {
 	 * @param odo - reference to the Odometer thread.
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
-	public Mapper(Odometer2 odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
+	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
