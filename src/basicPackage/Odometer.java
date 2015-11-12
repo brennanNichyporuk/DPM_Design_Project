@@ -82,11 +82,11 @@ public class Odometer implements TimerListener {
 		this.rightMotor = rightMotor;
 		
 		// default values, modify for your robot
-		rightRadius = 2.00;
-		leftRadius = 1.98;
-		width = 11.7;
-		this.x = 0.0;
-		this.y = 0.0;
+		rightRadius = 2.00; // original: 2.00
+		leftRadius = 1.98; // original: 1.98
+		width = 11.7; // original: 11.7
+		this.x = 30.48 * 2.5;
+		this.y = 30.48 * 0.5;
 		this.theta = 90.0;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
