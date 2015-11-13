@@ -1,6 +1,7 @@
 package modulePackage;
 
 import lejos.hardware.Button;
+import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class ColorDetection {
@@ -8,7 +9,6 @@ public class ColorDetection {
 	 * constant that controls how many samples the SampleProvider takes before returning the average value. 
 	 */
 	private static int SAMPLESIZE = 5;
-
 	
 	/**
 	 * threshold constant to differentiate between a blue block and a wooden block at 2CM.
@@ -24,23 +24,17 @@ public class ColorDetection {
 	 */
 	float[] colorData;
 	
-	public ColorDetection(SampleProvider sampleProvideColor,float[] sampleDataColor){
-		this.colorData = sampleDataColor;
-		this.sampleGetColor = sampleProvideColor;
+	public ColorDetection(SensorModes sensor){
+		this.sampleGetColor = sensor.getMode("RGB");
+		this.colorData = new float[sampleGetColor.sampleSize()];
 	}
-	/**
-	 * @param provider
-	 * @param destination
-	 * @return returns the average value depending on the SAMPLESIZE constant in ColorDetection.
+	/**@TODO 
+	 * @return returns the rgb profile of the block depending on what color it is.
 	 */
-	private float getData(SampleProvider provider, float[] destination){
+	private float getData(){
 		//getting the data from the sensor and averaging the value (SAMPLESIZE set at top)
-		float sum=0;
-		for(int i =0;i<SAMPLESIZE;i++){
-			provider.fetchSample(destination, 0);
-			float intensity = destination[0] * 100;
-			sum+=intensity;
-		}
-		return sum/SAMPLESIZE;
+		sampleGetColor.fetchSample(colorData, 0);
+		
+		return 0;
 	}
 }

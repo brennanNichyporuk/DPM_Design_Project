@@ -33,14 +33,6 @@ public class DesignProject {
 		//setting up the color sensor for object identification and localization
 		//SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
 		//LineDetection lineDetector = new LineDetection(lineSensor);
-		navigator.travelTo(30,30);
-		navigator.travelTo(-30,-30);
-		navigator.travelToBackwards(-30,-30);
-		navigator.moveBackward();
-		sleep(3000);
-		navigator.moveForward();
-		sleep(3000);
-		
 		
 		
 	}

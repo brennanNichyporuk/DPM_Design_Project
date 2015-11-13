@@ -14,7 +14,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * Clock constant
 	 */
-	private static final long CORRECTION_PERIOD = 10;
+	private static final long CORRECTION_PERIOD = 50;
 	/**
 	 * Odometer Instance
 	 */
@@ -43,10 +43,9 @@ public class OdometerCorrection extends Thread {
 
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-			
-			this.lineDetector.detectLine();
-			this.correctOdometer();
-			
+			if(this.lineDetector.detectLine()){
+				this.correctOdometer();
+			}
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
 				try {
@@ -66,6 +65,7 @@ public class OdometerCorrection extends Thread {
 	public void correctOdometer () {
 		double[] position = new double[3];
 		boolean[] update = {true, true, true};
+		//for now since I don't know if it can detect lines yet.
 		position = odometer.getPosition();
 	}
 }
