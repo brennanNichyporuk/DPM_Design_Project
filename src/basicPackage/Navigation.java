@@ -23,7 +23,7 @@ public class Navigation {
 	/**
 	 * Constant to determine acceleration. Set to 4000
 	 */
-	public final static int ACCELERATION = 2000;
+	public final static int ACCELERATION = 4000;
 	
 	/**
 	 * Set degree error in navigation.

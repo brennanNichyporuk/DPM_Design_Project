@@ -37,7 +37,7 @@ public class Localization {
 		while(!touched){
 			touch.fetchSample(touchData, 0);
 			if(touchData[0]==1){
-				double[] position = {11.0,0,0};
+				double[] position = {12.5,0,0};
 				boolean[] update = {true, false,false};
 				this.odo.setPosition(position,update);
 				touched = true;
@@ -53,7 +53,7 @@ public class Localization {
 		while(!touched){
 			this.touch.fetchSample(touchData, 0);
 			if(touchData[0]==1){
-				double[] position = {0,12.9,0};
+				double[] position = {0,12.5,0};
 				boolean[] update = {false, true,false};
 				this.odo.setPosition(position,update);
 				touched = true;
