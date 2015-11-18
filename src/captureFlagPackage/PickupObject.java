@@ -55,7 +55,7 @@ public class PickupObject
 	}
 	
 	/**
-	 * 
+	 *Dumps the block to a designated drop off zone 
 	 */
 	void discardBlock()
 	{
