@@ -23,7 +23,9 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * Line detection using a derivative in order to determine if a line has been detected on the ground.
 	 */
-	private LineDetection lineDetector;
+	private LineDetection leftLineDetector;
+	private LineDetection rightLineDetector;
+	
 	
 	/**
 	 * distance between squares. Set by default to 30 centimeters
@@ -34,26 +36,49 @@ public class OdometerCorrection extends Thread {
 	 * error in odometry correction
 	 */
 	private int DISTERRMARGIN = 4;
-
+	
+	/**
+	 * last time reported for left line checker
+	 */
+	private long leftTime;
+	
+	/**
+	 * last time reported for right line checker
+	 */
+	private long rightTime;
+	
+	
+	private long TIME_MARGIN = 1000;
+	
 	/**
 	 * Constructor for the Odometer correction
 	 * @param odometer Instance of the odometer that Odometer Correction will correct
 	 */
-	public OdometerCorrection(Odometer odometer,LineDetection lineDetector) {
+	public OdometerCorrection(Odometer odometer,LineDetection leftLineDetector,LineDetection rightLineDetector) {
 		this.odometer = odometer;
-		this.lineDetector = lineDetector;
+		this.leftLineDetector = leftLineDetector;
+		this.rightLineDetector = rightLineDetector;
+		this.leftTime = System.currentTimeMillis();
+		this.rightTime = System.currentTimeMillis();
 	}
 	/**
 	 * run odometer correction thread.
 	 */
 	public void run() {
 		long correctionStart, correctionEnd;
-
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-			if(this.lineDetector.detectLine()){
-				Sound.beep();
-				this.correctOdometer();
+			if(this.leftLineDetector.detectLine()){
+				long leftTime = System.currentTimeMillis();
+				if((this.leftTime - this.rightTime) < TIME_MARGIN){
+					Sound.beep();
+				}
+			}
+			if(this.rightLineDetector.detectLine()){
+				long rightTime = System.currentTimeMillis();
+				if((this.rightTime - this.leftTime) < TIME_MARGIN){
+					Sound.beep();
+				}
 			}
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
