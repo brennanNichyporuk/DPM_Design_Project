@@ -12,6 +12,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
+import mapPackage.Mapper;
 import modulePackage.LineDetection;
 import modulePackage.UltrasonicModule;
 
@@ -23,15 +24,21 @@ public class DesignProject {
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
-		Navigation navigator = new Navigation(odo);
-		LCDInfo lcd = new LCDInfo(odo);
+		//Navigation navigator = new Navigation(odo);
+		//LCDInfo lcd = new LCDInfo(odo);
 		
 		
-		//ssetting up the ultrasonic sensor for localization
+		//setting up the ultrasonic sensor for localization
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
+		
+		Mapper mapper = new Mapper(odo, ultrasonicMod, 14);
+		mapper.start();
+		mapper.setActive(true);
+		
+		//System.out.println("Done!");
 		
 		/*
 		while (true) {
@@ -39,8 +46,12 @@ public class DesignProject {
 		}
 		*/
 		
+		
+		
+		/*
 		Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 2, 0, 2, 7);
 		pilot.start();
+		*/
 		
 		Button.waitForAnyPress();
 		System.exit(0);
@@ -48,15 +59,6 @@ public class DesignProject {
 		//setting up the color sensor for object identification and localization
 		//SensorModes lineSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));	
 		//LineDetection lineDetector = new LineDetection(lineSensor);
-
-		navigator.travelTo(30,30);
-		navigator.travelTo(-30,-30);
-		navigator.travelToBackwards(-30,-30);
-		navigator.moveBackward();
-		sleep(3000);
-		navigator.moveForward();
-		sleep(3000);
-		
 		
 	}
 	public static void sleep(int sleepTime){

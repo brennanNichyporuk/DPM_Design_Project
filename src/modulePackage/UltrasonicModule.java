@@ -43,6 +43,9 @@ public class UltrasonicModule
 		this.neck = neck;
 		
 		this.windowSize = 5; // Size of window used in Median Filter
+		for (int i = 0; i < this.windowSize; i++) {
+			this.addValue(this.fetchDistance());
+		}
 	}
 	
 	
@@ -162,7 +165,6 @@ public class UltrasonicModule
 	{
 		int un_filtered = this.fetchDistance();
 		this.setDistance(this.filterDistance(un_filtered));
-		
 		return this.distance;
 	}
 	
@@ -210,5 +212,7 @@ public class UltrasonicModule
 	{
 		this.sensorAngle = sensorAngle;
 	}
+	
 }
+
 

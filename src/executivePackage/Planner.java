@@ -20,12 +20,13 @@ public class Planner extends Thread implements IObserver {
 	public void run() {
 		
 	}
-	
+
 	/**
 	 * Called by observed classes to notify Planner of changes.
 	 */
+	
 	public void update(ClassID x){
 		
 	}
-	
+
 }

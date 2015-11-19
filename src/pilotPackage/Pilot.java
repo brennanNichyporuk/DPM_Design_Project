@@ -43,7 +43,7 @@ public class Pilot extends Thread {
 		this.dStarLite.replan();
 		this.path = this.dStarLite.getPath();
 		int sensorAxleOffset = 12;
-		this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
+		//this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
 	}
 
 	public void run() {
@@ -59,17 +59,9 @@ public class Pilot extends Thread {
 			int deltaY = nextState.y - currentState.y;
 			this.faceNextBlock(deltaX, deltaY);
 
-			while (this.mapper.updateAndReturnMap()) {
-				this.dStarLite.replan();
-				currentState = this.path.get(0);
-				nextState = this.path.get(1);
-				deltaX = nextState.x - currentState.x;
-				deltaY = nextState.y - currentState.y;
-				this.faceNextBlock(deltaX, deltaY);
-			}
-
-			nextState = this.path.get(1);
+			this.mapper.setActive(true);
 			this.travelToNode(nextState);
+
 		}
 	}
 
