@@ -1,6 +1,7 @@
 package basicPackage;
 import java.util.Arrays;
 
+import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 import modulePackage.UltrasonicModule;
 
@@ -119,7 +120,6 @@ public class USLocalizer {
 				this.turn(-5.0, false);
 				distance = usModule.getDistance();
 			}
-
 			// keep rotating until the robot does not see a wall, then latch the angle
 			while (distance <= distanceStandard + errorMargin) {
 				angle = odo.getAng();
@@ -200,5 +200,12 @@ public class USLocalizer {
 		}
 		else
 			return (angle2 + angle1) / 2;
+	}
+	
+	public LocalizationType getLocType() {
+		return locType;
+	}
+	public void setLocType(LocalizationType locType) {
+		this.locType = locType;
 	}
 }

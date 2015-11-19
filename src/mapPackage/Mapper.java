@@ -15,7 +15,6 @@ import modulePackage.UltrasonicModule;
  */
 public class Mapper extends Thread {
 	private Object lock1 = new Object();
-
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
@@ -35,6 +34,7 @@ public class Mapper extends Thread {
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
 	public Mapper(Odometer odo, UltrasonicModule uM, /*DStarLite dStarLite */ int sensorAxleOffset) {
+
 		this.odo = odo;
 		this.uM = uM;
 		//this.dStarLite = dStarLite;

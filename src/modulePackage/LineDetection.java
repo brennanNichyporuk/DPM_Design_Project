@@ -12,9 +12,8 @@ public class LineDetection
 	private int lastDerivative;
 	private int lowValue;
 	private int highValue;
-	private int minDerivativeChange = 5;
-	private int	CORRECTION_PERIOD= 50;
-
+	private int minDerivativeChange = 15;
+	
 	/**
 	 * 
 	 * @param colorSensor: Light Sensor to read values
@@ -24,11 +23,8 @@ public class LineDetection
 	{
 		this.colorSensor = lineSensor.getMode("Red");
 		this.colorData = new float[colorSensor.sampleSize()];	
-
-
 		colorSensor.fetchSample(colorData,0);
 		this.lastValue = (int)(colorData[0]*100.0);	
-		this.lastValue = 0;
 		this.lastDerivative = 0;
 		this.lowValue = 0;
 		this.highValue = 0;
@@ -40,13 +36,10 @@ public class LineDetection
 	 * returns when a line is detected
 	 */
 	public boolean detectLine() {
-		long correctionStart, correctionEnd;
 
-		correctionStart = System.currentTimeMillis();
 		colorSensor.fetchSample(colorData,0);
 		int currentValue = (int)(colorData[0]*100.0);
 		int currentDerivative = currentValue - lastValue;
-
 		// if the derivative is increasing...
 		if (currentDerivative >= lastDerivative) {
 			// set the lowValue to the minimum value of the derivative (lastDerivative)
@@ -57,12 +50,11 @@ public class LineDetection
 			if (currentDerivative > highValue) {
 				highValue = currentDerivative;
 			}
-		} else {
-
+		} 
+		else {
 			// if the magnitude of the change in the derivative is greater than 4... we have detected a line
 			if (highValue - lowValue > minDerivativeChange) {
 				// if we have detected a line ... we run update() which performs 
-
 				lowValue = 0;
 				highValue = 0;
 				return true;
@@ -76,22 +68,8 @@ public class LineDetection
 			lowValue = 0;
 			highValue = 0;
 		}
-
 		lastDerivative = currentDerivative;
 		lastValue = currentValue;
-		// this ensure the odometry correction occurs only once every period
-
-		correctionEnd = System.currentTimeMillis();
-		if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
-			try {
-				Thread.sleep(CORRECTION_PERIOD
-						- (correctionEnd - correctionStart));
-			} catch (InterruptedException e) {
-				// there is nothing to be done here because it is not
-				// expected that the odometry correction will be
-				// interrupted by another thread
-			}
-		}
 		return false;
 	}
 }

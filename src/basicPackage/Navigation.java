@@ -16,14 +16,14 @@ public class Navigation {
 	public final static int FAST = 150;
 	
 	/**
-	 * Constant to determine the slow speed of the robot. Set to 80
+	 * Constant to determine the slow speed of the robot. Set to 90 by default
 	 */
 	public final static int SLOW = 90;
 	
 	/**
 	 * Constant to determine acceleration. Set to 4000
 	 */
-	public final static int ACCELERATION = 2000;
+	public final static int ACCELERATION = 4000;
 	
 	/**
 	 * Set degree error in navigation.
@@ -224,13 +224,5 @@ public class Navigation {
 	 */
 	public void stop(){
 		this.setWheels(0,0);
-	}
-	private static boolean inRange(double target, double value, double error){
-		if(Math.abs(target-value)>error){
-			return true;
-		}
-		else{
-			return false;
-		}
 	}
 }

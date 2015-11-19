@@ -14,7 +14,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * Clock constant
 	 */
-	private static final long CORRECTION_PERIOD = 10;
+	private static final long CORRECTION_PERIOD = 50;
 	/**
 	 * Odometer Instance
 	 */
@@ -23,30 +23,63 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * Line detection using a derivative in order to determine if a line has been detected on the ground.
 	 */
-	private LineDetection lineDetector;
-
-
-
+	private LineDetection leftLineDetector;
+	private LineDetection rightLineDetector;
+	
+	
+	/**
+	 * distance between squares. Set by default to 30 centimeters
+	 */
+	private int SQUAREDISTANCE = 30;
+	
+	/**
+	 * error in odometry correction
+	 */
+	private int DISTERRMARGIN = 4;
+	
+	/**
+	 * last time reported for left line checker
+	 */
+	private long leftTime;
+	
+	/**
+	 * last time reported for right line checker
+	 */
+	private long rightTime;
+	
+	
+	private long TIME_MARGIN = 1000;
+	
 	/**
 	 * Constructor for the Odometer correction
 	 * @param odometer Instance of the odometer that Odometer Correction will correct
 	 */
-	public OdometerCorrection(Odometer odometer,LineDetection lineDetector) {
+	public OdometerCorrection(Odometer odometer,LineDetection leftLineDetector,LineDetection rightLineDetector) {
 		this.odometer = odometer;
-		this.lineDetector = lineDetector;
+		this.leftLineDetector = leftLineDetector;
+		this.rightLineDetector = rightLineDetector;
+		this.leftTime = System.currentTimeMillis();
+		this.rightTime = System.currentTimeMillis();
 	}
 	/**
 	 * run odometer correction thread.
 	 */
 	public void run() {
 		long correctionStart, correctionEnd;
-
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-			
-			this.lineDetector.detectLine();
-			this.correctOdometer();
-			
+			if(this.leftLineDetector.detectLine()){
+				long leftTime = System.currentTimeMillis();
+				if((this.leftTime - this.rightTime) < TIME_MARGIN){
+					Sound.beep();
+				}
+			}
+			if(this.rightLineDetector.detectLine()){
+				long rightTime = System.currentTimeMillis();
+				if((this.rightTime - this.leftTime) < TIME_MARGIN){
+					Sound.beep();
+				}
+			}
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
 				try {
@@ -65,7 +98,23 @@ public class OdometerCorrection extends Thread {
 	 */
 	public void correctOdometer () {
 		double[] position = new double[3];
-		boolean[] update = {true, true, true};
-		position = odometer.getPosition();
+		boolean[] update = {true, true, false};
+		//for now since I don't know if it can detect lines yet.
+		position = this.odometer.getPosition();
+		double x = position[0];
+		double y = position[1];
+		
+		//testing to see if we are near 30 in the x
+		if((x % SQUAREDISTANCE) < DISTERRMARGIN || (x % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
+			double multipleX = Math.round( x / SQUAREDISTANCE);
+			position[0] = multipleX * SQUAREDISTANCE;
+		}
+		
+		//testing to see if we are near 30 in the y
+		if((y % SQUAREDISTANCE) < DISTERRMARGIN || (y % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
+			double multipleY = Math.round( y / SQUAREDISTANCE);
+			position[1] = multipleY * SQUAREDISTANCE;
+		}
+		this.odometer.setPosition(position, update);
 	}
 }
