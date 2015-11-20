@@ -13,7 +13,7 @@ public class Navigation {
 	/**
 	 * Constant to determine the fast speed of the robot. Set to 200
 	 */
-	public final static int FAST = 150;
+	public final static int FAST = 100;
 	
 	/**
 	 * Constant to determine the slow speed of the robot. Set to 90 by default

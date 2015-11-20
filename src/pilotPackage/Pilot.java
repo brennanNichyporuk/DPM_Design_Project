@@ -43,7 +43,7 @@ public class Pilot extends Thread {
 		this.dStarLite.replan();
 		this.path = this.dStarLite.getPath();
 		int sensorAxleOffset = 12;
-		//this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
+		this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
 	}
 
 	public void run() {
