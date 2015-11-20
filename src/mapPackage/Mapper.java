@@ -160,16 +160,15 @@ public class Mapper extends Thread {
 							// Locate the falling and rising edge location ...
 							// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
 							// + or - 15 degrees from the direction it is pointing.
-							objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle - 15);
-							objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle + 15);
-
 							try {
+								objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle - 15);
+								objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle + 15);
 								// Update the path ...
 								this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
 								objectDetected = true;
 							} catch (FalseObjectException e) {
 								// TODO Auto-generated catch block
-								e.printStackTrace();
+								//e.printStackTrace();
 							}
 
 							fallingEdgeRegistered = false;
@@ -219,11 +218,13 @@ public class Mapper extends Thread {
 	}
 
 	// Locates the x and y of a given object
-	private int[] locateDatObjectEdge(double distance, double angle) {
+	private int[] locateDatObjectEdge(double distance, double angle) throws FalseObjectException {
 		double[] sensorLoco = this.locateDatSensorLoco();
-		int objectX = (int) (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
-		int objectY = (int) (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
-		int[] objectLoco = {objectX, objectY};
+		int objectEdgeX = (int) (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
+		int objectEdgeY = (int) (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
+		if (objectEdgeX <= 5|| objectEdgeY <= 5 || objectEdgeX >= ((30.48 * this.mapSize) - 5)|| objectEdgeY >= ((30.48 * this.mapSize) - 5))
+			throw new FalseObjectException();
+		int[] objectLoco = {objectEdgeX, objectEdgeY};
 		return objectLoco;
 	}
 

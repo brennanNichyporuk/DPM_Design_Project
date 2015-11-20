@@ -42,7 +42,10 @@ public class DesignProject {
 		Mapper mapper = new Mapper(odo, ultrasonicMod, dS, 10);
 		mapper.start();
 		mapper.setActive(true);
-		navigator.moveForward();
+		for (int i = 0; i < 1000; i++) {
+			navigator.travelTo(2.5 * 30.5, 7.5 * 30.5);
+			navigator.travelTo(2.5 * 30.5, 0.5 * 30.5);
+		}
 		
 		Button.waitForAnyPress();
 		System.exit(0);

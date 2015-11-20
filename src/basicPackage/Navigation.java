@@ -112,7 +112,6 @@ public class Navigation {
 				error = angle -this.odometer.getAng()+360;
 			}
 		}
-		System.out.println(error);
 
 		while (Math.abs(error) > DEG_ERR) {
 
