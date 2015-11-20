@@ -15,8 +15,8 @@ public class Localization {
 	private int startTileX;
 	private int startTileY;
 	
-	private static double XLENGTH = 14.5;
-	private static double YLENGTH = 14.5;
+	private static double XLENGTH = 13.6;
+	private static double YLENGTH = 13.6;
 	private static double FIELDSIZE = 8;
 	
 	private EV3TouchSensor touch;
@@ -70,44 +70,55 @@ public class Localization {
 	public void correctXAndY(){
 		//crash into the wall ON PURPOSE
 		if((this.startTileX==1) && (this.startTileY==1)){
-			this.nav.turnTo(0,true);
+			nav.turnTo(0,true);
 			nav.setSpeeds(-80, -80);
 			this.touchedWall(true, false, XLENGTH);
-			nav.moveStraight(15);
+			nav.moveForward();
+			sleep(2000);
 			nav.turnTo(90, true);
 			nav.setSpeeds(-80, -80);
 			this.touchedWall(false, true, YLENGTH);
-			nav.moveStraight(20);
+			nav.moveForward();
+			sleep(2000);
 			
 		}
 		
 		else if((this.startTileX==1) && (this.startTileY==8)){
-			
-			this.nav.turnTo(315,true);
-			nav.setSpeeds(-80, -80);
-			
+			nav.turnTo(0,true);
+			nav.setSpeeds(-110, -110);
+			this.touchedWall(true, false, XLENGTH);
+			nav.moveForward();
+			sleep(2000);
+			nav.turnTo(270, true);
+			nav.setSpeeds(-110, -110);
+			this.touchedWall(false, true, FIELDSIZE*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
+			nav.moveForward();
+			sleep(2000);
 		}
 		
 		else if((this.startTileX==8) && (this.startTileY==1)){
-			
-			this.nav.turnTo(180,true);
-			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
-			nav.cm_to_seconds(10);
-			nav.turnTo(270, true);
-			nav.setSpeeds(-80, -80);
-			this.touchedWall(false, true,YLENGTH);
-			
+			nav.turnTo(180,true);
+			nav.setSpeeds(-110, -110);
+			this.touchedWall(true, false, FIELDSIZE*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
+			nav.moveForward();
+			sleep(2000);
+			nav.turnTo(90, true);
+			nav.setSpeeds(-110, -110);
+			this.touchedWall(false, true, YLENGTH);
+			nav.moveForward();
+			sleep(2000);
 		}
 		else{
-			this.nav.turnTo(180,true);
-			nav.setSpeeds(-80, -80);
+			nav.turnTo(180,true);
+			nav.setSpeeds(-110, -110);
 			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
-			nav.cm_to_seconds(10);
+			nav.moveForward();
+			sleep(2000);
 			nav.turnTo(270, true);
-			nav.setSpeeds(-80, -80);
+			nav.setSpeeds(-110, -110);
 			this.touchedWall(false, true, 8*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
-			
+			nav.moveForward();
+			sleep(2000);
 		}
 		nav.stop();
 	}
@@ -135,5 +146,13 @@ public class Localization {
 				}
 		}
 		return true;
+	}
+	public static void sleep(int sleepTime){
+		try {
+			Thread.sleep(sleepTime);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

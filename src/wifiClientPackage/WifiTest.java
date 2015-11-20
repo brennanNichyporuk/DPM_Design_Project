@@ -15,6 +15,7 @@ package wifiClientPackage;
 */
 import java.io.IOException;
 
+import basicPackage.DesignProject;
 import wifi.WifiConnection;
 import wifi.StartCorner;
 import wifi.Transmission;
@@ -63,7 +64,8 @@ public class WifiTest {
 		
 			// print out the transmission information
 			conn.printTransmission();
-			
+			System.out.println(corner.getX());
+			System.out.println(corner.getY());
 			
 		}
 		// stall until user decides to end program

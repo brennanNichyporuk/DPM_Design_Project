@@ -17,7 +17,7 @@ import modulePackage.UltrasonicModule;
 
 public class DesignProject {
 	
-	public DesignProject(){
+	public DesignProject(int startingX, int startingY, int targetX, int targetY){
 		
 		/**
 		 * rightWheel - A
@@ -49,29 +49,24 @@ public class DesignProject {
 		
 		//localizing the robot SET THE STARTING LOCATION TO (1,1), (1,8), (8,1) or (8,8) depending
 		//on the starting location
-		Localization localizer = new Localization(odo, navigator, ultrasonicMod, touch, 1, 1);
+		Localization localizer = new Localization(odo, navigator, ultrasonicMod, touch, startingX, startingY);
 		localizer.doLocalization();
 		
 		
 		//initializing odometry correction after having initialized localization
-		SensorModes colorSensorL = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
-		LineDetection lineDetector = new LineDetection(colorSensorL);
+		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+		LineDetection lineDetector = new LineDetection(colorSensor);
 		OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
 		odometryCorrecter.start();
 		//light sensor for odometry correction
 		
-		//navigator.travelTo(7*OdometerCorrection.SQUAREDISTANCE, 7*OdometerCorrection.SQUAREDISTANCE);
-		navigator.travelTo(60,0);
+		navigator.travelTo(30,30);
 		navigator.turnTo(0, true);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
-	public static void sleep(int sleepTime){
-		try {
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+	public static void main(String args[]){
+		 DesignProject dp = new DesignProject(1,1,1,1);
 	}
 }

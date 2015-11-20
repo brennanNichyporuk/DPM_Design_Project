@@ -26,11 +26,11 @@ public class USLocalizer {
 	/**
 	 * Standard threshold from the wall.
 	 */
-	private double distanceStandard = 40;
+	private double distanceStandard = 50;
 	/**
 	 * Error margin to account for erroneous readings at the edges.
 	 */
-	private double errorMargin = 5;
+	private double errorMargin = 8;
 	
 	/**
 	 * @param odo Odometer instance must not be null.
