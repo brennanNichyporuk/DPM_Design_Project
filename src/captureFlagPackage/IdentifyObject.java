@@ -1,7 +1,7 @@
 package captureFlagPackage;
 
 import modulePackage.*;
-import basicPackage.*;
+
 
 /**
  *A class which uses the robot's sensors to identify an object.
@@ -38,12 +38,12 @@ public class IdentifyObject extends Thread
 		this.us = usm; 
 		this.cd = cd;
 		
-		//initialize objectID
+		//initialize objectID (CHANGE THIS TO -1)
 		objectID = -1;
 		
 		//initialized to active and paused (i.e. thread will be idle)
 		this.isActive = true;
-		this.isPaused = false;
+		this.isPaused = true;
 	}
 	
 
@@ -54,14 +54,45 @@ public class IdentifyObject extends Thread
 	public void run()
 	{
 		while(isActive)
-		{
+		{				
+			
+			boolean didRead = false;
+			boolean justStartedRotating = true;
 			while(!isPaused)
-			{
-				//objectID = cd.getColor();
+			{	
+				if(didRead)
+				{
+					if(justStartedRotating)
+					{
+						us.rotateSensorTo(-90);
+						justStartedRotating = false;
+					}
+					else
+					{
+						us.rotateSensorTo(us.getSensorAngle()+10);
+						
+						if(us.getSensorAngle()==90)
+						{
+							captureFlag.update(ClassID.IDENTIFYOBJECT);
+							justStartedRotating = true;
+							us.rotateSensorTo(0);
+							continue;
+						}
+					}
+				}
+				
+				//allow sensor to stabilize before getting next color reading
+				try {Thread.sleep(100);} catch (InterruptedException e1) {}
+
+				//get color reading
+				objectID = cd.getData();
+				didRead = true;
 				
 				if(objectID!=-1)
 				{
 					//notify CaptureFlag class
+					us.rotateSensorTo(0.0);
+					didRead = false;
 					captureFlag.update(ClassID.IDENTIFYOBJECT);
 					try {Thread.sleep(500);} catch (InterruptedException e){}
 				}
@@ -71,6 +102,8 @@ public class IdentifyObject extends Thread
 			try {Thread.sleep(500);} catch (InterruptedException e){}
 		}
 	}
+	
+	
 	
 	/**
 	 *This method utilizes the robot's light sensor in order to
