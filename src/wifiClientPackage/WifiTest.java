@@ -31,9 +31,8 @@ public class WifiTest {
 	// 1. SERVER_IP: the IP address of the computer running the server application
 	// 2. TEAM_NUMBER: your project team number
 	
-	private static final String SERVER_IP = "localhost";
-	private static final int TEAM_NUMBER = 16;
-	
+	private static final String SERVER_IP = "192.168.10.200";
+	private static final int TEAM_NUMBER = 10;
 	
 	private static TextLCD LCD = LocalEV3.get().getTextLCD();
 
@@ -64,6 +63,8 @@ public class WifiTest {
 		
 			// print out the transmission information
 			conn.printTransmission();
+			
+			
 		}
 		// stall until user decides to end program
 		Button.ESCAPE.waitForPress();

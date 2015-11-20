@@ -77,12 +77,90 @@ public class Mapper extends Thread {
 		}
 	}
 
-	private boolean scan() {
+	public boolean scan() {
 		double distance = 0, lastDistance = 0, fallingEdgeDistance = 0;
-		int[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null;
+		int[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null, objectLoco = null;
 		int lastABSAngle = 0, fallingEdgeABSAngle = 0;
 		boolean objectDetected = false, fallingEdgeDetected = false, fallingEdgeRegistered = false;
-		
+
+		if (odd) {
+			uM.rotateSensorToWait(-90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()-90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(0);
+			distance = this.cycleUSsensor(5);
+			if (distance < 40) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng());
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()+90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+		}
+		else {
+			uM.rotateSensorToWait(90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()+90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(0);
+			distance = this.cycleUSsensor(5);
+			if (distance < 40) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng());
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(-90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()-90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+		}
+
+		/*
 		lastDistance = this.cycleUSsensor(5);
 		lastABSAngle = 0;
 		if (odd) {
@@ -109,8 +187,8 @@ public class Mapper extends Thread {
 							// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
 							// + or - 15 degrees from the direction it is pointing.
 							try {
-							objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle + 15);
-							objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle - 15);
+								objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle + 15);
+								objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle - 15);
 								// Update the path ...
 								this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
 								objectDetected = true;
@@ -194,13 +272,14 @@ public class Mapper extends Thread {
 				lastDistance = distance;
 			}
 		}
-		
+		 */
+
 		if (odd) {
 			uM.rotateSensorToWait(this.scanBand);
 		} else {
 			uM.rotateSensorToWait(-this.scanBand);
 		}
-		
+
 		this.odd = !odd;
 		return objectDetected;
 	}
@@ -223,6 +302,19 @@ public class Mapper extends Thread {
 		// TEMP CODE:
 		System.out.println(Arrays.toString(objectCenterNode));
 		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		this.dStarLite.replan();
+		Sound.beep();
+		//this.sleepFor(5000);
+	}
+	
+	private void updatePath2(int[] objectLoco) throws FalseObjectException {
+		int[] objectCenterNode = {(int) (objectLoco[0] / 30.48), (int) (objectLoco[1] / 30.48)};
+
+		// TEMP CODE:
+		//System.out.println(Arrays.toString(objectCenterNode));
+		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		this.dStarLite.replan();
+		System.out.println(Arrays.toString(objectCenterNode));
 		Sound.beep();
 		//this.sleepFor(5000);
 	}

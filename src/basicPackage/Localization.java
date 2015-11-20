@@ -15,6 +15,9 @@ public class Localization {
 	private int startTileX;
 	private int startTileY;
 	
+	private static double XLENGTH = 14.5;
+	private static double YLENGTH = 14.5;
+	private static double FIELDSIZE = 8;
 	
 	private EV3TouchSensor touch;
 	
@@ -67,46 +70,43 @@ public class Localization {
 	public void correctXAndY(){
 		//crash into the wall ON PURPOSE
 		if((this.startTileX==1) && (this.startTileY==1)){
-			
 			this.nav.turnTo(0,true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 14.5);
-			nav.cm_to_seconds(10);
+			this.touchedWall(true, false, XLENGTH);
+			nav.moveStraight(15);
 			nav.turnTo(90, true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(false, true, 14.5);
+			this.touchedWall(false, true, YLENGTH);
+			nav.moveStraight(20);
 			
 		}
 		
 		else if((this.startTileX==1) && (this.startTileY==8)){
 			
-			this.nav.turnTo(0,true);
+			this.nav.turnTo(315,true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 0);
-			nav.cm_to_seconds(10);
-			nav.turnTo(90, true);
-			this.touchedWall(false, true, 0);
 			
 		}
 		
 		else if((this.startTileX==8) && (this.startTileY==1)){
 			
-			this.nav.turnTo(0,true);
+			this.nav.turnTo(180,true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 0);
+			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
 			nav.cm_to_seconds(10);
-			nav.turnTo(90, true);
-			this.touchedWall(false, true, 0);
+			nav.turnTo(270, true);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(false, true,YLENGTH);
 			
 		}
 		else{
-			
-			this.nav.turnTo(0,true);
+			this.nav.turnTo(180,true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 0);
+			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
 			nav.cm_to_seconds(10);
-			nav.turnTo(90, true);
-			this.touchedWall(false, true, 0);
+			nav.turnTo(270, true);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(false, true, 8*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
 			
 		}
 		nav.stop();
