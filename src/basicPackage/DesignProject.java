@@ -31,22 +31,22 @@ public class DesignProject {
 		 */
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-		//EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
-		//EV3TouchSensor touch = new EV3TouchSensor(LocalEV3.get().getPort("S4"));
+		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+		EV3TouchSensor touch = new EV3TouchSensor(LocalEV3.get().getPort("S4"));
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
-		//LCDInfo lcd = new LCDInfo(odo);
+		LCDInfo lcd = new LCDInfo(odo);
 		
 		
 		//ssetting up the ultrasonic sensor for localization
-		//SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
-		//SampleProvider usValue = usSensor.getMode("Distance");
-		//float[] usData = new float[usValue.sampleSize()];
-		//UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
+		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		SampleProvider usValue = usSensor.getMode("Distance");
+		float[] usData = new float[usValue.sampleSize()];
+		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 		
 		//localizing the robot SET THE STARTING LOCATION TO (1,1), (1,8), (8,1) or (8,8) depending
 		//on the starting location
-		//Localization localizer = new Localization(odo, navigator, ultrasonicMod, touch, 1, 1);
+		Localization localizer = new Localization(odo, navigator, ultrasonicMod, touch, 1, 1);
 		//localizer.doLocalization();
 		
 		
@@ -55,20 +55,11 @@ public class DesignProject {
 		//LineDetection lineDetector = new LineDetection(colorSensorL);
 		//OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
 		//odometryCorrecter.start();
-		
-		
-		navigator.turnTo(0, false);
-		navigator.turnTo(120, false);
-		navigator.turnTo(240, false);
-		navigator.turnTo(0, false);
-		navigator.turnTo(120, false);
-		navigator.turnTo(240, false);
-		navigator.turnTo(0, false);
-		navigator.turnTo(120, false);
-		navigator.turnTo(240, false);
-		navigator.turnTo(0, true);
 		//light sensor for odometry correction
-		navigator.stop();
+		
+		//navigator.travelTo(7*OdometerCorrection.SQUAREDISTANCE, 7*OdometerCorrection.SQUAREDISTANCE);
+		navigator.travelTo(60,0);
+		navigator.turnTo(0, true);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}

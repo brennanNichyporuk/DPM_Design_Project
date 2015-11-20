@@ -98,23 +98,29 @@ public class Navigation {
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
 	 * motors when the turn is completed
 	 */
+	/*
+	 * The original turnTo() method was altered. We implemented our own turnTo() method from Lab 3: Navigation
+	 * The turnTo method rotates the robot at the specified angle that is passed through as an argument
+	 * It will make the most efficient turns when turning. Quickest route
+	 */
 	public void turnTo(double angle, boolean stop) {
-
 		double error = angle - this.odometer.getAng();
-		
-		
-		if(inRange(angle,0,3.5)||inRange(angle,360,3.5)){
-			if(inRange(this.odometer.getAng(),0,3.5)){
-				error=angle - 360 - this.odometer.getAng();
+		if(inRange(angle,0,5.0)||inRange(angle,360,5.0)){
+			if(inRange(this.odometer.getAng(),0,5.0)){
+				if(error>180){
+					error-=360;
+				}
 			}
-			else if(inRange(this.odometer.getAng(),360,3.5)){
-				error = angle -this.odometer.getAng()+360;
+			else if(inRange(this.odometer.getAng(),360,5.0)){
+				if(error<-180){
+					error+=360;
+				}
 			}
 		}
-
+		
 		while (Math.abs(error) > DEG_ERR) {
-
 			error = angle - this.odometer.getAng();
+			
 			if (error < -180.0) {
 				this.setSpeeds(-SLOW, SLOW);
 			} else if (error < 0.0) {

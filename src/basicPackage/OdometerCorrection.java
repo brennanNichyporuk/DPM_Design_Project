@@ -29,7 +29,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * distance between squares. Set by default to 30 centimeters
 	 */
-	private double SQUAREDISTANCE = 30.48;
+	public static double SQUAREDISTANCE = 30.48;
 	
 	/**
 	 * error in odometry correction
