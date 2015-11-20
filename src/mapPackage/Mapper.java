@@ -107,10 +107,9 @@ public class Mapper extends Thread {
 							// Locate the falling and rising edge location ...
 							// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
 							// + or - 15 degrees from the direction it is pointing.
+							try {
 							objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle + 15);
 							objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle - 15);
-
-							try {
 								// Update the path ...
 								this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
 								objectDetected = true;
