@@ -16,8 +16,9 @@ import modulePackage.LineDetection;
 import modulePackage.UltrasonicModule;
 
 public class DesignProject {
-	public static void main(String[] args) {
-		// Test Comment
+	
+	public DesignProject(){
+		
 		/**
 		 * rightWheel - A
 		 * leftWheel - D
@@ -29,6 +30,8 @@ public class DesignProject {
 		 * LIGHT LD -> S3
 		 * TOUCH SENSOR -> S4
 		 */
+		
+		
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
@@ -47,14 +50,14 @@ public class DesignProject {
 		//localizing the robot SET THE STARTING LOCATION TO (1,1), (1,8), (8,1) or (8,8) depending
 		//on the starting location
 		Localization localizer = new Localization(odo, navigator, ultrasonicMod, touch, 1, 1);
-		//localizer.doLocalization();
+		localizer.doLocalization();
 		
 		
 		//initializing odometry correction after having initialized localization
-		//SensorModes colorSensorL = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
-		//LineDetection lineDetector = new LineDetection(colorSensorL);
-		//OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
-		//odometryCorrecter.start();
+		SensorModes colorSensorL = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+		LineDetection lineDetector = new LineDetection(colorSensorL);
+		OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
+		odometryCorrecter.start();
 		//light sensor for odometry correction
 		
 		//navigator.travelTo(7*OdometerCorrection.SQUAREDISTANCE, 7*OdometerCorrection.SQUAREDISTANCE);
