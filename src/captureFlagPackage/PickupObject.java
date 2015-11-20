@@ -74,6 +74,11 @@ public class PickupObject
 		//bring arm down (release block)
 		armController.bringArmDown(450);
 		
+		//backing up in order to leave the block in the position
+		nav.moveBackward();
+		try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}
+		nav.stop();
+		
 		//bring arm back up
 		armController.bringArmUp(450);
 	}
