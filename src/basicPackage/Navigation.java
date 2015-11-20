@@ -21,7 +21,7 @@ package basicPackage;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation {
-	private final static int FAST = 100, SLOW = 90, ACCELERATION = 2000;
+	private final static int FAST = 100, SLOW = 90, ACCELERATION = 500;
 	
 
 	private final static double DEG_ERR = 3.5, CM_ERR = 1.0;

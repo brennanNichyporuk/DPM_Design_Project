@@ -28,11 +28,8 @@ public class DesignProject {
 
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
-		
-		
-		//setting up the ultrasonic sensor for localization
+
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
-		
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
