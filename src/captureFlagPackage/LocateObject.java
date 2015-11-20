@@ -74,29 +74,12 @@ public class LocateObject extends Thread
 		
 		//no objects detected. advance
 		if(!sweep())
-		{			
-			int time = nav.cm_to_seconds(10);
-			
+		{						
 			nav.moveForward();
-			long startTime = System.currentTimeMillis();
-			while(System.currentTimeMillis()-startTime < time)
-			{
-				int color = cd.getData();
-				if(color!=-1)
-				{
-					nav.stop();
-					objectLoco = odo.getPosition();
-					captureFlag.update(ClassID.LOCATEOBJECT);	
-					return;
-				}
-			}
+			try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}	
 			
 			nav.stop();
-			
-			nav.moveBackward();
-			try {Thread.sleep(time/5);} catch (InterruptedException e) {}	
-			nav.stop();
-			
+						
 			nav.turnTo(originalRobotAngle, true);
 		}
 		//object detected. notify CaptureFlag

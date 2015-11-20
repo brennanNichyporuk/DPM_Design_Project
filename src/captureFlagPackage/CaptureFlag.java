@@ -129,8 +129,7 @@ public class CaptureFlag extends Thread implements IObserver
 					//end locator
 					locator.deactivateThread();
 					
-					//pickup flag
-					//grabber.doPickup();
+					grabber.doPickup();
 					Sound.beep();Sound.beep();Sound.beep();
 				}
 				else
