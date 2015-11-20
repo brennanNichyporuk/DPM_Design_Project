@@ -1,8 +1,11 @@
 package basicPackage;
 
+import java.util.List;
+
 import executivePackage.Planner;
 import pilotPackage.DStarLite;
 import pilotPackage.Pilot;
+import pilotPackage.State;
 import basicPackage.USLocalizer.LocalizationType;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -20,27 +23,28 @@ import modulePackage.LineDetection;
 import modulePackage.UltrasonicModule;
 
 public class DesignProject {
-	
+
 	public static void main(String[] args) {
 
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 
+		
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
 
-		
+
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
-		
+
+
 		Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
 		pilot.start();
 
 		Button.waitForAnyPress();
 		System.exit(0);
-		
 	}
 }
