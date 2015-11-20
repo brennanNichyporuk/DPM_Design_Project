@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import pilotPackage.DStarLite;
 import basicPackage.Odometer;
+import lejos.hardware.Sound;
 import modulePackage.UltrasonicModule;
 
 /**
@@ -12,27 +13,27 @@ import modulePackage.UltrasonicModule;
  * @author brennanNichyporuk
  *
  */
-public class Mapper {
+public class Mapper{
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
-	private int sensorAxleOffset;
-	
-	private int detectionThreshold = 38;
-	private int scanBand = 25;
-	private int scanIncrement = 25;
+
+	private boolean odd;
+	private int scanBand = 90;
+	private int scanIncrement = 45;
+	private int sensorAxleOffset = 10;
+
 
 	/**
 	 * Instantiates a map.
 	 * @param odo - reference to the Odometer thread.
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
-	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
+	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite) {
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
-		this.sensorAxleOffset = sensorAxleOffset;
-		this.cycleUSsensor();
+		this.odd = true;
 	}
 
 	/**
@@ -42,31 +43,125 @@ public class Mapper {
 	 * @param y - present node y
 	 * @return - updated map.
 	 */
-	public boolean updateAndReturnMap() {
-		return this.scan();
-	}
 
-	private boolean scan() {
-
+	public void scan() {
 		double distance;
-		double ABSAngle = 0;
-		boolean objectDetected = false;
-
-		for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
-			uM.rotateSensorTo(i);
-			distance = this.cycleUSsensor();
-			if (distance < detectionThreshold) {
-				ABSAngle = this.wrapDatAngle(i + odo.getAng());
-				try {
-					int[] nodeID = this.locateDatObjectNode(ABSAngle, distance);
-					dStarLite.updateCell(nodeID[0], nodeID[1], -1);
-					objectDetected = true; // Skipped if there is an Exception
-				} catch (FalseObjectException fOE) {
-					System.out.println("FalseObjectE");
+		double currentAngle = this.odo.getAng();
+		double ABSAngle;
+		if (odd) {
+			for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
+				this.uM.rotateSensorTo(i);
+				ABSAngle = this.wrapDatAngle(currentAngle + i);
+				distance = this.cycleUSsensor(5);
+				if (i == 0) {
+					if (distance < 40) {
+						this.disQualifyNode(ABSAngle);
+					}
+					
+				}
+				else if (i == 45 || i == -45) {
+					if (distance < 35) {
+						this.disQualifyNode(ABSAngle);
+					}
+					
+				}
+				else {
+					if (distance < 45) {
+						this.disQualifyNode(ABSAngle);
+					}
+					
+				}
+				
+			}
+			
+		}
+		else {
+			for (int i = scanBand; i >= -scanBand; i -= scanIncrement) {
+				this.uM.rotateSensorTo(i);
+				ABSAngle = this.wrapDatAngle(currentAngle + i);
+				distance = this.cycleUSsensor(5);
+				if (i == 0) {
+					if (distance < 40) {
+						this.disQualifyNode(ABSAngle);
+					}
+				}
+				else if (i == 45 || i == -45) {
+					if (distance < 35) {
+						this.disQualifyNode(ABSAngle);
+					}
+				}
+				else {
+					if (distance < 45) {
+						this.disQualifyNode(ABSAngle);
+					}
 				}
 			}
 		}
-		return objectDetected;
+	}
+
+	private void disQualifyNode(double ABSAngle) {
+		int currentLocoNodeX = (int) (this.odo.getX() / 30.48);
+		int currentLocoNodeY = (int) (this.odo.getY() / 30.48);
+		int deltaX = 0;
+		int deltaY = 0;
+
+		if (ABSAngle > 337.5 || ABSAngle < 22.5) {
+			deltaX = 1;
+			deltaY = 0;
+		}
+		else if (ABSAngle > 22.5 && ABSAngle < 67.5) {
+			deltaX = 1;
+			deltaY = 1;
+		}
+		else if (ABSAngle > 67.5 && ABSAngle < 112.5) {
+			deltaX = 0;
+			deltaY = 1;
+		}
+		else if (ABSAngle > 112.5 && ABSAngle < 157.5) {
+			deltaX = -1;
+			deltaY = 1;
+		}
+		else if (ABSAngle > 157.5 && ABSAngle < 202.5) {
+			deltaX = -1;
+			deltaY = 0;
+		}
+		else if (ABSAngle > 202.5 && ABSAngle < 247.5) {
+			deltaX = -1;
+			deltaY = -1;
+		}
+		else if (ABSAngle > 247.5 && ABSAngle < 292.5) {
+			deltaX = 0;
+			deltaY = -1;
+		}
+		else if (ABSAngle > 292.5 && ABSAngle < 337.5) {
+			deltaX = 1;
+			deltaY = -1;
+		}
+
+		int dNodeX = currentLocoNodeX + deltaX;
+		int dNodeY = currentLocoNodeY + deltaY;
+
+		if (dNodeX >= 0 && dNodeX <= 7 && dNodeY >= 0 && dNodeY <= 7) {
+			Sound.beep();
+			this.dStarLite.updateCell(dNodeX, dNodeY, -1);
+			this.dStarLite.replan();
+		}
+	}
+
+	private double cycleUSsensor(int cycleCount) {
+
+		long t;
+		double distance = 0;
+		for (int i = 0; i < cycleCount; i++) {
+			t = System.currentTimeMillis();
+			distance = uM.getDistance();
+			t = System.currentTimeMillis() - t;
+			if (t < 25)
+				this.sleepFor(t);
+		}
+
+		return distance;
+
 	}
 
 	private double wrapDatAngle(double angle) {
@@ -77,52 +172,13 @@ public class Mapper {
 		return angle;
 	}
 
-	private int[] locateDatObjectNode(double angle, double distance) throws FalseObjectException {
-		double sensorX = odo.getX() + this.sensorAxleOffset * Math.cos(Math.toRadians(odo.getAng()));
-		double sensorY = odo.getY() + this.sensorAxleOffset * Math.sin(Math.toRadians(odo.getAng()));
-		
-		double objectX = sensorX + distance * Math.cos(Math.toRadians(angle));
-		double objectY = sensorY + distance * Math.sin(Math.toRadians(angle));
-		
-		if (objectX < 10 || objectY < 10)
-			throw new FalseObjectException();
-
-		int nodeX = (int) (objectX / 30.48);
-		int nodeY = (int) (objectY / 30.48);
-		int[] nodeID = {nodeX, nodeY};
-
-		int currentNodeX = (int) (odo.getX() / 30.48);
-		int currentNodeY = (int) (odo.getY() / 30.48);
-
-		// If the object is off the map or the object detected is the wall, raise FalseObjectException.
-		if (nodeX > 11 || nodeY > 11 || nodeX < 0 || nodeY < 0 || (nodeX == currentNodeX && nodeY == currentNodeY)) {
-			throw new FalseObjectException();
+	private void sleepFor(long t) {
+		try {
+			Thread.sleep(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		// If the object is not on an adjacent node, ignore...
-		if (!((nodeX == currentNodeX + 1 && nodeY == currentNodeY) || (nodeX == currentNodeX - 1 && nodeY == currentNodeY)
-				|| (nodeX == currentNodeX && nodeY == currentNodeY + 1) || (nodeX == currentNodeX && nodeY == currentNodeY - 1)))
-			throw new FalseObjectException();
-		
-		System.out.println("Ox:" + (int) objectX + "Oy:" + (int) objectY);
-
-		return nodeID;
-	}
-	
-	private int cycleUSsensor() {
-		
-		int distance = 0;
-		for (int i = 0; i < 5; i++) {
-			distance = uM.getDistance();
-			try {
-				Thread.sleep(25);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		return distance;
 	}
 
 }

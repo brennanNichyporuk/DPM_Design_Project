@@ -291,20 +291,20 @@ public class DStarLite implements java.io.Serializable{
 		//Moving in a clockwise manner
 		tempState = new State(u.x + 1, u.y, new Pair(-1.0,-1.0));
 		s.addFirst(tempState);
-		//tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0,-1.0));
-		//s.addFirst(tempState);
+		tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0,-1.0));
+		s.addFirst(tempState);
 		tempState = new State(u.x, u.y + 1, new Pair(-1.0,-1.0));
 		s.addFirst(tempState);
-		//tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0,-1.0));
-		//s.addFirst(tempState);
+		tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0,-1.0));
+		s.addFirst(tempState);
 		tempState = new State(u.x - 1, u.y, new Pair(-1.0,-1.0));
 		s.addFirst(tempState);
-		//tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0,-1.0));
-		//s.addFirst(tempState);
+		tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0,-1.0));
+		s.addFirst(tempState);
 		tempState = new State(u.x, u.y - 1, new Pair(-1.0,-1.0));
 		s.addFirst(tempState);
-		//tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0,-1.0));
-		//s.addFirst(tempState);
+		tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0,-1.0));
+		s.addFirst(tempState);
 
 		return s;
 	}
@@ -322,20 +322,20 @@ public class DStarLite implements java.io.Serializable{
 
 		tempState = new State(u.x + 1, u.y, new Pair(-1.0,-1.0));
 		if (!occupied(tempState)) s.addFirst(tempState);
-		//tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0,-1.0));
-		//if (!occupied(tempState)) s.addFirst(tempState);
+		tempState = new State(u.x + 1, u.y + 1, new Pair(-1.0,-1.0));
+		if (!occupied(tempState)) s.addFirst(tempState);
 		tempState = new State(u.x, u.y + 1, new Pair(-1.0,-1.0));
 		if (!occupied(tempState)) s.addFirst(tempState);
-		//tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0,-1.0));
-		//if (!occupied(tempState)) s.addFirst(tempState);
+		tempState = new State(u.x - 1, u.y + 1, new Pair(-1.0,-1.0));
+		if (!occupied(tempState)) s.addFirst(tempState);
 		tempState = new State(u.x - 1, u.y, new Pair(-1.0,-1.0));
 		if (!occupied(tempState)) s.addFirst(tempState);
-		//tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0,-1.0));
-		//if (!occupied(tempState)) s.addFirst(tempState);
+		tempState = new State(u.x - 1, u.y - 1, new Pair(-1.0,-1.0));
+		if (!occupied(tempState)) s.addFirst(tempState);
 		tempState = new State(u.x, u.y - 1, new Pair(-1.0,-1.0));
 		if (!occupied(tempState)) s.addFirst(tempState);
-		//tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0,-1.0));
-		//if (!occupied(tempState)) s.addFirst(tempState);
+		tempState = new State(u.x + 1, u.y - 1, new Pair(-1.0,-1.0));
+		if (!occupied(tempState)) s.addFirst(tempState);
 
 		return s;
 	}

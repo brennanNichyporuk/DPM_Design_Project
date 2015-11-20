@@ -6,5 +6,7 @@ package captureFlagPackage;
  */
 public enum ClassID {
 	LOCATEOBJECT,
-	IDENTIFYOBJECT
+	IDENTIFYOBJECT,
+	PILOT,
+	CAPTUREFLAG
 }

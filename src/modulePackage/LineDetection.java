@@ -7,7 +7,7 @@ public class LineDetection
 {
 	private SampleProvider colorSensor;
 	private float[] colorData;
-	
+
 	private int lastValue;
 	private int lastDerivative;
 	private int lowValue;
@@ -28,14 +28,15 @@ public class LineDetection
 		this.lastDerivative = 0;
 		this.lowValue = 0;
 		this.highValue = 0;
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * returns when a line is detected
 	 */
 	public boolean detectLine() {
+
 		colorSensor.fetchSample(colorData,0);
 		int currentValue = (int)(colorData[0]*100.0);
 		int currentDerivative = currentValue - lastValue;
@@ -58,6 +59,7 @@ public class LineDetection
 				highValue = 0;
 				return true;
 			}
+
 			/*
 			 * if the magnitude of the change in the derivative was great enough, then update()
 			 * was run and highValue and lowValue was reset... otherwise it was noise and lowValue 

@@ -12,8 +12,8 @@ public class Localization {
 	private Odometer odo;
 	private Navigation nav;
 	private USLocalizer usLocalizer;
-	private int startTileX;
-	private int startTileY;
+	public static int startTileX;
+	public static int startTileY;
 	
 	private static double XLENGTH = 13.6;
 	private static double YLENGTH = 13.6;
@@ -24,15 +24,31 @@ public class Localization {
 	float[] touchData;
 	private SensorMode touchMode;
 	
-	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, EV3TouchSensor touch,int startingTileX,int startingTileY) {
+	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, EV3TouchSensor touch,int startingCorner) {
 		this.odo = odo;
 		this.nav = nav;
 		this.usLocalizer = new USLocalizer(this.odo, this.nav, usModule,LocalizationType.FALLING_EDGE);
-		this.startTileX = startingTileX;
-		this.startTileY = startingTileY;
 		this.touch=touch;
 		this.touchMode = this.touch.getTouchMode();
 		touchData = new float[touch.sampleSize()];
+		
+		
+		switch (startingCorner) {
+        case 1:  startTileX=1; startTileY = 1;
+        break;
+        case 2:  startTileX=1; startTileY = 8;
+        break;
+        case 3:  startTileX=8; startTileY = 8;
+        break;
+        case 4:  this.startTileX=8; this.startTileY = 1;
+        break;
+        default: System.out.println("Error in Start Tile specification"); System.exit(1);
+        
+        break;
+}
+		
+		
+		
 	}
 	public void doLocalization(){
 		//doing ultrasonic localization
@@ -69,57 +85,16 @@ public class Localization {
 	 */
 	public void correctXAndY(){
 		//crash into the wall ON PURPOSE
-		if((this.startTileX==1) && (this.startTileY==1)){
-			nav.turnTo(0,true);
-			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, XLENGTH);
-			nav.moveForward();
-			sleep(2000);
-			nav.turnTo(90, true);
-			nav.setSpeeds(-80, -80);
-			this.touchedWall(false, true, YLENGTH);
-			nav.moveForward();
-			sleep(2000);
-			
-		}
-		
-		else if((this.startTileX==1) && (this.startTileY==8)){
-			nav.turnTo(0,true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(true, false, XLENGTH);
-			nav.moveForward();
-			sleep(2000);
-			nav.turnTo(270, true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(false, true, FIELDSIZE*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
-			nav.moveForward();
-			sleep(2000);
-		}
-		
-		else if((this.startTileX==8) && (this.startTileY==1)){
-			nav.turnTo(180,true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(true, false, FIELDSIZE*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
-			nav.moveForward();
-			sleep(2000);
-			nav.turnTo(90, true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(false, true, YLENGTH);
-			nav.moveForward();
-			sleep(2000);
-		}
-		else{
-			nav.turnTo(180,true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
-			nav.moveForward();
-			sleep(2000);
-			nav.turnTo(270, true);
-			nav.setSpeeds(-110, -110);
-			this.touchedWall(false, true, 8*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
-			nav.moveForward();
-			sleep(2000);
-		}
+		nav.turnTo(0,true);
+		nav.setSpeeds(-80, -80);
+		this.touchedWall(true, false, -30.48+XLENGTH);
+		nav.moveForward();
+		sleep(2000);
+		nav.turnTo(90, true);
+		nav.setSpeeds(-80, -80);
+		this.touchedWall(false, true, -30.48+YLENGTH);
+		nav.moveForward();
+		sleep(2000);
 		nav.stop();
 	}
 	
