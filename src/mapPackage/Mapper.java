@@ -19,10 +19,10 @@ public class Mapper extends Thread {
 	private DStarLite dStarLite;
 	private int sensorAxleOffset;
 
-	private final int maxRange = 60;
-	private final int minDerivativeChange = 5;
-	private int scanBand = 100;
-	private final int scanIncrement = 2;
+	private final int maxRange = 85;
+	private final int minDerivativeChange = 6;
+	private int scanBand = 90;
+	private final int scanIncrement = 5;
 	private final int mapSize = 8;
 	private boolean active;
 	private boolean objectDetected;
@@ -47,7 +47,6 @@ public class Mapper extends Thread {
 		uM.rotateSensorTo(-scanBand);
 		this.sleepFor(3000);
 
-		/*
 		for (int i = 0; i < this.mapSize; i++)
 			dStarLite.updateCell(i, this.mapSize, -1);
 
@@ -57,7 +56,6 @@ public class Mapper extends Thread {
 			dStarLite.updateCell(this.mapSize, j, -1);
 
 		dStarLite.replan();
-		 */
 	}
 
 	/**
@@ -72,7 +70,7 @@ public class Mapper extends Thread {
 		while (true) {
 			if (active) {
 				this.objectDetected = this.scan();
-				//active = false;
+				active = false;
 			}
 			else
 				this.sleepFor(100);
@@ -84,12 +82,15 @@ public class Mapper extends Thread {
 		int[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null;
 		int lastABSAngle = 0, fallingEdgeABSAngle = 0;
 		boolean objectDetected = false, fallingEdgeDetected = false, fallingEdgeRegistered = false;
-
+		
 		lastDistance = this.cycleUSsensor(5);
 		lastABSAngle = 0;
 		if (odd) {
 			for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
 				distance = this.rotateAndScan(i);
+				//uM.rotateSensorToWait(i);
+				//this.sleepFor(500);
+				//distance = this.cycleUSsensor(2);
 				double derivative = distance - lastDistance;
 				int ABSAngle = (int) this.wrapDatAngle(i + odo.getAng());
 
@@ -115,7 +116,7 @@ public class Mapper extends Thread {
 								objectDetected = true;
 							} catch (FalseObjectException e) {
 								// TODO Auto-generated catch block
-								e.printStackTrace();
+								//e.printStackTrace();
 							}
 
 							fallingEdgeRegistered = false;
@@ -141,6 +142,8 @@ public class Mapper extends Thread {
 		}
 		else {
 			for (int i = scanBand; i >= -scanBand; i -= scanIncrement) {
+				//uM.rotateSensorToWait(i);
+				//distance = this.cycleUSsensor(2);
 				distance = this.rotateAndScan(i);
 				double derivative = distance - lastDistance;
 				int ABSAngle = (int) this.wrapDatAngle(i + odo.getAng());
@@ -191,6 +194,13 @@ public class Mapper extends Thread {
 				lastDistance = distance;
 			}
 		}
+		
+		if (odd) {
+			uM.rotateSensorToWait(this.scanBand);
+		} else {
+			uM.rotateSensorToWait(-this.scanBand);
+		}
+		
 		this.odd = !odd;
 		return objectDetected;
 	}
@@ -212,6 +222,7 @@ public class Mapper extends Thread {
 
 		// TEMP CODE:
 		System.out.println(Arrays.toString(objectCenterNode));
+		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
 		Sound.beep();
 		//this.sleepFor(5000);
 	}
@@ -253,6 +264,7 @@ public class Mapper extends Thread {
 	private double rotateAndScan(int i) {
 		uM.rotateSensorTo(i);
 		this.sleepFor(50);
+		uM.getDistance();
 		return uM.getDistance();
 	}
 

@@ -1,5 +1,6 @@
 package basicPackage;
 
+import executivePackage.Planner;
 import pilotPackage.DStarLite;
 import pilotPackage.Pilot;
 import basicPackage.USLocalizer.LocalizationType;
@@ -22,28 +23,32 @@ public class DesignProject {
 	
 	
 	public static void main(String[] args) {
-		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
-
+		
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 		
-		DStarLite dS = new DStarLite();
+		Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
+		pilot.start();
 		
-		Mapper mapper = new Mapper(odo, ultrasonicMod, dS, 10);
-		mapper.start();
-		mapper.setActive(true);
+		//Mapper mapper = new Mapper(odo, ultrasonicMod, dS, 10);
+		//mapper.start();
+		//mapper.setActive(true);
+		/*
 		for (int i = 0; i < 1000; i++) {
-			navigator.travelTo(2.5 * 30.5, 7.5 * 30.5);
-			navigator.travelTo(2.5 * 30.5, 0.5 * 30.5);
+			navigator.travelTo(3.5 * 30.5, 3.5 * 30.5);
+			navigator.travelTo(0.5 * 30.5, 3.5 * 30.5);
+			navigator.travelTo(0.5 * 30.5, 0.5 * 30.5);
+			navigator.travelTo(0.5 * 30.5, 3.5 * 30.5);
 		}
-		
+		*/
 		Button.waitForAnyPress();
 		System.exit(0);
 		
