@@ -1,6 +1,6 @@
 package captureFlagPackage;
 
-import basicPackage.Navigation;
+import basicPackage.*;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
   
 /**
@@ -16,22 +16,24 @@ public class PickupObject
 	
 	//navigator 
 	private Navigation nav;
-	
-	//length of the arm. 
-	private final double armLength = 100.0;
-	
+		
 	//how many degrees the arm motor should rotate
-	private final int armMotorDegreesOfRotation = 490;
+	private final int armMotorDegreesOfRotation = 600;
+	
+	private final CaptureFlag captureFlag;
+	
+	private final int armLength = 14;
 	
 	/**
 	 *Constructor 
 	 *@param robotArmMotor the motor that controls the movement of the robot's arm
 	 *@param navigator contains methods which navigates the robot 
 	 */
-	public PickupObject(EV3LargeRegulatedMotor aMotor, Navigation navigator)
+	public PickupObject(EV3LargeRegulatedMotor aMotor, Navigation navigator, CaptureFlag captureFlag)
 	{
 		this.nav = navigator;
 		this.armController = new ArmController(aMotor, armMotorDegreesOfRotation);
+		this.captureFlag = captureFlag;
 	}
 	
 	/**
@@ -41,14 +43,17 @@ public class PickupObject
 	 */
 	void doPickup()
 	{
-		//move backward 14cm
-		nav.moveStraight(armLength);
+		nav.moveBackward();
+		try {Thread.sleep(nav.cm_to_seconds(armLength));} catch (InterruptedException e) {}
+		nav.stop();
 		
 		//drop arm
 		armController.bringArmDown();
 		
 		//move forward 14cm
-		nav.moveStraight(-armLength);
+		nav.moveForward();
+		try {Thread.sleep(nav.cm_to_seconds(armLength));} catch (InterruptedException e) {}
+		nav.stop();
 
 		//bring arm up (capture block)
 		armController.bringArmUp();		
@@ -59,8 +64,12 @@ public class PickupObject
 	 */
 	void discardBlock()
 	{
-		//navigate to drop zone
-		nav.travelTo(0, -20);
+		//navigate to drop zone 
+		nav.travelTo(captureFlag.getLocationPreIdentifier()[0], captureFlag.getLocationPreIdentifier()[1]);
+		
+		nav.moveForward();
+		try {Thread.sleep(nav.cm_to_seconds(10));} catch (InterruptedException e) {}
+		nav.stop();
 		
 		//bring arm down (release block)
 		armController.bringArmDown(350);

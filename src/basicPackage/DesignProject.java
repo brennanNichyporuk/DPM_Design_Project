@@ -32,6 +32,7 @@ public class DesignProject {
 		
 		//setting up the ultrasonic sensor for localization
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
@@ -42,7 +43,6 @@ public class DesignProject {
 		mapper.start();
 		mapper.setActive(true);
 		navigator.moveForward();
-		
 		
 		Button.waitForAnyPress();
 		System.exit(0);

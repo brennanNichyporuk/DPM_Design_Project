@@ -23,8 +23,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * Line detection using a derivative in order to determine if a line has been detected on the ground.
 	 */
-	private LineDetection leftLineDetector;
-	private LineDetection rightLineDetector;
+	private LineDetection lineDetector;
 	
 	
 	/**
@@ -37,16 +36,6 @@ public class OdometerCorrection extends Thread {
 	 */
 	private int DISTERRMARGIN = 4;
 	
-	/**
-	 * last time reported for left line checker
-	 */
-	private long leftTime;
-	
-	/**
-	 * last time reported for right line checker
-	 */
-	private long rightTime;
-	
 	
 	private long TIME_MARGIN = 1000;
 	
@@ -54,12 +43,9 @@ public class OdometerCorrection extends Thread {
 	 * Constructor for the Odometer correction
 	 * @param odometer Instance of the odometer that Odometer Correction will correct
 	 */
-	public OdometerCorrection(Odometer odometer,LineDetection leftLineDetector,LineDetection rightLineDetector) {
+	public OdometerCorrection(Odometer odometer,LineDetection lineDetector) {
 		this.odometer = odometer;
-		this.leftLineDetector = leftLineDetector;
-		this.rightLineDetector = rightLineDetector;
-		this.leftTime = System.currentTimeMillis();
-		this.rightTime = System.currentTimeMillis();
+		this.lineDetector = lineDetector;
 	}
 	/**
 	 * run odometer correction thread.
@@ -68,17 +54,8 @@ public class OdometerCorrection extends Thread {
 		long correctionStart, correctionEnd;
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-			if(this.leftLineDetector.detectLine()){
-				long leftTime = System.currentTimeMillis();
-				if((this.leftTime - this.rightTime) < TIME_MARGIN){
-					Sound.beep();
-				}
-			}
-			if(this.rightLineDetector.detectLine()){
-				long rightTime = System.currentTimeMillis();
-				if((this.rightTime - this.leftTime) < TIME_MARGIN){
-					Sound.beep();
-				}
+			if(this.lineDetector.detectLine()){
+				this.correctOdometer();
 			}
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {

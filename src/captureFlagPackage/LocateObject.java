@@ -1,11 +1,8 @@
 package captureFlagPackage;
 
-import java.util.ArrayList;
-import java.util.Stack;
-
+import basicPackage.*;
 import lejos.hardware.Sound;
 import modulePackage.*;
-import basicPackage.*;
 
 /**
  *A class which searches the environment in order to locate the target flag
@@ -26,6 +23,8 @@ public class LocateObject extends Thread
 	//activity state variables
 	private boolean isActive;
 	private boolean isPaused;
+	
+	private final double originalRobotAngle;
 
 	/**
 	 *Constructor
@@ -46,6 +45,8 @@ public class LocateObject extends Thread
 		//initialized to active and not paused (i.e. thread will run)
 		this.isActive = true;
 		this.isPaused = false;
+		
+		originalRobotAngle = odo.getAng();
 	}
 	
 	/**
@@ -53,10 +54,10 @@ public class LocateObject extends Thread
 	 */
 	@Override
 	public void run()
-	{
-		while(isActive)
+	{		
+		while(isActive && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
 		{
-			while(!isPaused)
+			while(!isPaused && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
 			{
 				scanArea();
 			}
@@ -69,11 +70,34 @@ public class LocateObject extends Thread
 	 */
 	private void scanArea()
 	{					
+		nav.turnTo(originalRobotAngle, true);
+		
 		//no objects detected. advance
 		if(!sweep())
-		{
-			nav.travelTo(odo.getX(), odo.getY() + 20);
-			nav.turnTo(0, true);
+		{			
+			int time = nav.cm_to_seconds(10);
+			
+			nav.moveForward();
+			long startTime = System.currentTimeMillis();
+			while(System.currentTimeMillis()-startTime < time)
+			{
+				int color = cd.getData();
+				if(color!=-1)
+				{
+					nav.stop();
+					objectLoco = odo.getPosition();
+					captureFlag.update(ClassID.LOCATEOBJECT);	
+					return;
+				}
+			}
+			
+			nav.stop();
+			
+			nav.moveBackward();
+			try {Thread.sleep(time/5);} catch (InterruptedException e) {}	
+			nav.stop();
+			
+			nav.turnTo(originalRobotAngle, true);
 		}
 		//object detected. notify CaptureFlag
 		else
@@ -82,26 +106,26 @@ public class LocateObject extends Thread
 		}
 	}
 	
+	
 	private boolean sweep()
-	{
-		nav.turnTo(0, true);
-		
+	{		
+		us.rotateSensorTo(-90.0);
+				
 		//how far the ultrasonic sensor should accept values
-		final double clippingConstant = 40.0;
+		final double clippingConstant = 30.0;
 		
 		//distance to block values (as read by us) and heading of the robot (as read by the odometer)
 		double distance1=-1, distance2=-1, theta1=0, theta2=0;
-				
-		//start turning left
-		nav.turnLeft();
-		
+						
 		double previousDistance = clippingConstant;
 				
 		try {Thread.sleep(200);} catch (InterruptedException e) {}
-				
+						
 		//turn 180 degrees
-		while(odo.getAng() < (180))
+		while(us.getSensorAngle() < 90)
 		{
+			us.rotateSensorTo(us.getSensorAngle()+10);
+			
 			//get distance value from us
 			double distance = getDistance();
 			double currentDistance = (distance<clippingConstant) ? distance : clippingConstant;
@@ -110,19 +134,26 @@ public class LocateObject extends Thread
 			if(currentDistance<clippingConstant && (previousDistance-currentDistance > 0) && distance1<0)
 			{
 				distance1 = currentDistance;
-				theta1 = odo.getAng();
+				
+				int angle = us.getSensorAngle();
+				theta1 = (angle<0) ? (90-Math.abs(angle)) : (Math.abs(angle)+90);
+				
 				Sound.beep();
 			}
 			//block lost
 			else if((currentDistance - previousDistance > 0) && distance1>0)
 			{
 				distance2 = currentDistance;
-				theta2 = odo.getAng();
+				
+				int angle = us.getSensorAngle();
+				theta2 = (angle<0) ? (90-Math.abs(angle)) : (Math.abs(angle)+90);
+				
 				Sound.beep();
 								
 				//calculate position of block and navigate towards it
 				objectLoco = calculateObjectLocation(new double[]{distance1, distance2, theta1, theta2});
 			
+				us.rotateSensorTo(0.0);
 				return true;
 			}
 			
@@ -132,23 +163,20 @@ public class LocateObject extends Thread
 			try {Thread.sleep(200);} catch (InterruptedException e) {}
 		}
 		
+		us.rotateSensorTo(0.0);
 		return false;
 	}
 
 	private double getDistance()
-	{
-		nav.stop();
-		
+	{				
 		double distance = -1;
 		
 		int counter = 0;
-		while(counter++<15)
+		while(counter++<30)
 		{
 			distance = us.getDistance();
 		}
-		
-		nav.turnLeft();
-		
+					
 		return distance;
 	}
 
@@ -164,7 +192,7 @@ public class LocateObject extends Thread
 
 		//calculate midpoint
 		x_mid = (loc1[0] + loc2[0])/2;
-		y_mid = (loc1[1]+loc2[1])/2;
+		y_mid = Math.max(loc1[1], loc2[1]);
 		
 		return new double[] {x_mid, y_mid};
 	}

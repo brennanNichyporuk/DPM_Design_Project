@@ -1,10 +1,9 @@
 package captureFlagPackage;
 
-import java.util.ArrayList;
-
+import basicPackage.*;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import modulePackage.*;
-import basicPackage.*;
 
 /**
  *A class which is responsible for locating and capturing the flag 
@@ -34,6 +33,8 @@ public class CaptureFlag extends Thread implements IObserver
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
 	
+	private double[] initialPosition;
+	
 
 	/**
 	 *Constructor
@@ -54,9 +55,10 @@ public class CaptureFlag extends Thread implements IObserver
 		
 		locator = new LocateObject(this, nav, odo, us, this.cd);
 		identifier = new IdentifyObject(this, us, this.cd);
-		grabber = new PickupObject(robotArmMotor, navigator);	
+		grabber = new PickupObject(robotArmMotor, navigator, this);	
 		
 		this.locationPreIdentifier = null;
+		this.initialPosition = odo.getPosition();
 	}
 
 	/**
@@ -86,6 +88,7 @@ public class CaptureFlag extends Thread implements IObserver
 		{	
 			//caller is LocateObject 
 			case LOCATEOBJECT:
+				try {Thread.sleep(100);} catch (InterruptedException e) {}
 				
 				//get the location of the found object
 				double[] objectsLocation = locator.getCurrentObjLoco();
@@ -96,25 +99,30 @@ public class CaptureFlag extends Thread implements IObserver
 					//pause locator
 					locator.pauseThread();
 					
-					//save the current locaiton of the robot
+					//save the current location of the robot
 					locationPreIdentifier = odo.getPosition();
-					
+										
 					//navigate towards object
-					nav.travelTo(objectsLocation[0], objectsLocation[1]);
-					
-					//identify object
-					identifier.resumeThread();
+					nav.travelTo(objectsLocation[0], odo.getY());	
+					nav.travelTo(odo.getX(), objectsLocation[1]);	
+
+					//identify object.
+					identifier.resumeThread();					
 				}
 												
 				break;
 				
 			//caller is IdentifyObject 
 			case IDENTIFYOBJECT:
+								
 				int objectColorID = identifier.getObjectID();
 				
 				//if the object is the target flag
 				if(objectColorID == targetFlagColorID)
 				{
+					identifier.pauseThread();
+					locator.pauseThread();
+					
 					//end identifier
 					identifier.deactivateThread();
 					
@@ -122,7 +130,8 @@ public class CaptureFlag extends Thread implements IObserver
 					locator.deactivateThread();
 					
 					//pickup flag
-					grabber.doPickup();
+					//grabber.doPickup();
+					Sound.beep();Sound.beep();Sound.beep();
 				}
 				else
 				{
@@ -135,8 +144,9 @@ public class CaptureFlag extends Thread implements IObserver
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
-						nav.travelTo(locationPreIdentifier[0], locationPreIdentifier[1]);
-						nav.turnTo(0, true);
+						nav.travelTo(odo.getX(), locationPreIdentifier[1]);
+						nav.travelTo(locationPreIdentifier[1], odo.getY());
+						nav.turnTo(90, true);
 						
 						//reset saved location for next iteration
 						locationPreIdentifier = null;
@@ -147,5 +157,14 @@ public class CaptureFlag extends Thread implements IObserver
 												
 				break;	
 		}
+	}
+	
+	double[] getInitialPostion()
+	{
+		return this.initialPosition;
+	}
+	double[] getLocationPreIdentifier()
+	{
+		return this.locationPreIdentifier;
 	}
 }
