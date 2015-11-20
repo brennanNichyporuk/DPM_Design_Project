@@ -17,7 +17,9 @@ public class Localization {
 	
 	
 	private EV3TouchSensor touch;
+	
 	float[] touchData;
+	private SensorMode touchMode;
 	
 	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, EV3TouchSensor touch,int startingTileX,int startingTileY) {
 		this.odo = odo;
@@ -26,6 +28,7 @@ public class Localization {
 		this.startTileX = startingTileX;
 		this.startTileY = startingTileY;
 		this.touch=touch;
+		this.touchMode = this.touch.getTouchMode();
 		touchData = new float[touch.sampleSize()];
 	}
 	public void doLocalization(){
@@ -35,7 +38,6 @@ public class Localization {
 		//depending on which corner we are in, we need to correct the orientation of the robot to ensure that the
 		//angle is consitant regardless of the starting tile. see below for detailed explanation
 		this.correctAngle();
-		this.nav.turnTo(0,true);
 		
 	}
 	
@@ -85,11 +87,45 @@ public class Localization {
 	}
 	/**
 	 * depending on starting orientation, we need to orient in different ways. 
-	 * strategy is to crash into the wall at a 45 degree angle ( set this angle as 45 degrees, and the position from the origin
+	 * strategy is to touch each wall and set the x or y accordingly.
 	 */
-	public void orient(double wallAngle){
+	public void correctXAndY(double wallAngle){
 		//crash into the wall ON PURPOSE
-		nav.setSpeeds(-80, -80);
-		
+		if((this.startTileX==1) && (this.startTileY==1)){
+			this.nav.turnTo(0,true);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(true, false, 0);
+			nav.moveStraight(10);
+			nav.turnTo(90, true);
+			this.touchedWall(false, true, 0);
+		}
+		else if((this.startTileX==1) && (this.startTileY==8)){
+			nav.turnTo(315, true);
+			nav.setSpeeds(-80, -80);
+		}
+		else if((this.startTileX==8) && (this.startTileY==1)){
+			nav.turnTo(315, true);
+			nav.setSpeeds(-80, -80);
+		}
+		else{
+			nav.turnTo(45, true);
+			nav.setSpeeds(-80, -80);
+		}
+		nav.stop();
+	}
+	
+	public boolean touchedWall(boolean updateX, boolean updateY,double setValue){
+		boolean[] update = {updateX, updateY,false};
+		boolean touched = false;
+		while(!touched){
+			this.touchMode.fetchSample(touchData, 0);
+			this.touch.fetchSample(touchData, 0);
+			if(touchData[0]==1){
+				double[] position = {0,12.9,0};
+				this.odo.setPosition(position,update);
+				touched = true;
+				}
+		}
+		return true;
 	}
 }

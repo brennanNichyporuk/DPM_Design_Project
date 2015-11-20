@@ -23,29 +23,25 @@ public class DesignProject {
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		Navigation navigator = new Navigation(odo);
-		//LCDInfo lcd = new LCDInfo(odo);
+		LCDInfo lcd = new LCDInfo(odo);
 		
 		
 		//ssetting up the ultrasonic sensor for localization
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 		
-		//left light sensor
-		SensorModes colorSensorL = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
-		LineDetection leftLineDetector = new LineDetection(colorSensorL);
+		//light sensor for odometry correction
+		//SensorModes colorSensorL = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+		//LineDetection lineDetector = new LineDetection(colorSensorL);
+	
 		
-		//right light sensor
-		SensorModes colorSensorR = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
-		LineDetection rightLineDetector = new LineDetection(colorSensorR);
+		//OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
+		//odometryCorrecter.start();
+		navigator.travelTo(0, 120);
 		
-		OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, leftLineDetector ,rightLineDetector);
-		odometryCorrecter.start();
-		navigator.travelTo(60, 0);
-		sleep(4000);
-		navigator.moveBackward();
-		sleep(4000);
 		navigator.stop();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
