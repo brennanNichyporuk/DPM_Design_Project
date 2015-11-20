@@ -30,8 +30,6 @@ public class DesignProject {
 		 * LIGHT LD -> S3
 		 * TOUCH SENSOR -> S4
 		 */
-		
-		
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
