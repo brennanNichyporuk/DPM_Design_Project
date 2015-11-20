@@ -18,11 +18,11 @@ public class PickupObject
 	private Navigation nav;
 		
 	//how many degrees the arm motor should rotate
-	private final int armMotorDegreesOfRotation = 600;
+	private final int armMotorDegreesOfRotation = 550;
 	
 	private final CaptureFlag captureFlag;
 	
-	private final int armLength = 14;
+	private final int armLength = 20;
 	
 	/**
 	 *Constructor 
@@ -44,7 +44,7 @@ public class PickupObject
 	void doPickup()
 	{
 		nav.moveBackward();
-		try {Thread.sleep(nav.cm_to_seconds(armLength));} catch (InterruptedException e) {}
+		try {Thread.sleep(nav.cm_to_seconds(armLength)*1000);} catch (InterruptedException e) {}
 		nav.stop();
 		
 		//drop arm
@@ -52,7 +52,7 @@ public class PickupObject
 		
 		//move forward 14cm
 		nav.moveForward();
-		try {Thread.sleep(nav.cm_to_seconds(armLength));} catch (InterruptedException e) {}
+		try {Thread.sleep(nav.cm_to_seconds(armLength)*1000);} catch (InterruptedException e) {}
 		nav.stop();
 
 		//bring arm up (capture block)
@@ -68,13 +68,13 @@ public class PickupObject
 		nav.travelTo(captureFlag.getLocationPreIdentifier()[0], captureFlag.getLocationPreIdentifier()[1]);
 		
 		nav.moveForward();
-		try {Thread.sleep(nav.cm_to_seconds(10));} catch (InterruptedException e) {}
+		try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}
 		nav.stop();
 		
 		//bring arm down (release block)
-		armController.bringArmDown(350);
+		armController.bringArmDown(450);
 		
 		//bring arm back up
-		armController.bringArmUp(350);
+		armController.bringArmUp(450);
 	}
 }
