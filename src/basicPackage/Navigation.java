@@ -21,8 +21,9 @@ package basicPackage;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Navigation {
-	private final static int FAST = 100, SLOW = 90, ACCELERATION = 2000;
+	private final static int FAST = 200, SLOW = 100, ACCELERATION = 1000;
 	
+
 	private final static double DEG_ERR = 3.5, CM_ERR = 1.0;
 	private Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor, rightMotor;
@@ -98,24 +99,29 @@ public class Navigation {
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
 	 * motors when the turn is completed
 	 */
+	/*
+	 * The original turnTo() method was altered. We implemented our own turnTo() method from Lab 3: Navigation
+	 * The turnTo method rotates the robot at the specified angle that is passed through as an argument
+	 * It will make the most efficient turns when turning. Quickest route
+	 */
 	public void turnTo(double angle, boolean stop) {
-
 		double error = angle - this.odometer.getAng();
-		
-		
-		if(inRange(angle,0,3.5)||inRange(angle,360,3.5)){
-			if(inRange(this.odometer.getAng(),0,3.5)){
-				error=angle - 360 - this.odometer.getAng();
+		if(inRange(angle,0,5.0)||inRange(angle,360,5.0)){
+			if(inRange(this.odometer.getAng(),0,5.0)){
+				if(error>180){
+					error-=360;
+				}
 			}
-			else if(inRange(this.odometer.getAng(),360,3.5)){
-				error = angle -this.odometer.getAng()+360;
+			else if(inRange(this.odometer.getAng(),360,5.0)){
+				if(error<-180){
+					error+=360;
+				}
 			}
 		}
-		System.out.println(error);
-
+		
 		while (Math.abs(error) > DEG_ERR) {
-
 			error = angle - this.odometer.getAng();
+			
 			if (error < -180.0) {
 				this.setSpeeds(-SLOW, SLOW);
 			} else if (error < 0.0) {

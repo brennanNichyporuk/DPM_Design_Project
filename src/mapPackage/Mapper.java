@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import pilotPackage.DStarLite;
 import basicPackage.Odometer;
+import lejos.hardware.Sound;
 import modulePackage.UltrasonicModule;
 
 /**
@@ -12,15 +13,20 @@ import modulePackage.UltrasonicModule;
  * @author brennanNichyporuk
  *
  */
-public class Mapper {
+public class Mapper extends Thread {
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
 	private int sensorAxleOffset;
-	
-	private int detectionThreshold = 38;
-	private int scanBand = 25;
-	private int scanIncrement = 25;
+
+	private final int maxRange = 85;
+	private final int minDerivativeChange = 6;
+	private int scanBand = 90;
+	private final int scanIncrement = 5;
+	private final int mapSize = 8;
+	private boolean active;
+	private boolean objectDetected;
+	private boolean odd;
 
 	/**
 	 * Instantiates a map.
@@ -28,11 +34,28 @@ public class Mapper {
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
 	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
+
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
 		this.sensorAxleOffset = sensorAxleOffset;
-		this.cycleUSsensor();
+		this.active = false;
+		this.objectDetected = false;
+		this.cycleUSsensor(5);
+		this.odd = true;
+
+		uM.rotateSensorTo(-scanBand);
+		this.sleepFor(3000);
+
+		for (int i = 0; i < this.mapSize; i++)
+			dStarLite.updateCell(i, this.mapSize, -1);
+
+		dStarLite.updateCell(this.mapSize, this.mapSize, -1);
+
+		for (int j = 0; j < this.mapSize; j++)
+			dStarLite.updateCell(this.mapSize, j, -1);
+
+		dStarLite.replan();
 	}
 
 	/**
@@ -42,32 +65,226 @@ public class Mapper {
 	 * @param y - present node y
 	 * @return - updated map.
 	 */
-	public boolean updateAndReturnMap() {
-		return this.scan();
+
+	public void run() {
+		while (true) {
+			if (active) {
+				this.objectDetected = this.scan();
+				active = false;
+			}
+			else
+				this.sleepFor(100);
+		}
 	}
 
-	private boolean scan() {
+	public boolean scan() {
+		double distance = 0, lastDistance = 0, fallingEdgeDistance = 0;
+		int[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null, objectLoco = null;
+		int lastABSAngle = 0, fallingEdgeABSAngle = 0;
+		boolean objectDetected = false, fallingEdgeDetected = false, fallingEdgeRegistered = false;
 
-		double distance;
-		double ABSAngle = 0;
-		boolean objectDetected = false;
-
-		for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
-			uM.rotateSensorTo(i);
-			distance = this.cycleUSsensor();
-			if (distance < detectionThreshold) {
-				ABSAngle = this.wrapDatAngle(i + odo.getAng());
+		if (odd) {
+			uM.rotateSensorToWait(-90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
 				try {
-					int[] nodeID = this.locateDatObjectNode(ABSAngle, distance);
-					dStarLite.updateCell(nodeID[0], nodeID[1], -1);
-					objectDetected = true; // Skipped if there is an Exception
-				} catch (FalseObjectException fOE) {
-					System.out.println("FalseObjectE");
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()-90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(0);
+			distance = this.cycleUSsensor(5);
+			if (distance < 40) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng());
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()+90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
 				}
 			}
 		}
+		else {
+			uM.rotateSensorToWait(90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()+90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(0);
+			distance = this.cycleUSsensor(5);
+			if (distance < 40) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng());
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+			uM.rotateSensorToWait(-90);
+			distance = this.cycleUSsensor(5);
+			if (distance < 45) {
+				try {
+					objectLoco = this.locateDatObjectEdge(distance, odo.getAng()-90);
+					this.updatePath2(objectLoco);
+					objectDetected = true;
+				} catch (FalseObjectException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+				}
+			}
+		}
+
+		/*
+		lastDistance = this.cycleUSsensor(5);
+		lastABSAngle = 0;
+		if (odd) {
+			for (int i = -scanBand; i <= scanBand; i += scanIncrement) {
+				distance = this.rotateAndScan(i);
+				//uM.rotateSensorToWait(i);
+				//this.sleepFor(500);
+				//distance = this.cycleUSsensor(2);
+				double derivative = distance - lastDistance;
+				int ABSAngle = (int) this.wrapDatAngle(i + odo.getAng());
+
+				// If the ABS of the derivative is great enough ...
+				if (Math.abs(derivative) > this.minDerivativeChange) {
+					// If the derivative is negative --> falling edge
+					if (derivative < 0) {
+						fallingEdgeDetected = true;
+					}
+					// If the derivative is positive --> rising edge
+					// If there is a rising edge and a fallingEdge has been registered, there must be an object ...
+					else if (derivative > 0 && fallingEdgeRegistered) {
+						// If the Object is within max range ...
+						if (lastDistance < this.maxRange) {
+							// Locate the falling and rising edge location ...
+							// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
+							// + or - 15 degrees from the direction it is pointing.
+							try {
+								objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle + 15);
+								objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle - 15);
+								// Update the path ...
+								this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
+								objectDetected = true;
+							} catch (FalseObjectException e) {
+								// TODO Auto-generated catch block
+								//e.printStackTrace();
+							}
+
+							fallingEdgeRegistered = false;
+						}
+					}
+
+				} 
+				else {
+					// This records the first distance and angle that does not meet the minimum derivative
+					// provided the a falling edge was previously detected.
+					if (fallingEdgeDetected) {
+						fallingEdgeDistance = distance;
+						fallingEdgeABSAngle = ABSAngle;
+						fallingEdgeDetected = false;
+						fallingEdgeRegistered = true;
+					}
+
+				}
+
+				lastABSAngle = ABSAngle;
+				lastDistance = distance;
+			}
+		}
+		else {
+			for (int i = scanBand; i >= -scanBand; i -= scanIncrement) {
+				//uM.rotateSensorToWait(i);
+				//distance = this.cycleUSsensor(2);
+				distance = this.rotateAndScan(i);
+				double derivative = distance - lastDistance;
+				int ABSAngle = (int) this.wrapDatAngle(i + odo.getAng());
+
+				// If the ABS of the derivative is great enough ...
+				if (Math.abs(derivative) > this.minDerivativeChange) {
+					// If the derivative is negative --> falling edge
+					if (derivative < 0) {
+						fallingEdgeDetected = true;
+					}
+					// If the derivative is positive --> rising edge
+					// If there is a rising edge and a fallingEdge has been registered, there must be an object ...
+					else if (derivative > 0 && fallingEdgeRegistered) {
+						// If the Object is within max range ...
+						if (lastDistance < this.maxRange) {
+							// Locate the falling and rising edge location ...
+							// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
+							// + or - 15 degrees from the direction it is pointing.
+							try {
+								objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle - 15);
+								objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle + 15);
+								// Update the path ...
+								this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
+								objectDetected = true;
+							} catch (FalseObjectException e) {
+								// TODO Auto-generated catch block
+								//e.printStackTrace();
+							}
+
+							fallingEdgeRegistered = false;
+						}
+					}
+
+				} 
+				else {
+					// This records the first distance and angle that does not meet the minimum derivative
+					// provided the a falling edge was previously detected.
+					if (fallingEdgeDetected) {
+						fallingEdgeDistance = distance;
+						fallingEdgeABSAngle = ABSAngle;
+						fallingEdgeDetected = false;
+						fallingEdgeRegistered = true;
+					}
+
+				}
+
+				lastABSAngle = ABSAngle;
+				lastDistance = distance;
+			}
+		}
+		 */
+
+		if (odd) {
+			uM.rotateSensorToWait(this.scanBand);
+		} else {
+			uM.rotateSensorToWait(-this.scanBand);
+		}
+
+		this.odd = !odd;
 		return objectDetected;
 	}
+
+
 
 	private double wrapDatAngle(double angle) {
 		if (angle < 0)
@@ -77,52 +294,103 @@ public class Mapper {
 		return angle;
 	}
 
-	private int[] locateDatObjectNode(double angle, double distance) throws FalseObjectException {
-		double sensorX = odo.getX() + this.sensorAxleOffset * Math.cos(Math.toRadians(odo.getAng()));
-		double sensorY = odo.getY() + this.sensorAxleOffset * Math.sin(Math.toRadians(odo.getAng()));
-		
-		double objectX = sensorX + distance * Math.cos(Math.toRadians(angle));
-		double objectY = sensorY + distance * Math.sin(Math.toRadians(angle));
-		
-		if (objectX < 10 || objectY < 10)
-			throw new FalseObjectException();
 
-		int nodeX = (int) (objectX / 30.48);
-		int nodeY = (int) (objectY / 30.48);
-		int[] nodeID = {nodeX, nodeY};
+	private void updatePath(int[] objectFallingEdgeLoco, int[] objectRisingEdgeLoco) throws FalseObjectException {
+		double[] objectCenterLoco = {(objectFallingEdgeLoco[0] + objectRisingEdgeLoco[0]) / 2, (objectFallingEdgeLoco[1] + objectRisingEdgeLoco[1]) / 2};
+		int[] objectCenterNode = {(int) (objectCenterLoco[0] / 30.48), (int) (objectCenterLoco[1] / 30.48)};
 
-		int currentNodeX = (int) (odo.getX() / 30.48);
-		int currentNodeY = (int) (odo.getY() / 30.48);
-
-		// If the object is off the map or the object detected is the wall, raise FalseObjectException.
-		if (nodeX > 11 || nodeY > 11 || nodeX < 0 || nodeY < 0 || (nodeX == currentNodeX && nodeY == currentNodeY)) {
-			throw new FalseObjectException();
-		}
-
-		// If the object is not on an adjacent node, ignore...
-		if (!((nodeX == currentNodeX + 1 && nodeY == currentNodeY) || (nodeX == currentNodeX - 1 && nodeY == currentNodeY)
-				|| (nodeX == currentNodeX && nodeY == currentNodeY + 1) || (nodeX == currentNodeX && nodeY == currentNodeY - 1)))
-			throw new FalseObjectException();
-		
-		System.out.println("Ox:" + (int) objectX + "Oy:" + (int) objectY);
-
-		return nodeID;
+		// TEMP CODE:
+		System.out.println(Arrays.toString(objectCenterNode));
+		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		this.dStarLite.replan();
+		Sound.beep();
+		//this.sleepFor(5000);
 	}
 	
-	private int cycleUSsensor() {
-		
-		int distance = 0;
-		for (int i = 0; i < 5; i++) {
+	private void updatePath2(int[] objectLoco) throws FalseObjectException {
+		int[] objectCenterNode = {(int) (objectLoco[0] / 30.48), (int) (objectLoco[1] / 30.48)};
+
+		// TEMP CODE:
+		//System.out.println(Arrays.toString(objectCenterNode));
+		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		this.dStarLite.replan();
+		System.out.println(Arrays.toString(objectCenterNode));
+		Sound.beep();
+		//this.sleepFor(5000);
+	}
+
+	// Locates the x and y of a given object
+	private int[] locateDatObjectEdge(double distance, double angle) throws FalseObjectException {
+		double[] sensorLoco = this.locateDatSensorLoco();
+		int objectEdgeX = (int) (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
+		int objectEdgeY = (int) (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
+		if (objectEdgeX <= 5|| objectEdgeY <= 5 || objectEdgeX >= ((30.48 * this.mapSize) - 5)|| objectEdgeY >= ((30.48 * this.mapSize) - 5))
+			throw new FalseObjectException();
+		int[] objectLoco = {objectEdgeX, objectEdgeY};
+		return objectLoco;
+	}
+
+	// Locates the location of the Ultrasonic sensor
+	private double[] locateDatSensorLoco() {
+		double sensorX = odo.getX() + this.sensorAxleOffset * Math.cos(Math.toRadians(odo.getAng()));
+		double sensorY = odo.getY() + this.sensorAxleOffset * Math.sin(Math.toRadians(odo.getAng()));
+		double[] sensorLoco = {sensorX, sensorY};
+		return sensorLoco;
+	}
+
+	private double cycleUSsensor(int cycleCount) {
+
+		long startTime;
+		double distance = 0;
+		for (int i = 0; i < cycleCount; i++) {
+			startTime = System.currentTimeMillis();
 			distance = uM.getDistance();
-			try {
-				Thread.sleep(25);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			if (System.currentTimeMillis() - startTime < 25)
+				this.sleepFor(25);
 		}
-		
+
 		return distance;
+
+	}
+
+	private double rotateAndScan(int i) {
+		uM.rotateSensorTo(i);
+		this.sleepFor(50);
+		uM.getDistance();
+		return uM.getDistance();
+	}
+
+	private void sleepFor(long t) {
+		try {
+			Thread.sleep(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public boolean isActive() {
+		synchronized(this) {
+			return active;
+		}
+	}
+
+	public void setActive(boolean active) {
+		synchronized(this) {
+			this.active = active;
+		}
+	}
+
+	public boolean isObjectDetected() {
+		synchronized(this) {
+			return objectDetected;
+		}
+	}
+
+	public void setObjectDetected(boolean objectDetected) {
+		synchronized(this) {
+			this.objectDetected = objectDetected;
+		}
 	}
 
 }

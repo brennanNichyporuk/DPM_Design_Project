@@ -15,6 +15,9 @@ public class Localization {
 	private int startTileX;
 	private int startTileY;
 	
+	private static double XLENGTH = 14.5;
+	private static double YLENGTH = 14.5;
+	private static double FIELDSIZE = 8;
 	
 	private EV3TouchSensor touch;
 	
@@ -34,37 +37,12 @@ public class Localization {
 	public void doLocalization(){
 		//doing ultrasonic localization
 		this.usLocalizer.doLocalization();
-		
+		this.usLocalizer.doLocalization();
 		//depending on which corner we are in, we need to correct the orientation of the robot to ensure that the
 		//angle is consitant regardless of the starting tile. see below for detailed explanation
 		this.correctAngle();
-		
+		this.correctXAndY();
 	}
-	
-	
-	//using tile (1,1) as a basis the orientation is as follows:
-	/*
-	 * Odometer defines cooridinate system as such...
-	 * 
-	 * 					90Deg:pos y-axis
-	 * 							|
-	 * 							|
-	 * 							|
-	 * 							|
-	 * 180Deg:neg x-axis------------------0Deg:pos x-axis
-	 * 							|
-	 * 							|
-	 * 							|
-	 * 							|
-	 * 					270Deg:neg y-axis
-	 * 
-	 * The odometer is initalized to 90 degrees, assuming the robot is facing up the positive y-axis
-	 * 
-	 * if we start at the (8,1) corner then we are actually at 270 degrees. (set the orientation to 270 degrees)
-	 * if we start at (8,8) we are actually at an orietnation of 90 degrees after localization
-	 * if we start at (1,1) we are properly at 0 degrees
-	 * if we start at (1,8) we are actually at 180 degrees. 
-	 */
 	public void correctAngle(){
 		double[] position = {0,0,0};
 		boolean[] update = {false, false,true};
@@ -90,27 +68,47 @@ public class Localization {
 	 * depending on starting orientation, we need to orient in different ways. 
 	 * strategy is to touch each wall and set the x or y accordingly.
 	 */
-	public void correctXAndY(double wallAngle){
+	public void correctXAndY(){
 		//crash into the wall ON PURPOSE
 		if((this.startTileX==1) && (this.startTileY==1)){
 			this.nav.turnTo(0,true);
 			nav.setSpeeds(-80, -80);
-			this.touchedWall(true, false, 0);
-			nav.moveStraight(10);
+			this.touchedWall(true, false, XLENGTH);
+			nav.moveStraight(15);
 			nav.turnTo(90, true);
-			this.touchedWall(false, true, 0);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(false, true, YLENGTH);
+			nav.moveStraight(20);
+			
 		}
+		
 		else if((this.startTileX==1) && (this.startTileY==8)){
-			nav.turnTo(315, true);
+			
+			this.nav.turnTo(315,true);
 			nav.setSpeeds(-80, -80);
+			
 		}
+		
 		else if((this.startTileX==8) && (this.startTileY==1)){
-			nav.turnTo(315, true);
+			
+			this.nav.turnTo(180,true);
 			nav.setSpeeds(-80, -80);
+			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
+			nav.cm_to_seconds(10);
+			nav.turnTo(270, true);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(false, true,YLENGTH);
+			
 		}
 		else{
-			nav.turnTo(45, true);
+			this.nav.turnTo(180,true);
 			nav.setSpeeds(-80, -80);
+			this.touchedWall(true, false, 8*OdometerCorrection.SQUAREDISTANCE-XLENGTH);
+			nav.cm_to_seconds(10);
+			nav.turnTo(270, true);
+			nav.setSpeeds(-80, -80);
+			this.touchedWall(false, true, 8*OdometerCorrection.SQUAREDISTANCE-YLENGTH);
+			
 		}
 		nav.stop();
 	}
@@ -122,7 +120,17 @@ public class Localization {
 			this.touchMode.fetchSample(touchData, 0);
 			this.touch.fetchSample(touchData, 0);
 			if(touchData[0]==1){
-				double[] position = {0,12.9,0};
+				
+				double[] position = {0,0,0};
+				
+				//if updateX is set updateY
+				if(updateX){
+					position[0]=setValue;
+				}
+				else{
+					position[1] = setValue;
+				}
+				
 				this.odo.setPosition(position,update);
 				touched = true;
 				}

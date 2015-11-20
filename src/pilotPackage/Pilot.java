@@ -7,6 +7,7 @@ import modulePackage.UltrasonicModule;
 import basicPackage.IObserver;
 import basicPackage.Navigation;
 import basicPackage.Odometer;
+
 /**
  * This class is is responsible for navigating to the opponents home zone while
  * avoiding obstacles.
@@ -43,6 +44,7 @@ public class Pilot extends Thread {
 		this.path = this.dStarLite.getPath();
 		int sensorAxleOffset = 12;
 		this.mapper = new Mapper(odo, uM, this.dStarLite, sensorAxleOffset);
+		//this.mapper.start();
 	}
 
 	public void run() {
@@ -58,17 +60,12 @@ public class Pilot extends Thread {
 			int deltaY = nextState.y - currentState.y;
 			this.faceNextBlock(deltaX, deltaY);
 
-			while (this.mapper.updateAndReturnMap()) {
-				this.dStarLite.replan();
-				currentState = this.path.get(0);
-				nextState = this.path.get(1);
-				deltaX = nextState.x - currentState.x;
-				deltaY = nextState.y - currentState.y;
-				this.faceNextBlock(deltaX, deltaY);
-			}
-
+			//this.mapper.setActive(true);
+			this.mapper.scan();
 			nextState = this.path.get(1);
+			System.out.println("NS:" + nextState.x + "," + nextState.y);
 			this.travelToNode(nextState);
+
 		}
 	}
 

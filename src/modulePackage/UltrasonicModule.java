@@ -43,6 +43,9 @@ public class UltrasonicModule
 		this.neck = neck;
 		
 		this.windowSize = 5; // Size of window used in Median Filter
+		for (int i = 0; i < this.windowSize; i++) {
+			this.addValue(this.fetchDistance());
+		}
 	}
 	
 	
@@ -160,9 +163,19 @@ public class UltrasonicModule
 	 */
 	public int getDistance() 
 	{
+		long startTime = System.currentTimeMillis();
 		int un_filtered = this.fetchDistance();
 		this.setDistance(this.filterDistance(un_filtered));
 		
+		long timeTaken = System.currentTimeMillis() - startTime;
+		if (timeTaken < 25) {
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return this.distance;
 	}
 	
@@ -187,7 +200,26 @@ public class UltrasonicModule
 		if(adj<0)
 		{
 			this.neck.setSpeed(ROTATE_SPEED);
-			this.neck.rotate(adj,false);
+			this.neck.rotate(adj,true);
+		} 
+		
+		else
+		{	
+			this.neck.setSpeed(-ROTATE_SPEED);
+			this.neck.rotate(adj, true);
+		}
+		
+		this.setSensorAngle((int)angle); 
+	}
+	
+	public void rotateSensorToWait(double angle)
+	{
+		int adj = (int)angle - this.getSensorAngle();
+		
+		if(adj<0)
+		{
+			this.neck.setSpeed(ROTATE_SPEED);
+			this.neck.rotate(adj, false);
 		} 
 		
 		else
@@ -210,5 +242,7 @@ public class UltrasonicModule
 	{
 		this.sensorAngle = sensorAngle;
 	}
+	
 }
+
 
