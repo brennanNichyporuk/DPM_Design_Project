@@ -41,8 +41,11 @@ public class DesignProject {
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 
 
-		Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
-		pilot.start();
+		Mapper mapper = new Mapper(odo, ultrasonicMod, null, 0);
+		mapper.start();
+		mapper.setActive(true);
+		//Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
+		//pilot.start();
 
 		Button.waitForAnyPress();
 		System.exit(0);

@@ -182,7 +182,7 @@ public class UltrasonicModule
 	 * 
 	 * @param angle: angle to turn Sensor
 	 */
-	public void rotateSensorTo(double angle)
+	public void rotateSensorToWait(double angle)
 	{
 		int adj = (int)angle - this.getSensorAngle();
 		
@@ -196,6 +196,25 @@ public class UltrasonicModule
 		{	
 			this.neck.setSpeed(-ROTATE_SPEED);
 			this.neck.rotate(adj, false);
+		}
+		
+		this.setSensorAngle((int)angle); 
+	}
+	
+	public void rotateSensorTo(double angle)
+	{
+		int adj = (int)angle - this.getSensorAngle();
+		
+		if(adj<0)
+		{
+			this.neck.setSpeed(ROTATE_SPEED);
+			this.neck.rotate(adj, true);
+		} 
+		
+		else
+		{	
+			this.neck.setSpeed(-ROTATE_SPEED);
+			this.neck.rotate(adj, true);
 		}
 		
 		this.setSensorAngle((int)angle); 
