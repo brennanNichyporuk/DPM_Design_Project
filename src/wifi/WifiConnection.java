@@ -36,21 +36,31 @@ public class WifiConnection {
 	
 	private TextLCD LCD = LocalEV3.get().getTextLCD();
 	
-	public WifiConnection(String serverIP, int teamNumber) throws IOException {
+	public WifiConnection(String serverIP, int teamNumber) throws IOException 
+	{
+		
 		LCD.clear();
 		
 		// Open connection to the server and data streams
+		
 		int port = 2000 + teamNumber; //semi-abritrary port number"
+		
 		LCD.drawString("Opening wifi connection to server at IP: " + serverIP, 0, 0);
+		
 	    Socket socketClient = new Socket(serverIP, port);
+	    
 	    LCD.drawString("Connected to server", 0, 1);
+	    
 		DataOutputStream dos = new DataOutputStream(socketClient.getOutputStream());
 		DataInputStream dis = new DataInputStream(socketClient.getInputStream());
 
 		// Wait for the server transmission to arrive
+		
 		LCD.drawString("Waiting from transmission...", 0, 2);
+		
 		while(dis.available() <= 0)
 			try {Thread.sleep(10);} catch (InterruptedException e) {}
+		
 		LCD.drawString("Receiving transmission", 0, 3);		
 		
 		// Parse transmission
