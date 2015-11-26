@@ -55,9 +55,9 @@ public class LocateObject extends Thread
 	@Override
 	public void run()
 	{		
-		while(isActive && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
+		while(isActive && (odo.getY()<(captureFlag.getInitialPostion()[1]+70)))
 		{
-			while(!isPaused && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
+			while(!isPaused && (odo.getY()<(captureFlag.getInitialPostion()[1]+70)))
 			{
 				scanArea();
 			}

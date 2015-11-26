@@ -1,126 +1,126 @@
 package basicPackage;
-/* 
- * Navigation.java
- * Group #: 61
- * Names: Fred Glozman (260635610) & Abdel Kader Gaye (260637736) 
- * 
- * This class contains methods which make the robot drive and turn to a specified location or direction
- */
 
-
-/*
- * File: Navigation.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * 
- * Movement control class (turnTo, travelTo, flt, localize)
- */
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.port.Port;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
-public class Navigation {
-	private final static int FAST = 200, SLOW = 100, ACCELERATION = 1000;
+public class Navigation extends Thread {
+	private static Odometer odometer;
+	private static EV3LargeRegulatedMotor leftMotor;
+	private static EV3LargeRegulatedMotor rightMotor;
+
+	private final double LEFT_WHEEL_RADIUS, RIGHT_WHEEL_RADIUS, TRACK;
+	private final int RIGHT_ROTATE_SPEED, LEFT_ROTATE_SPEED, RIGHT_FORWARD_SPEED, LEFT_FORWARD_SPEED;
+	public final static int SLOW = 100; 
+	private final static double DEG_ERR = 3;
 	
-
-	private final static double DEG_ERR = 3.5, CM_ERR = 1.0;
-	private Odometer odometer;
-	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-
-	public Navigation(Odometer odo) {
-		this.odometer = odo;
-
-		EV3LargeRegulatedMotor[] motors = this.odometer.getMotors();
-		this.leftMotor = motors[0];
-		this.rightMotor = motors[1];
-
-		// set acceleration
-		this.leftMotor.setAcceleration(ACCELERATION);
-		this.rightMotor.setAcceleration(ACCELERATION);
-	}
-
-	/*
-	 * Functions to set the motor speeds jointly
+	/**
+	 * 
+	 * @param odometer
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param ROTATE_SPEED should be around 4-6 
+	 * @param FORWARD_SPEED should be around 4-6
+	 * @param LEFT_WHEEL_RADIUS
+	 * @param RIGHT_WHEEL_RADIUS
+	 * @param TRACK
 	 */
+	public Navigation (Odometer odometer, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
+			int ROTATE_SPEED, int FORWARD_SPEED, double LEFT_WHEEL_RADIUS, double RIGHT_WHEEL_RADIUS,
+			double TRACK) {
+		Navigation.odometer = odometer;
+		Navigation.leftMotor = leftMotor;
+		Navigation.rightMotor = rightMotor;
+		this.LEFT_WHEEL_RADIUS = LEFT_WHEEL_RADIUS;
+		this.RIGHT_WHEEL_RADIUS = RIGHT_WHEEL_RADIUS;
+		this.TRACK = TRACK;
+		
+		// Adjust forward speed and rotate speed depending of wheel radius of each wheel
+		this.LEFT_ROTATE_SPEED = (int) ((ROTATE_SPEED * 360) / (2 * Math.PI * LEFT_WHEEL_RADIUS));
+		this.RIGHT_ROTATE_SPEED = (int) ((ROTATE_SPEED * 360) / (2 * Math.PI * RIGHT_WHEEL_RADIUS));
+		this.LEFT_FORWARD_SPEED = (int) ((FORWARD_SPEED * 360) / (2 * Math.PI * LEFT_WHEEL_RADIUS));
+		this.RIGHT_FORWARD_SPEED = (int) ((FORWARD_SPEED * 360) / (2 * Math.PI * RIGHT_WHEEL_RADIUS));
+	}
+	
+	public void moveStraight(double distance) {
+		
+	}
+	
 	public void setSpeeds(float lSpd, float rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
+		leftMotor.setSpeed(lSpd);
+		rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.backward();
+			leftMotor.backward();
 		else
-			this.leftMotor.forward();
+			leftMotor.forward();
 		if (rSpd < 0)
-			this.rightMotor.backward();
+			rightMotor.backward();
 		else
-			this.rightMotor.forward();
+			rightMotor.forward();
 	}
 
 	public void setSpeeds(int lSpd, int rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
+		leftMotor.setSpeed(lSpd);
+		rightMotor.setSpeed(rSpd);
 		if (lSpd < 0)
-			this.leftMotor.backward();
+			leftMotor.backward();
 		else
-			this.leftMotor.forward();
+			leftMotor.forward();
 		if (rSpd < 0)
-			this.rightMotor.backward();
+			rightMotor.backward();
 		else
-			this.rightMotor.forward();
+			rightMotor.forward();
 	}
 
-	/*
-	 * Float the two motors jointly
-	 */
-	public void setFloat() {
-		this.leftMotor.stop();
-		this.rightMotor.stop();
-		this.leftMotor.flt(true);
-		this.rightMotor.flt(true);
+	public void travelTo (double desiredX, double desiredY) {
+
+		double[] position = odometer.getPosition();
+
+		double xError = desiredX - position[0];
+		double yError = desiredY - position[1];
+		double desiredTheta = Math.toDegrees(Math.atan2(yError, xError)); 
+
+		// turn to desiredTheta
+		this.turnTo(desiredTheta,true);
+		
+		double linearError = Math.sqrt((xError * xError) + (yError * yError));
+
+		leftMotor.setSpeed(LEFT_FORWARD_SPEED);
+		rightMotor.setSpeed(RIGHT_FORWARD_SPEED);
+
+		leftMotor.rotate(convertDistance(LEFT_WHEEL_RADIUS, linearError), true);
+		rightMotor.rotate(convertDistance(RIGHT_WHEEL_RADIUS, linearError), false);
+
 	}
 
-	/*
-	 * TravelTo function which takes as arguments the x and y position in cm Will travel to designated position, while
-	 * constantly updating it's heading
-	 */
-	public void travelTo(double x, double y) {
-		double minAng;
-		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-			minAng = (Math.atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / Math.PI);
-			if (minAng < 0)
-				minAng += 360.0;
-			this.turnTo(minAng, false);
-			this.setSpeeds(FAST, FAST);
+	public void turnTo (double desiredTheta, boolean stop) {
+		double currentTheta = odometer.getAng();
+		double errorTheta = desiredTheta - currentTheta;
+
+		if (errorTheta < -180) {
+			errorTheta += 360;
 		}
-		this.setSpeeds(0, 0);
-	}
-
-	/*
-	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
-	 * motors when the turn is completed
-	 */
-	/*
-	 * The original turnTo() method was altered. We implemented our own turnTo() method from Lab 3: Navigation
-	 * The turnTo method rotates the robot at the specified angle that is passed through as an argument
-	 * It will make the most efficient turns when turning. Quickest route
-	 */
-	public void turnTo(double angle, boolean stop) {
-		double error = angle - this.odometer.getAng();
-		if(inRange(angle,0,5.0)||inRange(angle,360,5.0)){
-			if(inRange(this.odometer.getAng(),0,5.0)){
-				if(error>180){
-					error-=360;
-				}
-			}
-			else if(inRange(this.odometer.getAng(),360,5.0)){
-				if(error<-180){
-					error+=360;
-				}
-			}
+		else if (errorTheta > 180) {
+			errorTheta -= 360;
 		}
+
+		leftMotor.setSpeed(LEFT_ROTATE_SPEED);
+		rightMotor.setSpeed(RIGHT_ROTATE_SPEED);
+
+		leftMotor.rotate(-convertAngle(LEFT_WHEEL_RADIUS, TRACK, errorTheta), true);
+		rightMotor.rotate(convertAngle(RIGHT_WHEEL_RADIUS, TRACK, errorTheta), false);
+		if(stop){
+			this.setSpeeds(0, 0);
+		}
+	}
+	
+	public void turnToContinous(double angle, boolean stop) {
+		double error = angle - odometer.getAng();
 		
 		while (Math.abs(error) > DEG_ERR) {
-			error = angle - this.odometer.getAng();
+			error = angle - odometer.getAng();
 			
 			if (error < -180.0) {
 				this.setSpeeds(-SLOW, SLOW);
@@ -137,91 +137,39 @@ public class Navigation {
 			this.setSpeeds(0, 0);
 		}
 	}
-	
-	public void moveStraight(double distance) {
-		
-		if(distance>=0){
-			this.setWheels(FAST, FAST);
-			leftMotor.rotate(convertDistance(odometer.leftRadius, distance), true);
-			rightMotor.rotate(convertDistance(odometer.rightRadius, distance), false);
-		}
-		else{
-			this.setWheels(-FAST, -FAST);
-			leftMotor.rotate(convertDistance(odometer.leftRadius, distance), true);
-			rightMotor.rotate(convertDistance(odometer.rightRadius, distance), false);
-		}
-		
-		this.setWheels(0, 0);
-	}
-	
+
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
-	
-	private void setWheels(int lSpd, int rSpd) {
-		this.leftMotor.setSpeed(lSpd);
-		this.rightMotor.setSpeed(rSpd);
-		if (lSpd < 0)
-			this.leftMotor.backward();
-		else
-			this.leftMotor.forward();
-		if (rSpd < 0)
-			this.rightMotor.backward();
-		else
-			this.rightMotor.forward();
-	}
-	
-	/*
-	 * Go foward a set distance in cm
-	 */
-	public void goForward(double distance) {
-		this.travelTo(Math.cos(Math.toRadians(this.odometer.getAng())) * distance, Math.cos(Math.toRadians(this.odometer.getAng())) * distance);
 
+	private static int convertAngle(double radius, double width, double angle) {
+		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
 	//turns the robot left. 
 	public void turnLeft(){
-		this.setSpeeds(-SLOW,SLOW);
+		this.setSpeeds(-this.LEFT_ROTATE_SPEED,this.RIGHT_ROTATE_SPEED);
 	}
 	//turns the robot right
 	public void turnRight(){
-		this.setSpeeds(SLOW,-SLOW);
+		this.setSpeeds(this.LEFT_ROTATE_SPEED,-this.RIGHT_ROTATE_SPEED);
 	}
 	//move forward
 	public void moveForward(){
-		this.setSpeeds(SLOW, SLOW);
+		this.setSpeeds(this.LEFT_FORWARD_SPEED,this.RIGHT_FORWARD_SPEED);
 	}
 	//move backward
 	public void moveBackward(){
-		this.setSpeeds(-SLOW, -SLOW);
+		this.setSpeeds(-this.LEFT_FORWARD_SPEED,-this.RIGHT_FORWARD_SPEED);
 	}
 	//stops the robot motors
-	public void stop(){
+	public void stopMoving(){
 		this.setSpeeds(0,0);
 	}
-	
 	
 	public int cm_to_seconds(int distance)
 	{
 		return (int) ( (distance/(2*Math.PI*odometer.leftRadius)) * 360 )/SLOW;
 	}
-	
-	
-	
-	private boolean inRange(double val, double target, double absRange)
-	{
 
-		if(Math.abs(val-target)< absRange)
-		{
-			return true;
-		}
-		
-		else
-		{	
-			return false;
-		}
-		
-	}
-	
-	
 }

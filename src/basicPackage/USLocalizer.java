@@ -58,7 +58,7 @@ public class USLocalizer {
 			// rotate the robot until it sees no wall
 			double distance = usModule.getDistance();
 			while (distance < distanceStandard + errorMargin) {
-				this.turn(-5.0, false);
+				this.turn(-5, false);
 				distance = usModule.getDistance();
 			}
 
@@ -67,7 +67,7 @@ public class USLocalizer {
 				angle = odo.getAng();
 				if (distance >= distanceStandard + errorMargin)
 					angleA = angle;
-				this.turn(-5.0, false);
+				this.turn(-5, false);
 				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
@@ -76,7 +76,7 @@ public class USLocalizer {
 			// switch direction and wait until it sees no wall
 			distance = usModule.getDistance();
 			while (distance < distanceStandard + errorMargin) {
-				this.turn(5.0, false);
+				this.turn(5, false);
 				distance = usModule.getDistance();
 			}
 
@@ -86,7 +86,7 @@ public class USLocalizer {
 				angle = odo.getAng();
 				if (distance >= distanceStandard + errorMargin)
 					angleB = angle;
-				this.turn(5.0, false);
+				this.turn(5, false);
 				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
@@ -117,7 +117,7 @@ public class USLocalizer {
 			double distance = usModule.getDistance();
 			
 			while (distance > distanceStandard - errorMargin) {
-				this.turn(-5.0, false);
+				nav.turnRight();
 				distance = usModule.getDistance();
 			}
 			// keep rotating until the robot does not see a wall, then latch the angle
@@ -125,7 +125,7 @@ public class USLocalizer {
 				angle = odo.getAng();
 				if (distance <= distanceStandard - errorMargin)
 					angleA = angle;
-				this.turn(-5.0, false);
+				nav.turnRight();
 				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
@@ -134,7 +134,7 @@ public class USLocalizer {
 			// switch direction and wait until it sees a wall
 			//distance = this.getFilteredData();
 			while (distance > distanceStandard - errorMargin) {
-				this.turn(5.0, false);
+				nav.turnLeft();
 				distance = usModule.getDistance();
 			}
 
@@ -144,7 +144,7 @@ public class USLocalizer {
 				angle = odo.getAng();
 				if (distance <= distanceStandard - errorMargin)
 					angleB = angle;
-				this.turn(5.0, false);
+				nav.turnLeft();
 				distance = usModule.getDistance();
 			}
 			this.turn(0, true);
@@ -174,7 +174,7 @@ public class USLocalizer {
 	void turn(double degrees, boolean stop) {
 		double angle = odo.getAng();
 		angle = this.correctAngle(angle + degrees);
-		nav.turnTo(angle, stop);
+		nav.turnToContinous(angle, stop);
 	}
 	
 	/**

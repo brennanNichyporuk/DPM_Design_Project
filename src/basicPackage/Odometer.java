@@ -48,10 +48,8 @@ public class Odometer implements TimerListener {
 	public double leftRadius, rightRadius, width;
 	private double x, y, theta;
 	private double[] oldDH, dDH;
-	
 	// constructor
 	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autostart) {
-		
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		
@@ -59,13 +57,11 @@ public class Odometer implements TimerListener {
 		this.rightRadius = 2.06;
 		this.leftRadius = rightRadius*0.988;
 		this.width =10.21;
-		
-		this.x = 0.5 * 30.48;
-		this.y = 0.5 * 30.48;
-		this.theta = 90.0;
+		this.x = 0;
+		this.y = 0;
+		this.theta = 0;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
-
 		if (autostart) {
 			// if the timeout interval is given as <= 0, default to 20ms timeout 
 			this.timer = new Timer((INTERVAL <= 0) ? INTERVAL : DEFAULT_TIMEOUT_PERIOD, this);
@@ -96,6 +92,15 @@ public class Odometer implements TimerListener {
 		data[1] = (rightTacho * rightRadius - leftTacho * leftRadius) / width;
 	}
 	
+	/**
+	 * corrects the orientation of the robot using the gyroscope
+	 */
+//	public void correctOrientation(){
+//		double correctOrientation = this.gyroCorrecter.correctOrientation();
+//		boolean update[] = {false, false, true};
+//		double correction[] = {0.0,0.0,correctOrientation};
+//		this.setPosition(correction, update);
+//	}
 	/*
 	 * Recompute the odometer values using the displacement and heading changes
 	 */
@@ -108,7 +113,6 @@ public class Odometer implements TimerListener {
 		synchronized (this) {
 			theta += dDH[1];
 			theta = fixDegAngle(theta);
-
 			x += dDH[0] * Math.cos(Math.toRadians(theta));
 			y += dDH[0] * Math.sin(Math.toRadians(theta));
 		}

@@ -1,5 +1,6 @@
 package modulePackage;
 
+import lejos.hardware.Sound;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
@@ -12,7 +13,7 @@ public class LineDetection
 	private int lastDerivative;
 	private int lowValue;
 	private int highValue;
-	private int minDerivativeChange = 15;
+	private int minDerivativeChange = 5;
 	
 	/**
 	 * 
@@ -57,6 +58,7 @@ public class LineDetection
 				// if we have detected a line ... we run update() which performs 
 				lowValue = 0;
 				highValue = 0;
+				Sound.beep();
 				return true;
 			}
 
