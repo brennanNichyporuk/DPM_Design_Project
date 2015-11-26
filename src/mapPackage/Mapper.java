@@ -17,7 +17,7 @@ public class Mapper extends Thread {
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
-	private int sensorAxleOffset;
+	private double sensorAxleOffset = 7.5;
 
 	private final int maxRange = 50;
 	private final int minDerivativeChange = 6;
@@ -28,6 +28,8 @@ public class Mapper extends Thread {
 	private boolean objectDetected;
 	private boolean odd;
 	
+	private int risingEdgeABSAngleCorrectionFactor = 3, fallingEdgeABSAngleCorrectionFactor = 15;
+	
 	private long lastGetDistanceTime;
 
 	/**
@@ -35,12 +37,11 @@ public class Mapper extends Thread {
 	 * @param odo - reference to the Odometer thread.
 	 * @param uM - reference to an instance of the UltrasonicModule
 	 */
-	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite, int sensorAxleOffset) {
+	public Mapper(Odometer odo, UltrasonicModule uM, DStarLite dStarLite) {
 
 		this.odo = odo;
 		this.uM = uM;
 		this.dStarLite = dStarLite;
-		this.sensorAxleOffset = sensorAxleOffset;
 		this.active = false;
 		this.objectDetected = false;
 		this.cycleUSsensor(5);
@@ -83,10 +84,10 @@ public class Mapper extends Thread {
 
 	public boolean scan() {
 		double distance = 0, lastDistance = 0, fallingEdgeDistance = 0;
-		int[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null, objectLoco = null;
+		double[] objectFallingEdgeLoco = null, objectRisingEdgeLoco = null, objectLoco = null;
 		int lastABSAngle = 0, fallingEdgeABSAngle = 0;
 		boolean objectDetected = false, fallingEdgeDetected = false, fallingEdgeRegistered = false;
-
+		
 		lastDistance = this.cycleUSsensor(5);
 		lastABSAngle = 0;
 		int i;
@@ -114,12 +115,41 @@ public class Mapper extends Thread {
 						// Locate the falling and rising edge location ...
 						// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
 						// + or - 15 degrees from the direction it is pointing.
-						System.out.println("rED:" + (int) lastDistance);
-						this.sleepFor(10000);
-						/*
+						//System.out.println("rED:" + (int) lastDistance);
+						//this.sleepFor(10000);
+
 						try {
-							//objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, fallingEdgeABSAngle + 15);
-							//objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, lastABSAngle - 15);
+							double correctedFallingEdgeABSAngle, correctedRisingEdgeABSAngle;
+							if (odd) {
+								correctedFallingEdgeABSAngle = fallingEdgeABSAngle + fallingEdgeABSAngleCorrectionFactor;
+								correctedRisingEdgeABSAngle = lastABSAngle - risingEdgeABSAngleCorrectionFactor;
+							}
+							else {
+								correctedFallingEdgeABSAngle = fallingEdgeABSAngle - fallingEdgeABSAngleCorrectionFactor;
+								correctedRisingEdgeABSAngle = lastABSAngle + risingEdgeABSAngleCorrectionFactor;
+							}
+							
+							// CORRECT RISING EDGE DISCREPENCY AS DIRECTED TO BY EDGE DETECTION TESTING
+							lastDistance -= 2.75;
+			
+							//TEMP CODE:
+							correctedFallingEdgeABSAngle -= 90;
+							correctedRisingEdgeABSAngle -= 90;
+							System.out.println("oFeD:" + (int) fallingEdgeDistance);
+							this.sleepFor(5000);
+							//objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, correctedFallingEdgeABSAngle);
+							//int[] oFELoco = {(int) objectFallingEdgeLoco[0], (int) objectFallingEdgeLoco[1]};
+							System.out.println("oFeA:" + (int) correctedFallingEdgeABSAngle);
+							this.sleepFor(5000);
+							System.out.println("oReD:" + (int) lastDistance);
+							this.sleepFor(5000);
+							//objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, correctedRisingEdgeABSAngle);
+							if (false)
+								throw new FalseObjectException();
+							//int[] oRELoco = {(int) objectRisingEdgeLoco[0], (int) objectRisingEdgeLoco[1]};
+							System.out.println("oReA:" + (int) correctedRisingEdgeABSAngle);
+							this.sleepFor(5000);
+							// END OF TEMP CODE
 							// Update the path ...
 							//this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
 							objectDetected = true;
@@ -127,7 +157,6 @@ public class Mapper extends Thread {
 							// TODO Auto-generated catch block
 							//e.printStackTrace();
 						}
-						*/
 						fallingEdgeRegistered = false;
 					}
 				}
@@ -138,7 +167,7 @@ public class Mapper extends Thread {
 				if (fallingEdgeDetected) {
 					fallingEdgeDistance = distance;
 					fallingEdgeABSAngle = ABSAngle;
-					System.out.println("fED:" + (int) fallingEdgeDistance);
+					//System.out.println("fED:" + (int) fallingEdgeDistance);
 					fallingEdgeDetected = false;
 					fallingEdgeRegistered = true;
 				}
@@ -173,26 +202,27 @@ public class Mapper extends Thread {
 	}
 
 
-	private void updatePath(int[] objectFallingEdgeLoco, int[] objectRisingEdgeLoco) throws FalseObjectException {
+	private void updatePath(double[] objectFallingEdgeLoco, double[] objectRisingEdgeLoco) throws FalseObjectException {
 		double[] objectCenterLoco = {(objectFallingEdgeLoco[0] + objectRisingEdgeLoco[0]) / 2, (objectFallingEdgeLoco[1] + objectRisingEdgeLoco[1]) / 2};
-		int[] objectCenterNode = {(int) (objectCenterLoco[0] / 30.48), (int) (objectCenterLoco[1] / 30.48)};
+		//int[] objectCenterNode = {(int) (objectCenterLoco[0] / 30.48), (int) (objectCenterLoco[1] / 30.48)};
 
 		// TEMP CODE:
-		System.out.println(Arrays.toString(objectCenterNode));
-		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
-		this.dStarLite.replan();
+		int[] objectCenterLocoInt = {(int) objectCenterLoco[0], (int) objectCenterLoco[1]};
+		//System.out.println("C:" + Arrays.toString(objectCenterLocoInt));
+		//this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		//this.dStarLite.replan();
 		Sound.beep();
-		//this.sleepFor(5000);
+		this.sleepFor(5000);
 	}
 
 	// Locates the x and y of a given object
-	private int[] locateDatObjectEdge(double distance, double angle) throws FalseObjectException {
+	private double[] locateDatObjectEdge(double distance, double angle) throws FalseObjectException {
 		double[] sensorLoco = this.locateDatSensorLoco();
-		int objectEdgeX = (int) (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
-		int objectEdgeY = (int) (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
-		if (objectEdgeX <= 5|| objectEdgeY <= 5 || objectEdgeX >= ((30.48 * this.mapSize) - 5)|| objectEdgeY >= ((30.48 * this.mapSize) - 5))
-			throw new FalseObjectException();
-		int[] objectLoco = {objectEdgeX, objectEdgeY};
+		double objectEdgeX = (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
+		double objectEdgeY = (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
+		//if (objectEdgeX <= 5|| objectEdgeY <= 5 || objectEdgeX >= ((30.48 * this.mapSize) - 5)|| objectEdgeY >= ((30.48 * this.mapSize) - 5))
+			//throw new FalseObjectException();
+		double[] objectLoco = {objectEdgeX, objectEdgeY};
 		return objectLoco;
 	}
 
@@ -220,23 +250,17 @@ public class Mapper extends Thread {
 	}
 
 	private double rotateAndScan(int i) {
-		double distance;
-		long t = System.currentTimeMillis() - this.lastGetDistanceTime;
-		
-		if (t < 25)
-			this.sleepFor(25 - t);
 		
 		uM.rotateSensorTo(i);
 		this.sleepFor(50);
 		
-		distance = uM.getDistance();
-		this.sleepFor(25);
+		for (int j = 0; j < 2; j++) {
+			uM.getDistance();
+			this.sleepFor(25);
+		}
 		
-		distance = uM.getDistance();
+		double distance = uM.getDistance();
 		this.sleepFor(25);
-		
-		distance = uM.getDistance();
-		this.lastGetDistanceTime = System.currentTimeMillis();
 		
 		return distance;
 	}

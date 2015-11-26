@@ -30,18 +30,21 @@ public class DesignProject {
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 
+		double rightRadius = 2.06;
+		double leftRadius = rightRadius*0.988;
+		double track = 10.21;
 		
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
-		Navigation navigator = new Navigation(odo);
-
-
+		//Navigation2 navigator = new Navigation2(odo, leftMotor, rightMotor, 4, 6, leftRadius, rightRadius, track);
+		//Navigation navigator = new Navigation(odo);
+		
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 
 
-		Mapper mapper = new Mapper(odo, ultrasonicMod, null, 0);
+		Mapper mapper = new Mapper(odo, ultrasonicMod, null);
 		mapper.start();
 		mapper.setActive(true);
 		//Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
