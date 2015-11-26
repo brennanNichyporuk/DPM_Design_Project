@@ -75,7 +75,8 @@ public class Navigation extends Thread {
 	}
 
 	public void travelTo (double desiredX, double desiredY) {
-
+		leftMotor.setAcceleration(2000);
+		rightMotor.setAcceleration(2000);
 		double[] position = odometer.getPosition();
 
 		double xError = desiredX - position[0];
@@ -96,6 +97,8 @@ public class Navigation extends Thread {
 	}
 
 	public void turnTo (double desiredTheta, boolean stop) {
+		leftMotor.setAcceleration(2000);
+		rightMotor.setAcceleration(2000);
 		double currentTheta = odometer.getAng();
 		double errorTheta = desiredTheta - currentTheta;
 
