@@ -40,10 +40,14 @@ public class Pilot extends Thread {
 		this.observer = observer;
 		this.navigation = nav;
 		this.odometer = odo;
+		
 		this.dStarLite = new DStarLite();
+		
 		this.dStarLite.init(startX, startY, goalX, goalY);
 		this.dStarLite.replan();
-		//this.mapper = new Mapper(odo, uM, dStarLite);
+		
+		this.mapper = new Mapper(odo, uM, dStarLite);
+		
 		this.path = this.dStarLite.getPath();
 	}
 

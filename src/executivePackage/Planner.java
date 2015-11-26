@@ -46,7 +46,7 @@ public class Planner extends Thread implements IObserver {
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
 
 		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
-		this.nav = new Navigation(odo);
+		//this.nav = new Navigation(odo);
 		this.pilot = new Pilot(this, nav, odo, uM, 0, 0, 7, 7);
 		pilot.start();
 		

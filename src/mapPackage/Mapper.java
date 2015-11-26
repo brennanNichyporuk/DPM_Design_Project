@@ -17,7 +17,8 @@ public class Mapper extends Thread {
 	private Odometer odo;
 	private UltrasonicModule uM;
 	private DStarLite dStarLite;
-	private double sensorAxleOffset = 7.5;
+	private double sensorAxleOffset = 4.5;
+	private double sensorRotationOffset = 3.0;
 
 	private final int maxRange = 50;
 	private final int minDerivativeChange = 6;
@@ -28,6 +29,8 @@ public class Mapper extends Thread {
 	private boolean objectDetected;
 	private boolean odd;
 	
+	// BACKUP: 22, 8
+	// BACKUP2: 18, 12
 	private int risingEdgeABSAngleCorrectionFactor = 22, fallingEdgeABSAngleCorrectionFactor = 8;
 	
 	private long lastGetDistanceTime;
@@ -50,7 +53,6 @@ public class Mapper extends Thread {
 
 		uM.rotateSensorToWait(-scanBand);
 
-		/*
 		for (int i = 0; i < this.mapSize; i++)
 			dStarLite.updateCell(i, this.mapSize, -1);
 
@@ -60,7 +62,6 @@ public class Mapper extends Thread {
 			dStarLite.updateCell(this.mapSize, j, -1);
 
 		dStarLite.replan();
-		*/
 	}
 
 	/**
@@ -97,7 +98,6 @@ public class Mapper extends Thread {
 			i = scanBand;
 
 		while (Math.abs(i) <= Math.abs(scanBand)) {
-			//System.out.println(i);
 			distance = this.rotateAndScan(i);
 			double derivative = distance - lastDistance;
 			int ABSAngle = (int) this.wrapDatAngle(i + odo.getAng());
@@ -115,9 +115,6 @@ public class Mapper extends Thread {
 						// Locate the falling and rising edge location ...
 						// Note that 15 is added or subtracted since the Ultrasonic sensor detects distance
 						// + or - 15 degrees from the direction it is pointing.
-						//System.out.println("rED:" + (int) lastDistance);
-						//this.sleepFor(10000);
-
 						try {
 							double correctedFallingEdgeABSAngle, correctedRisingEdgeABSAngle;
 							if (odd) {
@@ -131,27 +128,32 @@ public class Mapper extends Thread {
 							
 							// CORRECT RISING EDGE DISCREPENCY AS DIRECTED TO BY EDGE DETECTION TESTING
 							lastDistance -= 2.75;
-			
-							//TEMP CODE:
-							correctedFallingEdgeABSAngle -= 90;
-							correctedRisingEdgeABSAngle -= 90;
-							System.out.println("oFeD:" + (int) fallingEdgeDistance);
-							this.sleepFor(5000);
-							//objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, correctedFallingEdgeABSAngle);
-							//int[] oFELoco = {(int) objectFallingEdgeLoco[0], (int) objectFallingEdgeLoco[1]};
-							System.out.println("oFeA:" + (int) correctedFallingEdgeABSAngle);
-							this.sleepFor(5000);
-							System.out.println("oReD:" + (int) lastDistance);
-							this.sleepFor(5000);
-							//objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, correctedRisingEdgeABSAngle);
-							if (false)
-								throw new FalseObjectException();
-							//int[] oRELoco = {(int) objectRisingEdgeLoco[0], (int) objectRisingEdgeLoco[1]};
-							System.out.println("oReA:" + (int) correctedRisingEdgeABSAngle);
-							this.sleepFor(5000);
-							// END OF TEMP CODE
+							
+							// In Doubt Code
+							lastDistance -= 2;
+							
+							// CORRECT FALLING EDGE DISCREPENCY
+							//fallingEdgeDistance -= 2.75;
+							
+							// In Doubt Code
+							fallingEdgeDistance -= 2;
+							
+							// TEST CODE
+							
+							objectFallingEdgeLoco = this.locateDatObjectEdge(fallingEdgeDistance, correctedFallingEdgeABSAngle, i);
+							//int[] oFELI = {(int) objectFallingEdgeLoco[0], (int) objectFallingEdgeLoco[1]};
+							//System.out.println(Arrays.toString(oFELI));
+							//this.sleepFor(5000);
+							
+							objectRisingEdgeLoco = this.locateDatObjectEdge(lastDistance, correctedRisingEdgeABSAngle, i);
+							//int[] oRELI = {(int) objectRisingEdgeLoco[0], (int) objectRisingEdgeLoco[1]};
+							//System.out.println(Arrays.toString(oRELI));
+							//this.sleepFor(5000);
+							
+							// END
+							
 							// Update the path ...
-							//this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
+							this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
 							objectDetected = true;
 						} catch (FalseObjectException e) {
 							// TODO Auto-generated catch block
@@ -204,32 +206,35 @@ public class Mapper extends Thread {
 
 	private void updatePath(double[] objectFallingEdgeLoco, double[] objectRisingEdgeLoco) throws FalseObjectException {
 		double[] objectCenterLoco = {(objectFallingEdgeLoco[0] + objectRisingEdgeLoco[0]) / 2, (objectFallingEdgeLoco[1] + objectRisingEdgeLoco[1]) / 2};
-		//int[] objectCenterNode = {(int) (objectCenterLoco[0] / 30.48), (int) (objectCenterLoco[1] / 30.48)};
+		int[] objectCenterNode = {(int) (objectCenterLoco[0] / 30.48), (int) (objectCenterLoco[1] / 30.48)};
 
 		// TEMP CODE:
-		int[] objectCenterLocoInt = {(int) objectCenterLoco[0], (int) objectCenterLoco[1]};
-		//System.out.println("C:" + Arrays.toString(objectCenterLocoInt));
-		//this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
-		//this.dStarLite.replan();
+		//int[] objectCenterLocoInt = {(int) objectCenterLoco[0], (int) objectCenterLoco[1]};
+		System.out.println("C:" + Arrays.toString(objectCenterNode));
+		this.dStarLite.updateCell(objectCenterNode[0], objectCenterNode[1], -1);
+		this.dStarLite.replan();
 		Sound.beep();
-		this.sleepFor(5000);
+		//this.sleepFor(5000);
 	}
 
 	// Locates the x and y of a given object
-	private double[] locateDatObjectEdge(double distance, double angle) throws FalseObjectException {
-		double[] sensorLoco = this.locateDatSensorLoco();
+	private double[] locateDatObjectEdge(double distance, double angle, int i) throws FalseObjectException {
+		double[] sensorLoco = this.locateDatSensorLoco(i);
 		double objectEdgeX = (sensorLoco[0] + distance * Math.cos(Math.toRadians(angle)));
 		double objectEdgeY = (sensorLoco[1] + distance * Math.sin(Math.toRadians(angle)));
-		//if (objectEdgeX <= 5|| objectEdgeY <= 5 || objectEdgeX >= ((30.48 * this.mapSize) - 5)|| objectEdgeY >= ((30.48 * this.mapSize) - 5))
-			//throw new FalseObjectException();
+		if (objectEdgeX <= 4|| objectEdgeY <= 4 || objectEdgeX >= ((30.48 * this.mapSize) - 4)|| objectEdgeY >= ((30.48 * this.mapSize) - 4))
+			throw new FalseObjectException();
 		double[] objectLoco = {objectEdgeX, objectEdgeY};
 		return objectLoco;
 	}
 
 	// Locates the location of the Ultrasonic sensor
-	private double[] locateDatSensorLoco() {
+	private double[] locateDatSensorLoco(int i) {
 		double sensorX = odo.getX() + this.sensorAxleOffset * Math.cos(Math.toRadians(odo.getAng()));
 		double sensorY = odo.getY() + this.sensorAxleOffset * Math.sin(Math.toRadians(odo.getAng()));
+		sensorX += this.sensorRotationOffset * Math.cos(Math.toRadians(i + odo.getAng()));
+		sensorY += this.sensorRotationOffset * Math.sin(Math.toRadians(i + odo.getAng()));
+		
 		double[] sensorLoco = {sensorX, sensorY};
 		return sensorLoco;
 	}

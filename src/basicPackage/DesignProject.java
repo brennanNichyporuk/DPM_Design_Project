@@ -36,19 +36,15 @@ public class DesignProject {
 		
 		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
 		//Navigation2 navigator = new Navigation2(odo, leftMotor, rightMotor, 4, 6, leftRadius, rightRadius, track);
-		//Navigation navigator = new Navigation(odo);
+		Navigation navigator = new Navigation(odo, leftMotor, rightMotor, 3, 6, leftRadius, rightRadius, track);
 		
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
 
-
-		Mapper mapper = new Mapper(odo, ultrasonicMod, null);
-		mapper.start();
-		mapper.setActive(true);
-		//Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
-		//pilot.start();
+		Pilot pilot = new Pilot(null, navigator, odo, ultrasonicMod, 0, 0, 7, 7);
+		pilot.start();
 
 		Button.waitForAnyPress();
 		System.exit(0);
