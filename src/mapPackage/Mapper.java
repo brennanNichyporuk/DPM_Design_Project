@@ -28,7 +28,7 @@ public class Mapper extends Thread {
 	private boolean objectDetected;
 	private boolean odd;
 	
-	private int risingEdgeABSAngleCorrectionFactor = 3, fallingEdgeABSAngleCorrectionFactor = 15;
+	private int risingEdgeABSAngleCorrectionFactor = 22, fallingEdgeABSAngleCorrectionFactor = 8;
 	
 	private long lastGetDistanceTime;
 
