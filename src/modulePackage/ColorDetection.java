@@ -1,6 +1,7 @@
 package modulePackage;
 
 import lejos.hardware.Button;
+import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class ColorDetection {
@@ -22,12 +23,13 @@ public class ColorDetection {
 	/**
 	 *  Used to store samples from SampleProvider.
 	 */
-	float[] colorData;
+	private float[] colorData;
 	
-	public ColorDetection(SampleProvider sampleProvideColor,float[] sampleDataColor)
+	public ColorDetection(SensorModes sampleProvideColor)
 	{
-		this.sampleGetColor = sampleProvideColor;
-		this.colorData = sampleDataColor;
+		this.sampleGetColor = sampleProvideColor.getMode("RGB");;
+		this.colorData = new float[sampleGetColor.sampleSize()];
+		this.sampleGetColor.fetchSample(this.colorData,0);
 		
 	}
 	/**
