@@ -34,7 +34,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * error in odometry correction
 	 */
-	private int DISTERRMARGIN = 4;
+	private int DISTERRMARGIN = 5;
 	
 	
 	private long TIME_MARGIN = 1000;
