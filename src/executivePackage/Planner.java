@@ -1,9 +1,14 @@
 package executivePackage;
 
+import java.util.Arrays;
+
+import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
@@ -14,6 +19,7 @@ import modulePackage.UltrasonicModule;
 import pilotPackage.Pilot;
 import captureFlagPackage.CaptureFlag;
 import captureFlagPackage.ClassID;
+import basicPackage.GyroCorrection;
 import basicPackage.IObserver;
 import basicPackage.Localization;
 import basicPackage.Navigation;
@@ -32,57 +38,66 @@ public class Planner extends Thread implements IObserver {
 	private Navigation nav;
 	private Pilot pilot;
 	private CaptureFlag cF;
+	private int startingCorner;
 
-	private boolean active;
+	private boolean active = false;
 
 	/**
 	 * Instantiates several classes.
 	 */
 	
 	private static int flagType;
+	private static int opponentHomeZoneLowX;
+	private static int opponentHomeZoneLowY;
+	private static int opponentHomeZoneHighX;
+	private static int opponentHomeZoneHighY;
 	
-	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) {
+	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) throws InterruptedException 
+	{
+		
+		this.startingCorner = startingCorner;
+		this.opponentHomeZoneLowX = opponentHomeZoneLowX;
+		this.opponentHomeZoneLowY = opponentHomeZoneLowY;
+		this.opponentHomeZoneHighX = opponentHomeZoneHighX;
+		this.opponentHomeZoneHighY = opponentHomeZoneHighY;
 		
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+		
+		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
+		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width);
+		
+		
 		this.neck = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
-
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
-
-		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
-		this.nav = new Navigation(odo);
 		
-		
-		
-		//localizing the robot SET THE STARTING LOCATION TO numbers 1 through 4 depending on 
-		//on the starting location
-		EV3TouchSensor touch = new EV3TouchSensor(LocalEV3.get().getPort("S4"));
-		Localization localizer = new Localization(odo, nav, uM, touch, startingCorner);
-		localizer.doLocalization();
-		nav.travelTo(0.5*30.48, 0.5*30.48);
-		nav.turnTo(90, true);
-		
-		
-		
-		//initializing odometry correction after having initialized localization
 		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
 		LineDetection lineDetector = new LineDetection(colorSensor);
-		OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
-		odometryCorrecter.start();
+		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
+		localizer.doLocalization();
+		
+		
+		//OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
+		//odometryCorrecter.start();
+		//EV3GyroSensor gyro = new EV3GyroSensor(SensorPort.S4);
+		//Thread gyroCorrecter = new Thread(new GyroCorrection(gyro));
+		//gyroCorrecter.start();
+		
 		
 		//initializing 
-		this.flagType = flagType;
+//		this.flagType = flagType;
 		
-		this.pilot = new Pilot(this, nav, odo, uM, 0,0, 7, 7);
-		pilot.start();
+//		this.pilot = new Pilot(this, nav, odo, uM, 0,0, opponentHomeZoneLowX, opponentHomeZoneLowY);
+//		pilot.start();
 		
 
 	}
 
-	public void run() {
+	public void run() 
+	{
 		if (active) {
 
 		}
@@ -103,7 +118,8 @@ public class Planner extends Thread implements IObserver {
 //			float[] colorData = new float[colorValue.sampleSize()];
 			ColorDetection cD = new ColorDetection(colorSensor);
 			EV3LargeRegulatedMotor robotArmMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-			nav.travelTo(5*30.48, 4*30.48);
+			nav.travelTo((this.opponentHomeZoneLowX+1)*30.48, this.opponentHomeZoneLowY*30.48);
+			nav.turnTo(90, true);
 			this.cF = new CaptureFlag(this.flagType, nav, odo, uM, cD, robotArmMotor);
 			this.cF.start();
 		default:
