@@ -46,41 +46,28 @@ public class DesignProject {
 	private static TextLCD LCD = LocalEV3.get().getTextLCD();
 	
 	public static void main(String args[]){
-//		WifiConnection conn = null;
-//		try {
-//			conn = new WifiConnection(SERVER_IP, TEAM_NUMBER);
-//		} catch (IOException e) {
-//			LCD.drawString("Connection failed", 0, 8);
-//		}
-//		
-//		// example usage of Transmission class
-//		Transmission t = conn.getTransmission();
-//		if (t == null) {
-//			LCD.drawString("Failed to read transmission", 0, 5);
-//		} else {
-//			StartCorner corner = t.startingCorner;
-//			int homeZoneBL_X = t.homeZoneBL_X;
-//			int homeZoneBL_Y = t.homeZoneBL_Y;
-//			int opponentHomeZoneBL_X = t.opponentHomeZoneBL_X;
-//			int opponentHomeZoneBL_Y = t.opponentHomeZoneBL_Y;
-//			int opponentHomeZoneTR_X= t.opponentHomeZoneTR_X;
-//			int opponentHomeZoneTR_Y= t.opponentHomeZoneTR_Y;
-//			int dropZone_X = t.dropZone_X;
-//			int dropZone_Y = t.dropZone_Y;
-//			int flagType = t.flagType;
-//			int	opponentFlagType = t.opponentFlagType;
-//			
-//			
-//			
-//			Planner planner = new Planner(corner.getId(),opponentHomeZoneBL_X,opponentHomeZoneBL_Y,opponentHomeZoneTR_X,opponentHomeZoneTR_Y,dropZone_X,dropZone_Y,flagType);
-//			
-//			
-//			conn.printTransmission();
-//		}
-//		// stall until user decides to end program
-//		Button.ESCAPE.waitForPress();
-//		System.exit(0);
-		Planner planner = new Planner(1,2,4,4,6,7,7,2);
+		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+		EV3MediumRegulatedMotor neck = new 	EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+
+		double rightRadius = 2.06;
+		double leftRadius = rightRadius*0.988;
+		double track = 10.21;
+		
+		Odometer odo = new Odometer(leftMotor, rightMotor, 20, true);
+		//Navigation2 navigator = new Navigation2(odo, leftMotor, rightMotor, 4, 6, leftRadius, rightRadius, track);
+		Navigation nav = new Navigation(odo, leftMotor, rightMotor, 4, 6, leftRadius, rightRadius, track);
+		
+		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+		SampleProvider usValue = usSensor.getMode("Distance");
+		float[] usData = new float[usValue.sampleSize()];
+		UltrasonicModule ultrasonicMod = new UltrasonicModule(usSensor, usData, neck);
+
+		Pilot pilot = new Pilot(null, nav, odo, ultrasonicMod, 0, 0, 6, 6);
+		pilot.start();
+
+		Button.waitForAnyPress();
+		System.exit(0);
 
 	}
 }

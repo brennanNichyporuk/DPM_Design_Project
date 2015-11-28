@@ -3,6 +3,7 @@ package pilotPackage;
 import java.util.List;
 
 import captureFlagPackage.ClassID;
+import lejos.hardware.Sound;
 import mapPackage.Mapper;
 import modulePackage.UltrasonicModule;
 import basicPackage.IObserver;
