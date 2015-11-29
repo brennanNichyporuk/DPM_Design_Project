@@ -13,7 +13,7 @@ public class LineDetection
 	private int lastDerivative;
 	private int lowValue;
 	private int highValue;
-	private int minDerivativeChange = 8;
+	private int minDerivativeChange = 10;
 	
 	/**
 	 * 
@@ -37,7 +37,7 @@ public class LineDetection
 	 * returns when a line is detected
 	 * @throws InterruptedException 
 	 */
-	public boolean detectLine() throws InterruptedException {
+	public boolean detectLine(){
 
 		colorSensor.fetchSample(colorData,0);
 		int currentValue = (int)(colorData[0]*100.0);

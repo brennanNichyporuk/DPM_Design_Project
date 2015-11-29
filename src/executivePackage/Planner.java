@@ -63,11 +63,14 @@ public class Planner extends Thread implements IObserver {
 		this.opponentHomeZoneHighX = opponentHomeZoneHighX;
 		this.opponentHomeZoneHighY = opponentHomeZoneHighY;
 		
+		//initializing motors and odometer/navigation. Also initializing LCDInfo for debugging purposes
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-		
 		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
 		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width);
+		LCDInfo lcd = new LCDInfo(odo);
+		lcd.timedOut();
+		
 		
 		
 		this.neck = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
@@ -75,9 +78,6 @@ public class Planner extends Thread implements IObserver {
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
-		
-		LCDInfo lcd = new LCDInfo(odo);
-		lcd.timedOut();
 		
 		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
 		LineDetection lineDetector = new LineDetection(colorSensor);
@@ -120,7 +120,7 @@ public class Planner extends Thread implements IObserver {
 	public void update(ClassID id){
 		switch (id) {
 		case PILOT:
-			SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("PORT ADD"));
+			SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
 //			SampleProvider colorValue = colorSensor.getMode("Color ID");
 //			float[] colorData = new float[colorValue.sampleSize()];
 			ColorDetection cD = new ColorDetection(colorSensor);

@@ -90,7 +90,13 @@ public class Navigation extends Thread {
 
 		leftMotor.setSpeed(LEFT_FORWARD_SPEED);
 		rightMotor.setSpeed(RIGHT_FORWARD_SPEED);
-
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		leftMotor.rotate(convertDistance(LEFT_WHEEL_RADIUS, linearError), true);
 		rightMotor.rotate(convertDistance(RIGHT_WHEEL_RADIUS, linearError), false);
 
@@ -111,7 +117,13 @@ public class Navigation extends Thread {
 
 		leftMotor.setSpeed(LEFT_ROTATE_SPEED);
 		rightMotor.setSpeed(RIGHT_ROTATE_SPEED);
-
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		leftMotor.rotate(-convertAngle(LEFT_WHEEL_RADIUS, TRACK, errorTheta), true);
 		rightMotor.rotate(convertAngle(RIGHT_WHEEL_RADIUS, TRACK, errorTheta), false);
 		if(stop){

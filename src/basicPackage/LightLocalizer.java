@@ -6,23 +6,16 @@ import modulePackage.LineDetection;
 public class LightLocalizer {
 	private enum UpdateType {XUpdate, YUpdate, Theta1Set, Theta2Set, Theta3Set, Theta4Set};
 	private double theta1, theta2, theta3, theta4 = 0;
-	private double d = 6.55;
+	private double d = 13.0;
 	private Odometer odo;
 	private Navigation nav;
-	private SampleProvider colorSensor;
-	private float[] colorData;
 	private int lastValue, lastDerivative, lowValue, highValue, minDerivativeChange;
-	private long CORRECTION_PERIOD = 50;
+	
 	private LineDetection lineDetector;
 	public LightLocalizer(Odometer odo, Navigation nav, LineDetection lineDetector) {
 		this.odo = odo;
 		this.nav = nav;
 		this.lineDetector = lineDetector;
-
-		this.lastValue = (int)(lineDetector.colorData[0]*100.0);
-		this.lastDerivative = 0;
-
-		this.minDerivativeChange = 5;
 	}
 
 	public void doLocalization() throws InterruptedException {
@@ -45,10 +38,12 @@ public class LightLocalizer {
 	public void refineOdometer() throws InterruptedException {
 		// start rotating and clock all 4 gridlines
 		nav.setSpeeds(-Navigation.SLOW, Navigation.SLOW);
+		for (int i = 0; i < 5; i++)
+			this.lineDetector.detectLine();
 		
 		while(!this.lineDetector.detectLine())
 		{
-			this.sleep(150);
+			this.sleep(50);
 		}
 		
 		
@@ -56,14 +51,14 @@ public class LightLocalizer {
 		
 		while(!this.lineDetector.detectLine())
 		{
-			this.sleep(150);
+			this.sleep(50);
 		}
 		
 		this.update(UpdateType.Theta2Set);
 		
 		while(!this.lineDetector.detectLine())
 		{
-			this.sleep(150);
+			this.sleep(50);
 		}
 		
 		
@@ -73,25 +68,25 @@ public class LightLocalizer {
 		
 		while(!this.lineDetector.detectLine())
 		{
-			this.sleep(150);
+			this.sleep(50);
 		}
-		
+		double odoAngle = this.odo.getAng();
+		nav.setSpeeds(0, 0);
 		this.update(UpdateType.Theta4Set);
 		
 		
-		nav.setSpeeds(0, 0);
+		
 
 		// do trig to compute (0,0) and 0 degrees
 		double x = d*Math.cos(Math.toRadians((theta3+360 - theta1)/2));
 		double y = -d*Math.cos(Math.toRadians((theta4 - theta2)/2));
 		double deltaTheta = 270.0 - theta4 + ((theta3 - theta1)/2);
 
-		//deltaTheta += 7;
-		
-		double theta = Math.toDegrees(Math.tan(y/x));
-
-		//double[] position = {x, y, this.correctAngle(90-deltaTheta + odo.getAng())};
-		double[] position = {x, y, this.correctAngle(theta)};
+		double overTurn = 0.0;
+//		
+		//double theta = Math.toDegrees(Math.atan2(y, x));
+		double[] position = {x, y, this.correctAngle(deltaTheta + odoAngle+overTurn)};
+		//double[] position = {x, y, this.correctAngle(theta)};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
 		this.sleep(5000);
