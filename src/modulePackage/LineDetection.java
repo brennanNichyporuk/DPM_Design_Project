@@ -13,7 +13,7 @@ public class LineDetection
 	private int lastDerivative;
 	private int lowValue;
 	private int highValue;
-	private int minDerivativeChange = 5;
+	private int minDerivativeChange = 8;
 	
 	/**
 	 * 
@@ -35,26 +35,39 @@ public class LineDetection
 	/**
 	 * 
 	 * returns when a line is detected
+	 * @throws InterruptedException 
 	 */
-	public boolean detectLine() {
+	public boolean detectLine() throws InterruptedException {
 
 		colorSensor.fetchSample(colorData,0);
 		int currentValue = (int)(colorData[0]*100.0);
 		int currentDerivative = currentValue - lastValue;
-		// if the derivative is increasing...
-		if (currentDerivative >= lastDerivative) {
-			// set the lowValue to the minimum value of the derivative (lastDerivative)
-			if (currentDerivative < lowValue) {
+		
+		
+		
+		// If the derivative is increasing...
+		
+		if (currentDerivative >= lastDerivative) 
+		{
+			// Set the lowValue to the minimum value of the derivative (lastDerivative)
+			
+			if (currentDerivative < lowValue) 
+			{
 				lowValue = lastDerivative;
 			}
-			// similarly... set highValue to the maximum value of the derivative...
-			if (currentDerivative > highValue) {
+			
+			// Similarly... set highValue to the maximum value of the derivative...
+			
+			if (currentDerivative > highValue) 
+			{
 				highValue = currentDerivative;
 			}
 		} 
-		else {
+		else 
+		{
 			// if the magnitude of the change in the derivative is greater than 4... we have detected a line
-			if (highValue - lowValue > minDerivativeChange) {
+			if (highValue - lowValue > minDerivativeChange) 
+			{
 				// if we have detected a line ... we run update() which performs 
 				lowValue = 0;
 				highValue = 0;
@@ -70,6 +83,8 @@ public class LineDetection
 			lowValue = 0;
 			highValue = 0;
 		}
+	
+		
 		lastDerivative = currentDerivative;
 		lastValue = currentValue;
 		return false;

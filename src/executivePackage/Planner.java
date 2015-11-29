@@ -3,6 +3,7 @@ package executivePackage;
 import java.util.Arrays;
 
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -21,6 +22,7 @@ import captureFlagPackage.CaptureFlag;
 import captureFlagPackage.ClassID;
 import basicPackage.GyroCorrection;
 import basicPackage.IObserver;
+import basicPackage.LCDInfo;
 import basicPackage.Localization;
 import basicPackage.Navigation;
 import basicPackage.Odometer;
@@ -74,8 +76,13 @@ public class Planner extends Thread implements IObserver {
 		float[] usData = new float[usValue.sampleSize()];
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
 		
+		LCDInfo lcd = new LCDInfo(odo);
+		lcd.timedOut();
+		
 		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
 		LineDetection lineDetector = new LineDetection(colorSensor);
+	
+	
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
 		

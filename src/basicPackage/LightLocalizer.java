@@ -6,7 +6,7 @@ import modulePackage.LineDetection;
 public class LightLocalizer {
 	private enum UpdateType {XUpdate, YUpdate, Theta1Set, Theta2Set, Theta3Set, Theta4Set};
 	private double theta1, theta2, theta3, theta4 = 0;
-	private double d = 17.25;
+	private double d = 6.55;
 	private Odometer odo;
 	private Navigation nav;
 	private SampleProvider colorSensor;
@@ -14,22 +14,10 @@ public class LightLocalizer {
 	private int lastValue, lastDerivative, lowValue, highValue, minDerivativeChange;
 	private long CORRECTION_PERIOD = 50;
 	private LineDetection lineDetector;
-	
-	
-	/**
-	 * 
-	 * @param odo: Odometer to fetch and update position
-	 * @param nav
-	 * @param lineDetector
-	 */
 	public LightLocalizer(Odometer odo, Navigation nav, LineDetection lineDetector) {
-		System.out.println("IN light Localization");
 		this.odo = odo;
 		this.nav = nav;
 		this.lineDetector = lineDetector;
-		lineDetector.colorSensor.fetchSample(lineDetector.colorData,0);
-		lineDetector.colorSensor.fetchSample(lineDetector.colorData,0);
-		lineDetector.colorSensor.fetchSample(lineDetector.colorData,0);
 
 		this.lastValue = (int)(lineDetector.colorData[0]*100.0);
 		this.lastDerivative = 0;
@@ -37,37 +25,57 @@ public class LightLocalizer {
 		this.minDerivativeChange = 5;
 	}
 
-	public void doLocalization() {
+	public void doLocalization() throws InterruptedException {
 		// drive to location listed in tutorial
-		this.initializePosition();
-
+		//System.out.println("initializePosition");
+		//this.initializePosition();
+		
+		
+		//System.out.println("refining odo");
 		this.refineOdometer();
 
 		// when done travel to (0,0) and turn to 0 degrees
+		
 		nav.travelTo(0.0, 0.0);
 		this.nav.turnTo(0.0, true);
+		this.sleep(5000);
 
 	}
 
-	public void refineOdometer() {
+	public void refineOdometer() throws InterruptedException {
 		// start rotating and clock all 4 gridlines
 		nav.setSpeeds(-Navigation.SLOW, Navigation.SLOW);
 		
-		while(!this.lineDetector.detectLine()){}
-		Sound.beep();
+		while(!this.lineDetector.detectLine())
+		{
+			this.sleep(150);
+		}
+		
+		
 		this.update(UpdateType.Theta1Set);
 		
-		while(!this.lineDetector.detectLine()){}
-		Sound.beep();
+		while(!this.lineDetector.detectLine())
+		{
+			this.sleep(150);
+		}
+		
 		this.update(UpdateType.Theta2Set);
 		
-		while(!this.lineDetector.detectLine()){}
-		Sound.beep();
+		while(!this.lineDetector.detectLine())
+		{
+			this.sleep(150);
+		}
+		
+		
+		
 		this.update(UpdateType.Theta3Set);
+
 		
+		while(!this.lineDetector.detectLine())
+		{
+			this.sleep(150);
+		}
 		
-		while(!this.lineDetector.detectLine()){}
-		Sound.beep();
 		this.update(UpdateType.Theta4Set);
 		
 		
@@ -78,11 +86,15 @@ public class LightLocalizer {
 		double y = -d*Math.cos(Math.toRadians((theta4 - theta2)/2));
 		double deltaTheta = 270.0 - theta4 + ((theta3 - theta1)/2);
 
-		deltaTheta += 7;
+		//deltaTheta += 7;
+		
+		double theta = Math.toDegrees(Math.tan(y/x));
 
-		double[] position = {x, y, this.correctAngle(deltaTheta + odo.getAng())};
+		//double[] position = {x, y, this.correctAngle(90-deltaTheta + odo.getAng())};
+		double[] position = {x, y, this.correctAngle(theta)};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
+		this.sleep(5000);
 	}
 
 	public void initializePosition() {
@@ -92,13 +104,23 @@ public class LightLocalizer {
 		
 		this.update(UpdateType.YUpdate);
 		nav.setSpeeds(0, 0);
+		
+		this.sleep(500);
 
 		this.nav.turnTo(0.0, true);
+		
+		this.sleep(500);
+		
 		nav.setSpeeds(Navigation.SLOW, Navigation.SLOW);
+		
+		this.sleep(500);
+		
 		this.update(UpdateType.XUpdate);
 		nav.setSpeeds(0, 0);
+		
+		this.sleep(500);
 
-		nav.travelTo(-6.0, -6.0);
+		nav.travelTo(6.0, 6.0);
 		nav.turnTo(90, true);
 	}
 
@@ -115,7 +137,7 @@ public class LightLocalizer {
 		double[] position = new double[3];
 		boolean[] update = new boolean[3];
 
-		Sound.beep();
+		//Sound.beep();
 
 		switch (uT) {
 		case XUpdate:

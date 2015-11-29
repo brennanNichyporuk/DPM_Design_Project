@@ -21,7 +21,7 @@ public class Localization {
 	private static int FIELDSIZE = 8;
 	
 	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, int startingCorner, LineDetection lineDetector) {
-		System.out.println("Localization Initilaized");
+		//System.out.println("Localization Initilaized");
 		this.odo = odo;
 		this.nav = nav;
 		this.usLocalizer = new USLocalizer(this.odo, this.nav, usModule,LocalizationType.FALLING_EDGE);
@@ -30,10 +30,10 @@ public class Localization {
 		this.lineDetector = lineDetector;
 }
 	public void doLocalization() throws InterruptedException{
-		System.out.println("doing USLocalization");
-		this.usLocalizer.doLocalization();
+		//System.out.println("doing USLocalization");
+		//this.usLocalizer.doLocalization();
 		Thread.sleep(500);
-		System.out.println("doing Light Localization");
+		//System.out.println("doing Light Localization");
 		this.lightLocalizer.doLocalization();
 	}
 	/**
