@@ -54,8 +54,13 @@ public class OdometerCorrection extends Thread {
 		long correctionStart, correctionEnd;
 		while (true) {
 			correctionStart = System.currentTimeMillis();
-			if(this.lineDetector.detectLine()){
-				this.correctOdometer();
+			try {
+				if(this.lineDetector.detectLine()){
+					this.correctOdometer();
+				}
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {

@@ -13,7 +13,7 @@ public class Navigation extends Thread {
 
 	private final double LEFT_WHEEL_RADIUS, RIGHT_WHEEL_RADIUS, TRACK;
 	private final int RIGHT_ROTATE_SPEED, LEFT_ROTATE_SPEED, RIGHT_FORWARD_SPEED, LEFT_FORWARD_SPEED;
-	public final static int SLOW = 100; 
+	public final static int SLOW = 120; 
 	private final static double DEG_ERR = 3;
 	
 	/**

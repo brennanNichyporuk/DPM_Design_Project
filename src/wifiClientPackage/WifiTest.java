@@ -16,6 +16,9 @@ package wifiClientPackage;
 import java.io.IOException;
 
 import basicPackage.DesignProject;
+
+import executivePackage.Planner;
+
 import wifi.WifiConnection;
 import wifi.StartCorner;
 import wifi.Transmission;
@@ -49,23 +52,9 @@ public class WifiTest {
 		
 		// example usage of Transmission class
 		Transmission t = conn.getTransmission();
-		if (t == null) {
-			LCD.drawString("Failed to read transmission", 0, 5);
-		} else {
-			StartCorner corner = t.startingCorner;
-			int homeZoneBL_X = t.homeZoneBL_X;
-			int homeZoneBL_Y = t.homeZoneBL_Y;
-			int opponentHomeZoneBL_X = t.opponentHomeZoneBL_X;
-			int opponentHomeZoneBL_Y = t.opponentHomeZoneBL_Y;
-			int dropZone_X = t.dropZone_X;
-			int dropZone_Y = t.dropZone_Y;
-			int flagType = t.flagType;
-			int	opponentFlagType = t.opponentFlagType;
 		
-			// print out the transmission information
-			conn.printTransmission();
 		}
 		// stall until user decides to end program
-		Button.ESCAPE.waitForPress();
+		//Button.ESCAPE.waitForPress();
 	}
-}
+

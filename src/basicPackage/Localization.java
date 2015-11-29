@@ -21,6 +21,7 @@ public class Localization {
 	private static int FIELDSIZE = 8;
 	
 	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, int startingCorner, LineDetection lineDetector) {
+		//System.out.println("Localization Initilaized");
 		this.odo = odo;
 		this.nav = nav;
 		this.usLocalizer = new USLocalizer(this.odo, this.nav, usModule,LocalizationType.FALLING_EDGE);
@@ -28,11 +29,12 @@ public class Localization {
 		this.lightLocalizer = new LightLocalizer(odo, nav, lineDetector);
 		this.lineDetector = lineDetector;
 }
-	public void doLocalization(){
-		//doing ultrasonic localization
-		this.usLocalizer.doLocalization();
+	public void doLocalization() throws InterruptedException{
+		//System.out.println("doing USLocalization");
+		//this.usLocalizer.doLocalization();
+		Thread.sleep(500);
+		//System.out.println("doing Light Localization");
 		this.lightLocalizer.doLocalization();
-		nav.turnTo(0, true);
 	}
 	/**
 	 * depending on starting orientation, we need to orient in different ways. 

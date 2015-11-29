@@ -3,6 +3,7 @@ package executivePackage;
 import java.util.Arrays;
 
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -21,6 +22,7 @@ import captureFlagPackage.CaptureFlag;
 import captureFlagPackage.ClassID;
 import basicPackage.GyroCorrection;
 import basicPackage.IObserver;
+import basicPackage.LCDInfo;
 import basicPackage.Localization;
 import basicPackage.Navigation;
 import basicPackage.Odometer;
@@ -38,6 +40,7 @@ public class Planner extends Thread implements IObserver {
 	private Navigation nav;
 	private Pilot pilot;
 	private CaptureFlag cF;
+	private int startingCorner;
 
 	private boolean active = false;
 
@@ -51,19 +54,21 @@ public class Planner extends Thread implements IObserver {
 	private static int opponentHomeZoneHighX;
 	private static int opponentHomeZoneHighY;
 	
-	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) {
+	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) throws InterruptedException 
+	{
+		
+		this.startingCorner = startingCorner;
 		this.opponentHomeZoneLowX = opponentHomeZoneLowX;
 		this.opponentHomeZoneLowY = opponentHomeZoneLowY;
 		this.opponentHomeZoneHighX = opponentHomeZoneHighX;
 		this.opponentHomeZoneHighY = opponentHomeZoneHighY;
+		
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+		
 		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
 		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width);
 		
-		
-		
-
 		
 		this.neck = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
@@ -71,8 +76,13 @@ public class Planner extends Thread implements IObserver {
 		float[] usData = new float[usValue.sampleSize()];
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
 		
+		LCDInfo lcd = new LCDInfo(odo);
+		lcd.timedOut();
+		
 		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
 		LineDetection lineDetector = new LineDetection(colorSensor);
+	
+	
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
 		
@@ -111,9 +121,9 @@ public class Planner extends Thread implements IObserver {
 		switch (id) {
 		case PILOT:
 			SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("PORT ADD"));
-			SampleProvider colorValue = colorSensor.getMode("Color ID");
-			float[] colorData = new float[colorValue.sampleSize()];
-			ColorDetection cD = new ColorDetection(colorValue, colorData);
+//			SampleProvider colorValue = colorSensor.getMode("Color ID");
+//			float[] colorData = new float[colorValue.sampleSize()];
+			ColorDetection cD = new ColorDetection(colorSensor);
 			EV3LargeRegulatedMotor robotArmMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 			nav.travelTo((this.opponentHomeZoneLowX+1)*30.48, this.opponentHomeZoneLowY*30.48);
 			nav.turnTo(90, true);

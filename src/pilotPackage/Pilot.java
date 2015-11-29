@@ -3,6 +3,7 @@ package pilotPackage;
 import java.util.List;
 
 import captureFlagPackage.ClassID;
+import lejos.hardware.Sound;
 import mapPackage.Mapper;
 import modulePackage.UltrasonicModule;
 import basicPackage.IObserver;
@@ -40,10 +41,14 @@ public class Pilot extends Thread {
 		this.observer = observer;
 		this.navigation = nav;
 		this.odometer = odo;
+		
 		this.dStarLite = new DStarLite();
+		
 		this.dStarLite.init(startX, startY, goalX, goalY);
 		this.dStarLite.replan();
+		
 		this.mapper = new Mapper(odo, uM, dStarLite);
+		
 		this.path = this.dStarLite.getPath();
 	}
 
