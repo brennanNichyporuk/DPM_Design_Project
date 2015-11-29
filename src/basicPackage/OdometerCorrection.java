@@ -34,7 +34,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * error in odometry correction
 	 */
-	private int DISTERRMARGIN = 5;
+	private int DISTERRMARGIN = 10;
 	
 	
 	private long TIME_MARGIN = 1000;
@@ -71,12 +71,12 @@ public class OdometerCorrection extends Thread {
 		}
 	}
 	/**
-	 * calls get position and correcs the odometer heading.
+	 * calls get position and corrects the odometer heading.
 	 */
 	public void correctOdometer () {
 		double[] position = new double[3];
-		boolean[] update = {true, true, false};
-		//for now since I don't know if it can detect lines yet.
+		boolean[] update = {false, false, false};
+		
 		position = this.odometer.getPosition();
 		double x = position[0];
 		double y = position[1];
@@ -85,12 +85,16 @@ public class OdometerCorrection extends Thread {
 		if((x % SQUAREDISTANCE) < DISTERRMARGIN || (x % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
 			double multipleX = Math.round( x / SQUAREDISTANCE);
 			position[0] = multipleX * SQUAREDISTANCE;
+			update[0] = true; 
+			System.out.println("Set to x: "+position[0]);
 		}
 		
 		//testing to see if we are near 30 in the y
 		if((y % SQUAREDISTANCE) < DISTERRMARGIN || (y % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
 			double multipleY = Math.round( y / SQUAREDISTANCE);
 			position[1] = multipleY * SQUAREDISTANCE;
+			update[1] = true;
+			System.out.println("Set to y: "+position[1]);
 		}
 		this.odometer.setPosition(position, update);
 	}
