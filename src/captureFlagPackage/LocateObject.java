@@ -2,7 +2,8 @@ package captureFlagPackage;
 
 import basicPackage.*;
 import lejos.hardware.Sound;
-import modulePackage.*;
+import modulePackage.ColorDetection;
+import modulePackage.UltrasonicModule;
 
 /**
  *A class which searches the environment in order to locate the target flag
@@ -23,6 +24,9 @@ public class LocateObject extends Thread
 	//activity state variables
 	private boolean isActive;
 	private boolean isPaused;
+	
+	//Depending on the position of the object
+	private boolean onSide = false;
 	
 	private final double originalRobotAngle;
 
@@ -47,6 +51,16 @@ public class LocateObject extends Thread
 		this.isPaused = false;
 		
 		originalRobotAngle = odo.getAng();
+	}
+	
+	public void setOnSide(boolean onSide)
+	{
+		this.onSide = onSide;
+	}
+	
+	public boolean getOnSide()
+	{
+		return onSide;
 	}
 	
 	/**
@@ -101,21 +115,18 @@ public class LocateObject extends Thread
 		double distance1=-1, distance2=-1, theta1=0, theta2=0;
 						
 		double previousDistance = clippingConstant;
-				
-	//	try {Thread.sleep(200);} catch (InterruptedException e) {}		FORMER!
 						
 		//turn 180 degrees
 		while(us.getSensorAngle() < 90)
 		{
 			us.rotateSensorToWait(us.getSensorAngle()+10);
 			
-			double distance = rotateAndScan(us.getSensorAngle());	//ADDED!
+			double distance = rotateAndScan(us.getSensorAngle());	
 			
 			//get distance value from us
-			//double distance = getDistance();		//FORMER!
 			double currentDistance = (distance<clippingConstant) ? distance : clippingConstant;
 			
-			//block found
+			//block found (rising edge)
 			if(currentDistance<clippingConstant && (previousDistance-currentDistance > 0) && distance1<0)
 			{
 				distance1 = currentDistance;
@@ -123,9 +134,20 @@ public class LocateObject extends Thread
 				int angle = us.getSensorAngle();
 				theta1 = (angle<0) ? (90-Math.abs(angle)) : (Math.abs(angle)+90);
 				
+				//block is angled positioned
+				if(theta1 < 20 || theta1 < 70)
+				{
+					onSide = true;
+				}
+				else
+				{
+					onSide = false;
+				}
+				
 				Sound.beep();
 			}
-			//block lost
+			
+			//block lost (falling edge)
 			else if((currentDistance - previousDistance > 0) && distance1>0)
 			{
 				distance2 = currentDistance;
@@ -151,23 +173,8 @@ public class LocateObject extends Thread
 		us.rotateSensorToWait(0.0);
 		return false;
 	}
-
-	//DEPRECATED
-	/*
-	private double getDistance()
-	{				
-		double distance = -1;
-		
-		int counter = 0;
-		while(counter++<30)
-		{
-			distance = us.getDistance();
-		}
-					
-		return distance;
-	}
-	*/
 	
+
 	private double rotateAndScan(int i) 
 	{
 		double distance;
