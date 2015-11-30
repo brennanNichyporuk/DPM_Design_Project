@@ -156,9 +156,9 @@ public class CaptureFlag extends Thread implements IObserver
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
-						nav.travelTo(odo.getX(), locationPreIdentifier[1]);
-						nav.travelTo(locationPreIdentifier[1], odo.getY());
-						nav.turnTo(90, true);
+						nav.travelTo(odo.getX(), locationPreIdentifier[1]);	
+						nav.travelTo(locationPreIdentifier[0], odo.getY());
+						nav.turnTo(initialPosition[2], true);
 						
 						//reset saved location for next iteration
 						locationPreIdentifier = null;
