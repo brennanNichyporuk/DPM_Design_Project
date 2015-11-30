@@ -168,8 +168,6 @@ public class LocateObject extends Thread
 			
 			//reset for next iteration
 			previousDistance = currentDistance;
-			
-		//	try {Thread.sleep(200);} catch (InterruptedException e) {}		//FORMER!!
 		}
 		
 		us.rotateSensorToWait(0.0);

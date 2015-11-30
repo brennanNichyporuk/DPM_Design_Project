@@ -119,8 +119,6 @@ public class CaptureFlag extends Thread implements IObserver
 						nav.travelTo(objectsLocation[0], odo.getY());
 					}
 
-					while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-
 					//identify object.
 					identifier.resumeThread();					
 				}
