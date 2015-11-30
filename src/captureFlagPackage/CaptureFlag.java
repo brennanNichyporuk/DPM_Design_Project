@@ -34,7 +34,6 @@ public class CaptureFlag extends Thread implements IObserver
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
 	
-	//initial position of the robot when capture flag thread is started
 	private double[] initialPosition;
 	
 
@@ -60,6 +59,7 @@ public class CaptureFlag extends Thread implements IObserver
 		grabber = new PickupObject(robotArmMotor, navigator, this);	
 		
 		this.locationPreIdentifier = null;
+		this.initialPosition = odo.getPosition();
 	}
 
 	/**
@@ -68,8 +68,6 @@ public class CaptureFlag extends Thread implements IObserver
 	@Override
 	public void run()
 	{		
-		this.initialPosition = odo.getPosition();
-
 		//start looking for object (it's initialized to active and not paused)
 		locator.start();
 		
@@ -150,13 +148,13 @@ public class CaptureFlag extends Thread implements IObserver
 					//pause identifier
 					identifier.pauseThread();
 					
-					grabber.doPickup();
-					grabber.discardBlock();
+					//grabber.doPickup();
+					//grabber.discardBlock();
 					
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
-						nav.travelTo(odo.getX(), locationPreIdentifier[1]);	
+						nav.travelTo(odo.getX(), locationPreIdentifier[1]);
 						nav.travelTo(locationPreIdentifier[0], odo.getY());
 						nav.turnTo(initialPosition[2], true);
 						
@@ -170,18 +168,11 @@ public class CaptureFlag extends Thread implements IObserver
 				break;	
 		}
 	}
-	/**
-	 * Getter method for the robot's initital position at thread start
-	 * @return double array with the position of the robot when the capture flag thread was started
-	 */
+	
 	double[] getInitialPostion()
 	{
 		return this.initialPosition;
 	}
-	/**
-	 * Getter method for the robot's position before investigating object
-	 * @return double array with the position of the robot at previoius scan
-	 */
 	double[] getLocationPreIdentifier()
 	{
 		return this.locationPreIdentifier;
