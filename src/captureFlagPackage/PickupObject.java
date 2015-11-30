@@ -18,10 +18,12 @@ public class PickupObject
 	private Navigation nav;
 		
 	//how many degrees the arm motor should rotate
-	private final int armMotorDegreesOfRotation = 620;
+	private final int armMotorDegreesOfRotation = 600;
 	
+	//reference to capture flag class (caller)
 	private final CaptureFlag captureFlag;
 	
+	//length of the robot's arm when lowered
 	private final int armLength = 22;
 	
 	/**
