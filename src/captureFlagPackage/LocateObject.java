@@ -55,9 +55,9 @@ public class LocateObject extends Thread
 	@Override
 	public void run()
 	{		
-		while(isActive && (odo.getY()<(captureFlag.getInitialPostion()[1]+70)))
+		while(isActive && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
 		{
-			while(!isPaused && (odo.getY()<(captureFlag.getInitialPostion()[1]+70)))
+			while(!isPaused && (odo.getY()<(captureFlag.getInitialPostion()[1]+85)))
 			{
 				scanArea();
 			}
@@ -78,7 +78,7 @@ public class LocateObject extends Thread
 			nav.moveForward();
 			try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}	
 			
-			nav.stop();
+			nav.stopMoving();
 						
 			nav.turnTo(originalRobotAngle, true);
 		}
@@ -92,7 +92,7 @@ public class LocateObject extends Thread
 	
 	private boolean sweep()
 	{		
-		us.rotateSensorTo(-90.0);
+		us.rotateSensorToWait(-90.0);
 				
 		//how far the ultrasonic sensor should accept values
 		final double clippingConstant = 30.0;
@@ -102,15 +102,17 @@ public class LocateObject extends Thread
 						
 		double previousDistance = clippingConstant;
 				
-		try {Thread.sleep(200);} catch (InterruptedException e) {}
+	//	try {Thread.sleep(200);} catch (InterruptedException e) {}		FORMER!
 						
 		//turn 180 degrees
 		while(us.getSensorAngle() < 90)
 		{
-			us.rotateSensorTo(us.getSensorAngle()+10);
+			us.rotateSensorToWait(us.getSensorAngle()+10);
+			
+			double distance = rotateAndScan(us.getSensorAngle());	//ADDED!
 			
 			//get distance value from us
-			double distance = getDistance();
+			//double distance = getDistance();		//FORMER!
 			double currentDistance = (distance<clippingConstant) ? distance : clippingConstant;
 			
 			//block found
@@ -136,20 +138,22 @@ public class LocateObject extends Thread
 				//calculate position of block and navigate towards it
 				objectLoco = calculateObjectLocation(new double[]{distance1, distance2, theta1, theta2});
 			
-				us.rotateSensorTo(0.0);
+				us.rotateSensorToWait(0.0);
 				return true;
 			}
 			
 			//reset for next iteration
 			previousDistance = currentDistance;
 			
-			try {Thread.sleep(200);} catch (InterruptedException e) {}
+		//	try {Thread.sleep(200);} catch (InterruptedException e) {}		//FORMER!!
 		}
 		
-		us.rotateSensorTo(0.0);
+		us.rotateSensorToWait(0.0);
 		return false;
 	}
 
+	//DEPRECATED
+	/*
 	private double getDistance()
 	{				
 		double distance = -1;
@@ -162,7 +166,35 @@ public class LocateObject extends Thread
 					
 		return distance;
 	}
+	*/
+	
+	private double rotateAndScan(int i) 
+	{
+		double distance;
+		
+		us.rotateSensorTo(i);
+		this.sleepFor(25);
+		
+		distance = us.getDistance();
+		this.sleepFor(25);
+		
+		distance = us.getDistance();
+		this.sleepFor(25);
+		
+		distance = us.getDistance();
+		
+		return distance;
+	}
 
+	private void sleepFor(long t) {
+		try {
+			Thread.sleep(t);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+		
 	
 	private double[] calculateObjectLocation(double[] a)
 	{
@@ -242,4 +274,7 @@ public class LocateObject extends Thread
 	{
 		this.isActive = false;
 	}
+	
+	
+
 }
