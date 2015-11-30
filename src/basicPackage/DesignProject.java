@@ -28,19 +28,9 @@ import modulePackage.LineDetection;
 import modulePackage.UltrasonicModule;
 
 public class DesignProject {
-
-		/**
-		 * PORT CONFIGURATIONS FOR EV3 MODULE:
-		 * RIGHT WHEEL MOTOR - A
-		 * LEFT WHEEL MOTOR - D
-		 * MOTOR FOR CLAW - B
-		 * SERVO MOTOR FOR US TURN - C
-		 * 
-		 * ULTRASONIC SENSOR -> S1
-		 * LIGHT ColorDetection SENSOR-> S2
-		 * LIGHT LD -> S3
-		 * gyroscope-> S4
-		 */
+	/**
+	 * ip address as detailed in specifications of first demo.
+	 */
 	private static final String SERVER_IP = "192.168.10.200";
 	private static final int TEAM_NUMBER = 10;
 	private static TextLCD LCD = LocalEV3.get().getTextLCD();
@@ -83,7 +73,8 @@ public class DesignProject {
 //					conn.printTransmission();
 //				}
 				try {
-					Planner planner = new Planner(0, 0, 0, 0, 0, 0, 0, 0);
+					//starting corner, opponentHomeZoneLowX, opponentHomeZoneLowY, opponentHomeZoneHighX, opponentHomeZoneHighY, dropZoneX, dropZoneY, flagtype
+					Planner planner = new Planner(1, 0, 0, 0, 0, 0, 0, 0);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

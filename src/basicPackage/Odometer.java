@@ -48,7 +48,13 @@ public class Odometer implements TimerListener {
 	public double leftRadius, rightRadius, width;
 	private double x, y, theta;
 	private double[] oldDH, dDH;
-	// constructor
+	/**
+	 * 
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param INTERVAL how often the odometer should poll the wheels.
+	 * @param autostart set to true to have the odometer thread start immedietly on construction.
+	 */
 	public Odometer (EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, int INTERVAL, boolean autostart) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -57,8 +63,8 @@ public class Odometer implements TimerListener {
 		this.rightRadius = 2.06;
 		this.leftRadius = rightRadius*0.988;
 		this.width =10.21;
-		this.x = 0;
-		this.y = 0;
+		this.x = 30.48;
+		this.y = 30.48;
 		this.theta = 90;
 		this.oldDH = new double[2];
 		this.dDH = new double[2];
@@ -70,11 +76,16 @@ public class Odometer implements TimerListener {
 			this.timer = null;
 	}
 	
-	// functions to start/stop the timerlistener
+	/*
+	 *  function to stop the timerlistener
+	 */
 	public void stop() {
 		if (this.timer != null)
 			this.timer.stop();
 	}
+	/*
+	 * function to start the timerlistener.
+	 */
 	public void start() {
 		if (this.timer != null)
 			this.timer.start();
@@ -91,16 +102,6 @@ public class Odometer implements TimerListener {
 		data[0] = (leftTacho * leftRadius + rightTacho * rightRadius) * Math.PI / 360.0;
 		data[1] = (rightTacho * rightRadius - leftTacho * leftRadius) / width;
 	}
-	
-	/**
-	 * corrects the orientation of the robot using the gyroscope
-	 */
-//	public void correctOrientation(){
-//		double correctOrientation = this.gyroCorrecter.correctOrientation();
-//		boolean update[] = {false, false, true};
-//		double correction[] = {0.0,0.0,correctOrientation};
-//		this.setPosition(correction, update);
-//	}
 	/*
 	 * Recompute the odometer values using the displacement and heading changes
 	 */
@@ -121,28 +122,38 @@ public class Odometer implements TimerListener {
 		oldDH[1] += dDH[1];
 	}
 
-	// return X value
+	/**
+	 *  return X value
+	 */
 	public double getX() {
 		synchronized (this) {
 			return x;
 		}
 	}
 
-	// return Y value
+	/**
+	 *  return Y value
+	 */
 	public double getY() {
 		synchronized (this) {
 			return y;
 		}
 	}
 
-	// return theta value
+	/**
+	 * return theta value
+	 */
 	public double getAng() {
 		synchronized (this) {
 			return theta;
 		}
 	}
 
-	// set x,y,theta
+	/**
+	 *  set x,y,theta
+	 * @param position an array with three entries representing the x,y and theta of the robot.
+	 * @param update an array representing which values of x,y or theta shold be updated from position.
+	 */
 	public void setPosition(double[] position, boolean[] update) {
 		synchronized (this) {
 			if (update[0])
@@ -154,7 +165,9 @@ public class Odometer implements TimerListener {
 		}
 	}
 
-	// return x,y,theta
+	/*
+	 *  return x,y,theta and store in array.
+	 */
 	public void getPosition(double[] position) {
 		synchronized (this) {
 			position[0] = x;
@@ -163,31 +176,54 @@ public class Odometer implements TimerListener {
 		}
 	}
 
+	/**
+	 * 
+	 * @return returns a new array with x,y, theta values
+	 */
 	public double[] getPosition() {
 		synchronized (this) {
 			return new double[] { x, y, theta };
 		}
 	}
 	
-	// accessors to motors
+	/**
+	 *  accessors to motors
+	 */
 	public EV3LargeRegulatedMotor [] getMotors() {
 		return new EV3LargeRegulatedMotor[] {this.leftMotor, this.rightMotor};
 	}
+	/**
+	 * 
+	 * @return the left motor is returned.
+	 */
 	public EV3LargeRegulatedMotor getLeftMotor() {
 		return this.leftMotor;
 	}
+	/**
+	 * 
+	 * @return the right motor is returned.
+	 */
 	public EV3LargeRegulatedMotor getRightMotor() {
 		return this.rightMotor;
 	}
 
-	// static 'helper' methods
+	/**
+	 * 
+	 * @param angle angle that needs to be corrected
+	 * @return an angle in range from 0 to 360 degrees
+	 */
 	public static double fixDegAngle(double angle) {
 		if (angle < 0.0)
 			angle = 360.0 + (angle % 360.0);
 
 		return angle % 360.0;
 	}
-
+	/**
+	 * calculates the minimum angle from a starting position a to a final position b.
+	 * @param a starting theta.
+	 * @param b final theta.
+	 * @return the minimum amount of turning from a to b.
+	 */
 	public static double minimumAngleFromTo(double a, double b) {
 		double d = fixDegAngle(b - a);
 

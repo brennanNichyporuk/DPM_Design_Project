@@ -32,11 +32,26 @@ public class OdometerCorrection extends Thread {
 	public static double SQUAREDISTANCE = 30.48;
 	
 	/**
-	 * error in odometry correction
+	 * error allowed in distance from a line
 	 */
-	private int DISTERRMARGIN = 10;
+	private static int DISTERRMARGIN = 3;
+	/**
+	 * error allowed in angle
+	 */
+	private static int ANGLEERRMARGIN = 5;
 	
+	/**
+	 * offset that accounts for distance and time delay between light sensor and the center of rotation 
+	 */
+	private static double OFFSET = 15.0;
+	/**
+	 * tracks if odometrycorrection should be correcting.
+	 */
+	public  boolean CORRECT = true;
 	
+	/**
+	 * frequency of odometry correction
+	 */
 	private long TIME_MARGIN = 1000;
 	
 	/**
@@ -48,15 +63,20 @@ public class OdometerCorrection extends Thread {
 		this.lineDetector = lineDetector;
 	}
 	/**
-	 * run odometer correction thread.
+	 * runs the odometer correction thread. 
 	 */
 	public void run() {
 		long correctionStart, correctionEnd;
 		while (true) {
 			correctionStart = System.currentTimeMillis();
+			
+			if(this.CORRECT){
 			if(this.lineDetector.detectLine()){
-				this.correctOdometer();
+					Sound.beep();
+					this.correctOdometer();
+				}
 			}
+			
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
 				try {
@@ -71,7 +91,8 @@ public class OdometerCorrection extends Thread {
 		}
 	}
 	/**
-	 * calls get position and corrects the odometer heading.
+	 * corrects the odometer position based on the current position of the odometer and the direction of travel. 
+	 * Only corrects if in the range of 0, 90, 180, 270, 360 degrees +- 5 degrees 
 	 */
 	public void correctOdometer () {
 		double[] position = new double[3];
@@ -80,22 +101,43 @@ public class OdometerCorrection extends Thread {
 		position = this.odometer.getPosition();
 		double x = position[0];
 		double y = position[1];
+		double angle = position[2];
 		
-		//testing to see if we are near 30 in the x
-		if((x % SQUAREDISTANCE) < DISTERRMARGIN || (x % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
-			double multipleX = Math.round( x / SQUAREDISTANCE);
-			position[0] = multipleX * SQUAREDISTANCE;
-			update[0] = true; 
-			System.out.println("Set to x: "+position[0]);
+		if(inRange(0,angle,ANGLEERRMARGIN)||inRange(360,angle,ANGLEERRMARGIN)){
+			double nodeX = Math.round((x-OFFSET) / SQUAREDISTANCE);
+			position[0]= nodeX *SQUAREDISTANCE + OFFSET;
+			update[0]=true;
 		}
 		
-		//testing to see if we are near 30 in the y
-		if((y % SQUAREDISTANCE) < DISTERRMARGIN || (y % SQUAREDISTANCE) > (SQUAREDISTANCE - DISTERRMARGIN)){
-			double multipleY = Math.round( y / SQUAREDISTANCE);
-			position[1] = multipleY * SQUAREDISTANCE;
+		else if(inRange(90,angle,ANGLEERRMARGIN)){
+			double nodeY = Math.round((y-OFFSET) / SQUAREDISTANCE);
+			position[1]= nodeY * SQUAREDISTANCE + OFFSET;
 			update[1] = true;
-			System.out.println("Set to y: "+position[1]);
 		}
+		else if(inRange(180,angle,ANGLEERRMARGIN)){
+			double nodeX = Math.round((x+OFFSET) / SQUAREDISTANCE);
+			position[0]= nodeX *SQUAREDISTANCE - OFFSET;
+			update[0]=true;
+		}
+		else if(inRange(270,angle,ANGLEERRMARGIN)){
+			double nodeY = Math.round((y+OFFSET) / SQUAREDISTANCE);
+			position[1]= nodeY *SQUAREDISTANCE - OFFSET;
+			update[1]=true;
+		}
+		
 		this.odometer.setPosition(position, update);
+		}
+	/**
+	 * 
+	 * @param target the goal value.
+	 * @param value the value you want to be compared.
+	 * @param relaxationFactor how much the in range function should relax the two values.
+	 * @return a boolean to tell if a variable is currently in range or not.
+	 */
+	private boolean inRange(double target, double value, double relaxationFactor){
+		if(Math.abs(target-value)<relaxationFactor){
+			return true;
+		}
+		return false;
 	}
 }

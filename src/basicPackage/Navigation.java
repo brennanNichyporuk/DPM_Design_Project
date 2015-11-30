@@ -2,6 +2,8 @@ package basicPackage;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
+import lejos.hardware.port.SensorPort;
+import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
@@ -10,7 +12,8 @@ public class Navigation extends Thread {
 	private static Odometer odometer;
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
-
+	private static GyroCorrection gyroCorrecter;
+	private static OdometerCorrection odometryCorrecter;
 	private final double LEFT_WHEEL_RADIUS, RIGHT_WHEEL_RADIUS, TRACK;
 	private final int RIGHT_ROTATE_SPEED, LEFT_ROTATE_SPEED, RIGHT_FORWARD_SPEED, LEFT_FORWARD_SPEED;
 	public final static int SLOW = 120; 
@@ -29,7 +32,7 @@ public class Navigation extends Thread {
 	 */
 	public Navigation (Odometer odometer, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, 
 			int ROTATE_SPEED, int FORWARD_SPEED, double LEFT_WHEEL_RADIUS, double RIGHT_WHEEL_RADIUS,
-			double TRACK) {
+			double TRACK, GyroCorrection gyroCorrecter, OdometerCorrection odometryCorrecter) {
 		Navigation.odometer = odometer;
 		Navigation.leftMotor = leftMotor;
 		Navigation.rightMotor = rightMotor;
@@ -42,6 +45,8 @@ public class Navigation extends Thread {
 		this.RIGHT_ROTATE_SPEED = (int) ((ROTATE_SPEED * 360) / (2 * Math.PI * RIGHT_WHEEL_RADIUS));
 		this.LEFT_FORWARD_SPEED = (int) ((FORWARD_SPEED * 360) / (2 * Math.PI * LEFT_WHEEL_RADIUS));
 		this.RIGHT_FORWARD_SPEED = (int) ((FORWARD_SPEED * 360) / (2 * Math.PI * RIGHT_WHEEL_RADIUS));
+		this.gyroCorrecter = gyroCorrecter;
+		this.odometryCorrecter = odometryCorrecter;
 	}
 	
 	public void moveStraight(double distance) {
@@ -77,8 +82,12 @@ public class Navigation extends Thread {
 	public void travelTo (double desiredX, double desiredY) {
 		leftMotor.setAcceleration(2000);
 		rightMotor.setAcceleration(2000);
+		
+		double[] angleSet = {0,0,gyroCorrecter.correctOrientation()};
+		boolean[] update = {false,false,true};
+		odometer.setPosition(angleSet, update);
+		
 		double[] position = odometer.getPosition();
-
 		double xError = desiredX - position[0];
 		double yError = desiredY - position[1];
 		double desiredTheta = Math.toDegrees(Math.atan2(yError, xError)); 
@@ -105,6 +114,8 @@ public class Navigation extends Thread {
 	public void turnTo (double desiredTheta, boolean stop) {
 		leftMotor.setAcceleration(2000);
 		rightMotor.setAcceleration(2000);
+		this.odometryCorrecter.CORRECT = false;
+		
 		double currentTheta = odometer.getAng();
 		double errorTheta = desiredTheta - currentTheta;
 
@@ -129,6 +140,8 @@ public class Navigation extends Thread {
 		if(stop){
 			this.setSpeeds(0, 0);
 		}
+		
+		this.odometryCorrecter.CORRECT = true;
 	}
 	
 	public void turnToContinous(double angle, boolean stop) {

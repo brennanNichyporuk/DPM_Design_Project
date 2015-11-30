@@ -18,8 +18,19 @@ public class Localization {
 	private LineDetection lineDetector;
 	public static int startTileX;
 	public static int startTileY;
+	/**
+	 * what is the maximum field size? Helpful in determining the location based on starting corner.
+	 */
 	private static int FIELDSIZE = 8;
 	
+	/**
+	 * constructor for 
+	 * @param odo
+	 * @param nav
+	 * @param usModule
+	 * @param startingCorner, which corner are we starting in? Must update starting position based on starting corner.
+	 * @param lineDetector
+	 */
 	public Localization(Odometer odo, Navigation nav, UltrasonicModule usModule, int startingCorner, LineDetection lineDetector) {
 		this.odo = odo;
 		this.nav = nav;
@@ -28,8 +39,10 @@ public class Localization {
 		this.lightLocalizer = new LightLocalizer(odo, nav, lineDetector);
 		this.lineDetector = lineDetector;
 }
-	public void doLocalization() throws InterruptedException{
-		//System.out.println("doing USLocalization");
+	/*
+	 * directs the uslocalizer and lightlocalizer to execute localization
+	 */
+	public void doLocalization(){
 		this.usLocalizer.doLocalization();
 		
 		nav.turnToContinous(45, true);
@@ -37,10 +50,7 @@ public class Localization {
 		sleep(1500);
 		this.lightLocalizer.doLocalization();
 	}
-	/**
-	 * depending on starting orientation, we need to orient in different ways. 
-	 * strategy is to touch each wall and set the x or y accordingly.
-	 */
+	
 	public static void sleep(int sleepTime){
 		try {
 			Thread.sleep(sleepTime);

@@ -6,11 +6,10 @@ import modulePackage.LineDetection;
 public class LightLocalizer {
 	private enum UpdateType {XUpdate, YUpdate, Theta1Set, Theta2Set, Theta3Set, Theta4Set};
 	private double theta1, theta2, theta3, theta4 = 0;
-	private double d = 13.0;
+	private static double d = 13.0;
 	private Odometer odo;
 	private Navigation nav;
 	private int lastValue, lastDerivative, lowValue, highValue, minDerivativeChange;
-	
 	private LineDetection lineDetector;
 	public LightLocalizer(Odometer odo, Navigation nav, LineDetection lineDetector) {
 		this.odo = odo;
@@ -18,7 +17,10 @@ public class LightLocalizer {
 		this.lineDetector = lineDetector;
 	}
 
-	public void doLocalization() throws InterruptedException {
+	/**
+	 * executes the light localization routine.
+	 */
+	public void doLocalization() {
 		// drive to location listed in tutorial
 		//System.out.println("initializePosition");
 		//this.initializePosition();
@@ -34,8 +36,10 @@ public class LightLocalizer {
 		this.sleep(5000);
 
 	}
-
-	public void refineOdometer() throws InterruptedException {
+	/**
+	 * executes the circular motion for light localization in order to determine exact position and angle.
+	 */
+	public void refineOdometer(){
 		// start rotating and clock all 4 gridlines
 		nav.setSpeeds(-Navigation.SLOW, Navigation.SLOW);
 		for (int i = 0; i < 5; i++)
@@ -84,14 +88,15 @@ public class LightLocalizer {
 
 		double overTurn = 0.0;
 //		
-		//double theta = Math.toDegrees(Math.atan2(y, x));
 		double[] position = {x, y, this.correctAngle(deltaTheta + odoAngle+overTurn)};
-		//double[] position = {x, y, this.correctAngle(theta)};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
 		this.sleep(5000);
 	}
-
+	/*
+	 * initialize the position by reading the lines on x and y axis.
+	 */
+	
 	public void initializePosition() {
 
 		this.nav.turnTo(90.0, true);
@@ -119,7 +124,7 @@ public class LightLocalizer {
 		nav.turnTo(90, true);
 	}
 
-	public void sleep(long t) {
+	private void sleep(long t) {
 		try {
 			Thread.sleep(t);
 		} catch (InterruptedException e) {
@@ -128,6 +133,10 @@ public class LightLocalizer {
 		}
 	}
 
+	/**
+	 * update the odometer based on an enumerable type for which odometer update is required.
+	 * @param uT see enumerable types for different updates avaliable.
+	 */
 	void update(UpdateType uT) {
 		double[] position = new double[3];
 		boolean[] update = new boolean[3];

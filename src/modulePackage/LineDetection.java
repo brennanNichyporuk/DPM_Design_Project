@@ -71,7 +71,6 @@ public class LineDetection
 				// if we have detected a line ... we run update() which performs 
 				lowValue = 0;
 				highValue = 0;
-				Sound.beep();
 				return true;
 			}
 

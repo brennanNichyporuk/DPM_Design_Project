@@ -31,7 +31,17 @@ import basicPackage.OdometerCorrection;
 /**
  * This class is responsible for coordinating all responsibilities of the robot.
  * @author brennanNichyporuk
- *
+ * 
+ * 
+ * PORT CONFIGURATIONS FOR EV3 MODULE:
+ * RIGHT WHEEL MOTOR - A
+ * LEFT WHEEL MOTOR - D
+ * MOTOR FOR CLAW - B
+ * SERVO MOTOR FOR US TURN - C
+ * ULTRASONIC SENSOR -> S1
+ * LIGHT ColorDetection SENSOR-> S2
+ * LIGHT LD -> S3
+ * gyroscope-> S4
  */
 public class Planner extends Thread implements IObserver {
 	private EV3MediumRegulatedMotor neck;
@@ -40,65 +50,70 @@ public class Planner extends Thread implements IObserver {
 	private Navigation nav;
 	private Pilot pilot;
 	private CaptureFlag cF;
-	private int startingCorner;
-
-	private boolean active = false;
-
 	/**
-	 * Instantiates several classes.
+	 * 
 	 */
+	private boolean active = false;
 	
 	private static int flagType;
+	private static int startingCorner;
 	private static int opponentHomeZoneLowX;
 	private static int opponentHomeZoneLowY;
 	private static int opponentHomeZoneHighX;
 	private static int opponentHomeZoneHighY;
+	private static int dropZoneX;
+	private static int dropZoneY;
 	
 	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) throws InterruptedException 
 	{
+		//recording all parameters.
+		startingCorner = startingCorner;
+		opponentHomeZoneLowX = opponentHomeZoneLowX;
+		opponentHomeZoneLowY = opponentHomeZoneLowY;
+		opponentHomeZoneHighX = opponentHomeZoneHighX;
+		opponentHomeZoneHighY = opponentHomeZoneHighY;
+		flagType = flagType;
+		dropZoneX = dropZoneX;
+		dropZoneY = dropZoneY;
 		
-		this.startingCorner = startingCorner;
-		this.opponentHomeZoneLowX = opponentHomeZoneLowX;
-		this.opponentHomeZoneLowY = opponentHomeZoneLowY;
-		this.opponentHomeZoneHighX = opponentHomeZoneHighX;
-		this.opponentHomeZoneHighY = opponentHomeZoneHighY;
-		
-		//initializing motors and odometer/navigation. Also initializing LCDInfo for debugging purposes
+		//initializing motors and various sensors for the trial run.
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+		EV3GyroSensor gyro = new EV3GyroSensor(SensorPort.S4);
+		
+		//ensure that travelTo and turnTo are not called during localization routines, otherwise gyro will correct angle.
+		GyroCorrection gyroCorrecter = new GyroCorrection(gyro);
+		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
 		this.odo = new Odometer(leftMotor, rightMotor, 20, true);
-		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width);
-		LCDInfo lcd = new LCDInfo(odo);
-		lcd.timedOut();
+		LineDetection lineDetector = new LineDetection(colorSensor);
+		OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
+		odometryCorrecter.start();
+		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width,gyroCorrecter,odometryCorrecter);
+		
+		//displays current location on odometer if not commented out.
+		//LCDInfo lcd = new LCDInfo(odo);
+		//lcd.timedOut();
 		
 		
-		
+		//intializing the ultrasonic sensor module.
 		this.neck = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
 		SensorModes usSensor = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
 		SampleProvider usValue = usSensor.getMode("Distance");
 		float[] usData = new float[usValue.sampleSize()];
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
-		
-		SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
-		LineDetection lineDetector = new LineDetection(colorSensor);
 	
-	
+		// ensuring that odometryCorrection does not occur during localization
+		odometryCorrecter.CORRECT=false;
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
+		odometryCorrecter.CORRECT=true;
+		
+		//will have to update this based on starting position.
+		nav.travelTo(1.5*30.48, 1.5*30.48);
 		
 		
-		//OdometerCorrection odometryCorrecter = new OdometerCorrection(odo, lineDetector);
-		//odometryCorrecter.start();
-		//EV3GyroSensor gyro = new EV3GyroSensor(SensorPort.S4);
-		//Thread gyroCorrecter = new Thread(new GyroCorrection(gyro));
-		//gyroCorrecter.start();
-		
-		
-		//initializing 
-//		this.flagType = flagType;
-		
-//		this.pilot = new Pilot(this, nav, odo, uM, 0,0, opponentHomeZoneLowX, opponentHomeZoneLowY);
-//		pilot.start();
+		this.pilot = new Pilot(this, nav, odo, uM, 1,1, 6,6);
+		pilot.start();
 		
 
 	}
@@ -115,8 +130,8 @@ public class Planner extends Thread implements IObserver {
 
 	/**
 	 * Called by observed classes to notify Planner of changes.
+	 * @param takes as input a class ID which determines which routine should be executed.
 	 */
-
 	public void update(ClassID id){
 		switch (id) {
 		case PILOT:
@@ -133,7 +148,10 @@ public class Planner extends Thread implements IObserver {
 			System.out.println("UNPLANNED ClassID");
 		}
 	}
-
+	/**
+	 * Will cause the planner thread to sleep for a certain amount of time.
+	 * @param t time in milliseconds that is required to sleep.
+	 */
 	private void sleepFor(long t) {
 		try {
 			Thread.sleep(t);

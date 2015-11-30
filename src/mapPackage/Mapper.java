@@ -193,8 +193,9 @@ public class Mapper extends Thread {
 				else
 					objectFallingEdgeLoco = this.locateDatObjectEdge(32, -55, -55);
 
-
-				this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
+				try {
+					this.updatePath(objectFallingEdgeLoco, objectRisingEdgeLoco);
+				} catch(NullPointerException e) {}
 
 			} catch (FalseObjectException e) {}
 		}
@@ -244,14 +245,14 @@ public class Mapper extends Thread {
 			this.dStarLite.updateCell(objectFallingEdgeNode[0], objectFallingEdgeNode[1], -1);
 			this.dStarLite.updateCell(objectRisingEdgeNode[0], objectRisingEdgeNode[1], -1);
 
-			System.out.println("1:" + Arrays.toString(objectFallingEdgeNode));
-			System.out.println("2:" + Arrays.toString(objectRisingEdgeNode));
-			
+			//System.out.println("1:" + Arrays.toString(objectFallingEdgeNode));
+			//System.out.println("2:" + Arrays.toString(objectRisingEdgeNode));
+
 			if (objectFallingEdgeNode[0] != objectRisingEdgeNode[0] && objectFallingEdgeNode[1] != objectRisingEdgeNode[1]) {
 				int[] diagonalNode = this.isDiagonalNode();
 				if (diagonalNode != null) {
 					this.dStarLite.updateCell(diagonalNode[0], diagonalNode[1], -1);
-					System.out.println("D:" + Arrays.toString(diagonalNode));
+					//System.out.println("D:" + Arrays.toString(diagonalNode));
 				}
 			}
 
