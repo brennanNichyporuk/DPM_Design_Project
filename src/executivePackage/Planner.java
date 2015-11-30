@@ -103,13 +103,22 @@ public class Planner extends Thread implements IObserver {
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
 	
 		// ensuring that odometryCorrection does not occur during localization
-		odometryCorrecter.CORRECT=false;
-		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
-		localizer.doLocalization();
-		odometryCorrecter.CORRECT=true;
+		//odometryCorrecter.CORRECT=false;
+		//Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
+		//localizer.doLocalization();
+		//odometryCorrecter.CORRECT=true;
 		
 		//will have to update this based on starting position.
 		nav.travelTo(1.5*30.48, 1.5*30.48);
+		nav.travelTo(2.5*30.48, 1.5*30.48);
+		nav.travelTo(3.5*30.48, 1.5*30.48);
+		nav.travelTo(3.5*30.48, 2.5*30.48);
+		nav.travelTo(3.5*30.48, 3.5*30.48);
+		nav.travelTo(2.5*30.48,3.5*30.48);
+		nav.travelTo(1.5*30.48, 3.5*30.48);
+		nav.travelTo(1.5*30.48, 2.5*30.48);
+		nav.travelTo(1.5*30.48, 1.5*30.48);
+		
 		
 		
 		this.pilot = new Pilot(this, nav, odo, uM, 1,1, 6,6);
