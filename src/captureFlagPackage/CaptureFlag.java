@@ -152,8 +152,8 @@ public class CaptureFlag extends Thread implements IObserver
 					//pause identifier
 					identifier.pauseThread();
 					
-					//grabber.doPickup();
-					//grabber.discardBlock();
+					grabber.doPickup();
+					grabber.discardBlock();
 					
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
