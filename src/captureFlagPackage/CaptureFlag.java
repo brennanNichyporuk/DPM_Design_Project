@@ -1,6 +1,7 @@
 package captureFlagPackage;
 
 import basicPackage.*;
+import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import modulePackage.*;
@@ -33,6 +34,7 @@ public class CaptureFlag extends Thread implements IObserver
 	//[x,y,theta]
 	private double[] locationPreIdentifier; 
 	
+	//initial position of the robot when capture flag thread is started
 	private double[] initialPosition;
 	
 
@@ -58,7 +60,6 @@ public class CaptureFlag extends Thread implements IObserver
 		grabber = new PickupObject(robotArmMotor, navigator, this);	
 		
 		this.locationPreIdentifier = null;
-		this.initialPosition = odo.getPosition();
 	}
 
 	/**
@@ -66,7 +67,9 @@ public class CaptureFlag extends Thread implements IObserver
 	 */
 	@Override
 	public void run()
-	{
+	{		
+		this.initialPosition = odo.getPosition();
+
 		//start looking for object (it's initialized to active and not paused)
 		locator.start();
 		
@@ -103,8 +106,20 @@ public class CaptureFlag extends Thread implements IObserver
 					locationPreIdentifier = odo.getPosition();
 										
 					//navigate towards object
-					nav.travelTo(objectsLocation[0], odo.getY());	
-					nav.travelTo(odo.getX(), objectsLocation[1]);	
+					//If the object is not detected on the side, travel to y, then to x
+					if(!locator.getOnSide())
+					{
+						nav.travelTo(objectsLocation[0], odo.getY());	
+						nav.travelTo(odo.getX(), objectsLocation[1]);	
+					}
+					//Else, travel to x, then to y
+					else
+					{
+						nav.travelTo(odo.getX(), objectsLocation[1]);	
+						nav.travelTo(objectsLocation[0], odo.getY());
+					}
+
+					while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 
 					//identify object.
 					identifier.resumeThread();					
@@ -129,8 +144,8 @@ public class CaptureFlag extends Thread implements IObserver
 					//end locator
 					locator.deactivateThread();
 					
-					grabber.doPickup();
 					Sound.beep();Sound.beep();Sound.beep();
+					grabber.doPickup();
 				}
 				else
 				{
@@ -157,11 +172,18 @@ public class CaptureFlag extends Thread implements IObserver
 				break;	
 		}
 	}
-	
+	/**
+	 * Getter method for the robot's initital position at thread start
+	 * @return double array with the position of the robot when the capture flag thread was started
+	 */
 	double[] getInitialPostion()
 	{
 		return this.initialPosition;
 	}
+	/**
+	 * Getter method for the robot's position before investigating object
+	 * @return double array with the position of the robot at previoius scan
+	 */
 	double[] getLocationPreIdentifier()
 	{
 		return this.locationPreIdentifier;

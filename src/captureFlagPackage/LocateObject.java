@@ -2,7 +2,8 @@ package captureFlagPackage;
 
 import basicPackage.*;
 import lejos.hardware.Sound;
-import modulePackage.*;
+import modulePackage.ColorDetection;
+import modulePackage.UltrasonicModule;
 
 /**
  *A class which searches the environment in order to locate the target flag
@@ -24,6 +25,10 @@ public class LocateObject extends Thread
 	private boolean isActive;
 	private boolean isPaused;
 	
+	//Depending on the position of the object
+	private boolean onSide = false;
+	
+	//stores the angle of the robot prior to starting this thread
 	private final double originalRobotAngle;
 
 	/**
@@ -47,6 +52,16 @@ public class LocateObject extends Thread
 		this.isPaused = false;
 		
 		originalRobotAngle = odo.getAng();
+	}
+	
+	/**
+	 * returns true if the object detected is on the side of the robot. returns false if object is in front of the robot
+	 * on side is defined as the object being located at an angle inferior to 20 or greater than 170 relative to the robot
+	 * @return boolean whether or not the block is on the sides of the robot
+	 */
+	public boolean getOnSide()
+	{
+		return onSide;
 	}
 	
 	/**
@@ -90,6 +105,7 @@ public class LocateObject extends Thread
 	}
 	
 	
+	//sweeps the ultrasonic sensor in order to detect objects and calculate their position
 	private boolean sweep()
 	{		
 		us.rotateSensorToWait(-90.0);
@@ -101,21 +117,18 @@ public class LocateObject extends Thread
 		double distance1=-1, distance2=-1, theta1=0, theta2=0;
 						
 		double previousDistance = clippingConstant;
-				
-	//	try {Thread.sleep(200);} catch (InterruptedException e) {}		FORMER!
 						
 		//turn 180 degrees
 		while(us.getSensorAngle() < 90)
 		{
 			us.rotateSensorToWait(us.getSensorAngle()+10);
 			
-			double distance = rotateAndScan(us.getSensorAngle());	//ADDED!
+			double distance = rotateAndScan(us.getSensorAngle());	
 			
 			//get distance value from us
-			//double distance = getDistance();		//FORMER!
 			double currentDistance = (distance<clippingConstant) ? distance : clippingConstant;
 			
-			//block found
+			//block found (rising edge)
 			if(currentDistance<clippingConstant && (previousDistance-currentDistance > 0) && distance1<0)
 			{
 				distance1 = currentDistance;
@@ -123,9 +136,20 @@ public class LocateObject extends Thread
 				int angle = us.getSensorAngle();
 				theta1 = (angle<0) ? (90-Math.abs(angle)) : (Math.abs(angle)+90);
 				
+				//block is angled positioned
+				if(theta1 < 20 || theta1 > 70)
+				{
+					onSide = true;
+				}
+				else
+				{
+					onSide = false;
+				}
+				
 				Sound.beep();
 			}
-			//block lost
+			
+			//block lost (falling edge)
 			else if((currentDistance - previousDistance > 0) && distance1>0)
 			{
 				distance2 = currentDistance;
@@ -151,23 +175,8 @@ public class LocateObject extends Thread
 		us.rotateSensorToWait(0.0);
 		return false;
 	}
-
-	//DEPRECATED
-	/*
-	private double getDistance()
-	{				
-		double distance = -1;
-		
-		int counter = 0;
-		while(counter++<30)
-		{
-			distance = us.getDistance();
-		}
-					
-		return distance;
-	}
-	*/
 	
+	//rotates the ultrasonic sensor and fetches distance values
 	private double rotateAndScan(int i) 
 	{
 		double distance;
@@ -186,6 +195,7 @@ public class LocateObject extends Thread
 		return distance;
 	}
 
+	//makes the robot sleep for t seconds
 	private void sleepFor(long t) {
 		try {
 			Thread.sleep(t);
@@ -195,7 +205,7 @@ public class LocateObject extends Thread
 		}
 	}
 		
-	
+	//calculates the location of the object
 	private double[] calculateObjectLocation(double[] a)
 	{
 		double x_mid,y_mid;
