@@ -27,10 +27,9 @@ public class ColorDetection {
 	
 	public ColorDetection(SensorModes sampleProvideColor)
 	{
-		this.sampleGetColor = sampleProvideColor.getMode("RGB");;
+		this.sampleGetColor = sampleProvideColor.getMode("ColorID");
 		this.colorData = new float[sampleGetColor.sampleSize()];
 		this.sampleGetColor.fetchSample(this.colorData,0);
-		
 	}
 	/**
 	 * @param provider
@@ -40,12 +39,11 @@ public class ColorDetection {
 	public int getData()
 	{
 		// Getting the data from the sensor and averaging the value (SAMPLESIZE set at top)
-		
 		int sum=0;
 		for(int i =0;i<SAMPLESIZE;i++)
 		{
 			this.sampleGetColor.fetchSample(this.colorData, 0);
-			int intensity = (int)(this.colorData[0]*100);
+			int intensity = (int)(this.colorData[0]);
 			sum+=intensity;
 		}
 		
