@@ -104,7 +104,7 @@ public class CaptureFlag extends Thread implements IObserver
 					locationPreIdentifier = odo.getPosition();
 										
 					//navigate towards object
-					//If the object is detected on the side, travel to y, then to x
+					//If the object is not detected on the side, travel to y, then to x
 					if(!locator.getOnSide())
 					{
 						nav.travelTo(objectsLocation[0], odo.getY());	
