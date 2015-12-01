@@ -23,6 +23,8 @@ public class PickupObject
 	//reference to capture flag class (caller)
 	private final CaptureFlag captureFlag;
 	
+	private final Odometer odo;
+	
 	//length of the robot's arm when lowered
 	private final int armLength = 22;
 	
@@ -31,11 +33,12 @@ public class PickupObject
 	 *@param robotArmMotor the motor that controls the movement of the robot's arm
 	 *@param navigator contains methods which navigates the robot 
 	 */
-	public PickupObject(EV3LargeRegulatedMotor aMotor, Navigation navigator, CaptureFlag captureFlag)
+	public PickupObject(EV3LargeRegulatedMotor aMotor, Navigation navigator, CaptureFlag captureFlag, Odometer odo)
 	{
 		this.nav = navigator;
 		this.armController = new ArmController(aMotor, armMotorDegreesOfRotation);
 		this.captureFlag = captureFlag;
+		this.odo = odo;
 	}
 	
 	/**
@@ -67,7 +70,7 @@ public class PickupObject
 	void discardBlock()
 	{
 		//navigate to drop zone 
-		nav.travelTo(captureFlag.getLocationPreIdentifier()[0], captureFlag.getLocationPreIdentifier()[1],true);
+		nav.travelTo(odo.getX(), captureFlag.getLocationPreIdentifier()[1],true);
 		
 		nav.moveForward();
 		try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}

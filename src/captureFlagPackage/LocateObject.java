@@ -120,10 +120,8 @@ public class LocateObject extends Thread
 						
 		//turn 180 degrees
 		while(us.getSensorAngle() < 90)
-		{
-			us.rotateSensorToWait(us.getSensorAngle()+10);
-			
-			double distance = rotateAndScan(us.getSensorAngle());	
+		{			
+			double distance = rotateAndScan(us.getSensorAngle() + 10);	
 			
 			//get distance value from us
 			double currentDistance = (distance<clippingConstant) ? distance : clippingConstant;

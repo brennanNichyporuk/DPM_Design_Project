@@ -56,7 +56,7 @@ public class CaptureFlag extends Thread implements IObserver
 		
 		locator = new LocateObject(this, nav, odo, us, this.cd);
 		identifier = new IdentifyObject(this, us, this.cd);
-		grabber = new PickupObject(robotArmMotor, navigator, this);	
+		grabber = new PickupObject(robotArmMotor, navigator, this, odo);	
 		
 		this.locationPreIdentifier = null;
 		this.initialPosition = odo.getPosition();
