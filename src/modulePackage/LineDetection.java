@@ -13,7 +13,7 @@ public class LineDetection
 	private int lastDerivative;
 	private int lowValue;
 	private int highValue;
-	private int minDerivativeChange = 10;
+	private int minDerivativeChange = 13;
 	
 	/**
 	 * 

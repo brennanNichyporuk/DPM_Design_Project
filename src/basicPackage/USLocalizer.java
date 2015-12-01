@@ -26,7 +26,7 @@ public class USLocalizer {
 	/**
 	 * Standard threshold from the wall.
 	 */
-	private double distanceStandard = 50;
+	private double distanceStandard = 45;
 	/**
 	 * Error margin to account for erroneous readings at the edges.
 	 */

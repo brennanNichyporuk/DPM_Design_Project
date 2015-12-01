@@ -58,7 +58,10 @@ public class Pilot extends Thread {
 			int currentNodeY = (int) (this.odometer.getY() / 30.48);
 			this.dStarLite.updateStart(currentNodeX, currentNodeY);
 			this.dStarLite.replan();
-
+			
+			if (this.path.size()  < 2)
+				break;
+				
 			pilotPackage.State currentState = this.path.get(0);
 			pilotPackage.State nextState = this.path.get(1);
 			int deltaX = nextState.x - currentState.x;

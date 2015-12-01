@@ -63,9 +63,8 @@ public class DesignProject {
 //					Planner planner = new Planner(corner.getId(),opponentHomeZoneBL_X,opponentHomeZoneBL_Y,opponentHomeZoneTR_X,opponentHomeZoneTR_Y,dropZone_X,dropZone_Y,flagType);
 //					conn.printTransmission();
 //				}
-//				
-//				Button.waitForAnyPress();
-//				System.exit(0);
-		Planner planner = new Planner(1,4,4,6,6,2,2,1);
+				Planner planner = new Planner(1,2,2,3,3,5,5,2);
+				Button.waitForAnyPress();
+				System.exit(0);
 		 	}
 }

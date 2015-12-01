@@ -25,6 +25,12 @@ public class LightLocalizer {
 		//System.out.println("initializePosition");
 		//this.initializePosition();
 		this.refineOdometer();
+
+		// when done travel to (0,0) and turn to 0 degrees
+		
+		nav.travelTo(0, 0,false);
+		this.nav.turnTo(0.0, true);
+
 	}
 	/**
 	 * executes the circular motion for light localization in order to determine exact position and angle.
@@ -42,6 +48,7 @@ public class LightLocalizer {
 		
 		
 		this.update(UpdateType.Theta1Set);
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
@@ -49,39 +56,39 @@ public class LightLocalizer {
 		}
 		
 		this.update(UpdateType.Theta2Set);
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
 			this.sleep(50);
 		}
-		
-		
 		
 		this.update(UpdateType.Theta3Set);
-
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
 			this.sleep(50);
 		}
-		double odoAngle = this.odo.getAng();
-		nav.setSpeeds(0, 0);
-		this.update(UpdateType.Theta4Set);
 		
+		this.update(UpdateType.Theta4Set);
+		Sound.beep();
+		nav.setSpeeds(0, 0);
 		
 		
 
 		// do trig to compute (0,0) and 0 degrees
-		double x = d*Math.cos(Math.toRadians((theta3+360 - theta1)/2));
+		double x = -d*Math.cos(Math.toRadians((theta3 - theta1)/2));
 		double y = -d*Math.cos(Math.toRadians((theta4 - theta2)/2));
 		double deltaTheta = 270.0 - theta4 + ((theta3 - theta1)/2);
+		
+		
+		double correction = 7;
 
-		double overTurn = 0.0;
-//		
-		double[] position = {x, y, this.correctAngle(deltaTheta + odoAngle+overTurn)};
+		double[] position = {x , y , this.correctAngle(deltaTheta + correction + this.odo.getAng())};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
-		this.sleep(5000);
+		//this.sleep(5000000);
 	}
 	/*
 	 * initialize the position by reading the lines on x and y axis.
