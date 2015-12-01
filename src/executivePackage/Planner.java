@@ -63,7 +63,8 @@ public class Planner extends Thread implements IObserver {
 	private static int opponentHomeZoneHighY;
 	private static int dropZoneX;
 	private static int dropZoneY;
-	public final static int sizeOfBoard = 12;
+	public final static int sizeOfBoard = 8;
+	private static int[] goalPoint;
 	
 	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) 
 	{
@@ -76,9 +77,11 @@ public class Planner extends Thread implements IObserver {
 		Planner.flagType = flagType;
 		Planner.dropZoneX = dropZoneX;
 		Planner.dropZoneY = dropZoneY;
-		
+		Planner.goalPoint = chooseGoal();
 		//function which sets all parameters to reflect the starting corner.
 		interpretCompParams();
+		
+		//
 
 		
 		//initializing motors and various sensors
@@ -108,18 +111,19 @@ public class Planner extends Thread implements IObserver {
 		this.uM = new UltrasonicModule(usSensor, usData, neck);
 	
 		// ensuring that odometryCorrection does not occur during localization
-		odometryCorrecter.CORRECT=false;
-		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
-		localizer.doLocalization();
-		gyroCorrecter.setGyro(this.odo.getAng());
-		odometryCorrecter.CORRECT=true;
-		sleepFor(2000);
+		//odometryCorrecter.CORRECT=false;
+		//Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
+		//localizer.doLocalization();
+		//gyroCorrecter.setGyro(this.odo.getAng());
+		//odometryCorrecter.CORRECT=true;
+		//sleepFor(2000);
 		//should now be localized.
 		nav.travelTo(0.5*30.48, 0.5*30.48,true);
 		nav.turnTo(90, true);
 		
 		//pilot to bottom corner of a tile.
-		this.pilot = new Pilot(this, nav, odo, uM, 1,1,opponentHomeZoneLowX-1,opponentHomeZoneLowY+2);
+		
+		this.pilot = new Pilot(this, nav, odo, uM, 1,1,goalPoint[0]+1,goalPoint[1]);
 		pilot.start();
 		
 
@@ -143,11 +147,11 @@ public class Planner extends Thread implements IObserver {
 		switch (id) {
 		case PILOT:
 			SensorModes colorSensor = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
-//			SampleProvider colorValue = colorSensor.getMode("Color ID");
-//			float[] colorData = new float[colorValue.sampleSize()];
+			SampleProvider colorValue = colorSensor.getMode("Color ID");
+			float[] colorData = new float[colorValue.sampleSize()];
 			ColorDetection cD = new ColorDetection(colorSensor);
 			EV3LargeRegulatedMotor robotArmMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-			nav.travelTo(1,1,true);
+			nav.travelTo(30.48*goalPoint[0],30.48*goalPoint[1],true);
 			nav.turnTo(90, true);
 			this.cF = new CaptureFlag(flagType, nav, odo, uM, cD, robotArmMotor);
 			this.cF.start();
@@ -169,10 +173,7 @@ public class Planner extends Thread implements IObserver {
 	}
 	
 	
-	/**
-	 * converts absolute parameters to relative parameters based on starting corner.
-	 */
-	private static void interpretCompParams(){
+private static void interpretCompParams(){
 		
 		switch (startingCorner){
 		// in first case do nothing, our relative and absolute position is the same.
@@ -225,6 +226,44 @@ public class Planner extends Thread implements IObserver {
 		default:
 			System.out.println("invalid corner input");
 			System.exit(3);
+		}
+	}
+	
+	private static int[] convertPoint(int x, int y){
+		switch (startingCorner){
+		// in first case do nothing, our relative and absolute position is the same.
+		case 1: 
+			return new int[] {x,y};
+		
+		//second case is bottom left corner
+		case 2:
+			int temp = y;
+			y = (sizeOfBoard-2) - x;
+			x = temp;
+			return new int[] {x,y};
+			
+		//third case is top right corner
+		case 3:
+			x = (sizeOfBoard-2) - x;
+			y = (sizeOfBoard-2) - y;
+			return new int[] {x,y};
+		case 4:
+			temp = x;
+			x = (sizeOfBoard-2) - y;
+			y = temp;
+			return new int[] {x,y};
+		default:
+			System.out.println("invalid corner input");
+			return new int[] {};
+		}
+	}
+	private static int[] chooseGoal(){
+		int median = (opponentHomeZoneLowX + opponentHomeZoneLowY)/2;
+		if(opponentHomeZoneLowY>(sizeOfBoard/2)){
+			return new int[] {median,opponentHomeZoneLowY};
+		}
+		else{
+			return new int[] {median,opponentHomeZoneHighY};
 		}
 	}
 }
