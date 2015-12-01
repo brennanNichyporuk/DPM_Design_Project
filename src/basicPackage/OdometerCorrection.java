@@ -43,7 +43,7 @@ public class OdometerCorrection extends Thread {
 	/**
 	 * offset that accounts for distance and time delay between light sensor and the center of rotation 
 	 */
-	private static double OFFSET = 15.0;
+	private static double OFFSET = 13.3;
 	/**
 	 * tracks if odometrycorrection should be correcting.
 	 */
