@@ -43,11 +43,11 @@ public class Localization {
 	 * directs the uslocalizer and lightlocalizer to execute localization
 	 */
 	public void doLocalization(){
-		this.usLocalizer.doLocalization();
+		//this.usLocalizer.doLocalization();
 		
-		nav.turnToContinous(45, true);
-		nav.moveForward();
-		sleep(1500);
+		//nav.turnToContinous(45, true);
+		//nav.moveForward();
+		//sleep(1500);
 		this.lightLocalizer.doLocalization();
 	}
 	

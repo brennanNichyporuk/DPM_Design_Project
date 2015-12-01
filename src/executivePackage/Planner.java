@@ -106,11 +106,14 @@ public class Planner extends Thread implements IObserver {
 		odometryCorrecter.CORRECT=false;
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
-		odometryCorrecter.CORRECT=true;
+		this.sleepFor(50000);
+		//odometryCorrecter.CORRECT=true;
 		
 		//will have to update this based on starting position.
-		nav.travelTo(1.5*30.48, 1.5*30.48);
-		
+		//nav.travelTo(1.5*30.48, 1.5*30.48);
+		nav.travelTo(0, 0);
+		nav.turnTo(0, true);
+		this.sleepFor(5999999);
 		
 		this.pilot = new Pilot(this, nav, odo, uM, 1,1, 6,6);
 		pilot.start();

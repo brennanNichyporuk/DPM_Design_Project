@@ -33,7 +33,7 @@ public class LightLocalizer {
 		
 		nav.travelTo(0.0, 0.0);
 		this.nav.turnTo(0.0, true);
-		this.sleep(5000);
+		this.sleep(500000);
 
 	}
 	/**
@@ -52,6 +52,7 @@ public class LightLocalizer {
 		
 		
 		this.update(UpdateType.Theta1Set);
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
@@ -59,39 +60,53 @@ public class LightLocalizer {
 		}
 		
 		this.update(UpdateType.Theta2Set);
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
 			this.sleep(50);
 		}
-		
-		
 		
 		this.update(UpdateType.Theta3Set);
-
+		Sound.beep();
 		
 		while(!this.lineDetector.detectLine())
 		{
 			this.sleep(50);
 		}
-		double odoAngle = this.odo.getAng();
-		nav.setSpeeds(0, 0);
-		this.update(UpdateType.Theta4Set);
 		
+		this.update(UpdateType.Theta4Set);
+		Sound.beep();
+		nav.setSpeeds(0, 0);
 		
 		
 
 		// do trig to compute (0,0) and 0 degrees
-		double x = d*Math.cos(Math.toRadians((theta3+360 - theta1)/2));
-		double y = -d*Math.cos(Math.toRadians((theta4 - theta2)/2));
+		double x = -d*Math.cos(Math.toRadians((theta3 - theta1)/2));
+		double y = d*Math.cos(Math.toRadians((theta4 - theta2)/2));
+		//double deltaThetaX = 360 + ((theta4 - theta2)/2) - theta2;
+		//double deltaThetaY = 90 + ((theta3 - theta1)/2) - theta1;
 		double deltaTheta = 270.0 - theta4 + ((theta3 - theta1)/2);
+		//double deltaThetaO21 = ((theta4 - theta2)/2) - theta3;
+		//double deltaThetaO22 = ((theta4 - theta2)/2) - theta1;
+		//double deltaTheta = (deltaThetaX + deltaThetaY) / 2;
+		//deltaTheta = -deltaTheta;
+		
+		//System.out.println("T:" + (int) odo.getAng());
+		//System.out.println("dTX:" + (int) deltaThetaX);
+		//System.out.println("dTY:" + (int) deltaThetaY);
+		//System.out.println("dTO1:" + (int) deltaThetaO1);
+		//System.out.println("dTO21:" + (int) deltaThetaO21);
+		//System.out.println("dTO22:" + (int) deltaThetaO22);
+		//System.out.println("CA:" + (int) this.correctAngle(deltaTheta + this.odo.getAng()));
+		//System.out.println("dX:" + (int) x);
+		//System.out.println("dY:" + (int) y);
+		//this.sleep(5000000);
 
-		double overTurn = 0.0;
-//		
-		double[] position = {x, y, this.correctAngle(deltaTheta + odoAngle+overTurn)};
+		double[] position = {x, y, this.correctAngle(deltaTheta + this.odo.getAng())};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
-		this.sleep(5000);
+		//this.sleep(5000000);
 	}
 	/*
 	 * initialize the position by reading the lines on x and y axis.
