@@ -25,6 +25,15 @@ public class IdentifyObject extends Thread
 	//activity state variables
 	private boolean isActive;
 	private boolean isPaused;
+	
+	private final double[] blocks = 
+	{	-1, //nothing
+		6, //light blue
+		0, //red
+		3, //yellow
+		6, //white
+		2 //dark blue
+	};
 
 
 	/**
@@ -46,6 +55,18 @@ public class IdentifyObject extends Thread
 		this.isPaused = true;
 	}
 	
+	private int isBlock(int colorID)
+	{
+		for(int i=1; i<6; i++)
+		{
+			if(colorID == blocks[i])
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 
 	/**
 	 *Overrides the run method in the Thread superclass
@@ -64,7 +85,7 @@ public class IdentifyObject extends Thread
 				{
 					if(justStartedRotating)
 					{
-						us.rotateSensorTo(-90);
+						us.rotateSensorToWait(-90);
 						justStartedRotating = false;
 					}
 					else
@@ -75,7 +96,7 @@ public class IdentifyObject extends Thread
 						{
 							captureFlag.update(ClassID.IDENTIFYOBJECT);
 							justStartedRotating = true;
-							us.rotateSensorTo(0);
+							us.rotateSensorToWait(0);
 							continue;
 						}
 					}
@@ -85,13 +106,13 @@ public class IdentifyObject extends Thread
 				try {Thread.sleep(100);} catch (InterruptedException e1) {}
 
 				//get color reading
-				objectID = cd.getData();
+				objectID = isBlock(cd.getData());
 				didRead = true;
 				
 				if(objectID!=-1)
 				{
 					//notify CaptureFlag class
-					us.rotateSensorTo(0.0);
+					us.rotateSensorToWait(0.0);
 					didRead = false;
 					captureFlag.update(ClassID.IDENTIFYOBJECT);
 					try {Thread.sleep(500);} catch (InterruptedException e){}

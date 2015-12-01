@@ -119,7 +119,7 @@ public class Pilot extends Thread {
 		double actualX = nodeX * 30.48 + 15.24;
 		double actualY = nodeY * 30.48 + 15.24;
 
-		this.navigation.travelTo(actualX, actualY);
+		this.navigation.travelTo(actualX, actualY,true);
 	}
 	
 	private void notifyObserver() {

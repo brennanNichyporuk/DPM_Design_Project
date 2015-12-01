@@ -24,14 +24,11 @@ public class LightLocalizer {
 		// drive to location listed in tutorial
 		//System.out.println("initializePosition");
 		//this.initializePosition();
-		
-		
-		//System.out.println("refining odo");
 		this.refineOdometer();
 
 		// when done travel to (0,0) and turn to 0 degrees
 		
-		nav.travelTo(0.0, 0.0);
+		nav.travelTo(0.0, 0.0,false);
 		this.nav.turnTo(0.0, true);
 		this.sleep(500000);
 
@@ -102,8 +99,10 @@ public class LightLocalizer {
 		//System.out.println("dX:" + (int) x);
 		//System.out.println("dY:" + (int) y);
 		//this.sleep(5000000);
+		
+		double correction = 7;
 
-		double[] position = {x, y, this.correctAngle(deltaTheta + this.odo.getAng())};
+		double[] position = {x, y, this.correctAngle(deltaTheta + correction + this.odo.getAng())};
 		boolean[] update = {true, true, true};
 		odo.setPosition(position, update);
 		//this.sleep(5000000);
@@ -135,7 +134,7 @@ public class LightLocalizer {
 		
 		this.sleep(500);
 
-		nav.travelTo(6.0, 6.0);
+		nav.travelTo(6.0, 6.0,false);
 		nav.turnTo(90, true);
 	}
 

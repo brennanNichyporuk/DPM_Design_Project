@@ -56,7 +56,7 @@ public class CaptureFlag extends Thread implements IObserver
 		
 		locator = new LocateObject(this, nav, odo, us, this.cd);
 		identifier = new IdentifyObject(this, us, this.cd);
-		grabber = new PickupObject(robotArmMotor, navigator, this);	
+		grabber = new PickupObject(robotArmMotor, navigator, this, odo);	
 		
 		this.locationPreIdentifier = null;
 		this.initialPosition = odo.getPosition();
@@ -107,17 +107,15 @@ public class CaptureFlag extends Thread implements IObserver
 					//If the object is not detected on the side, travel to y, then to x
 					if(!locator.getOnSide())
 					{
-						nav.travelTo(objectsLocation[0], odo.getY());	
-						nav.travelTo(odo.getX(), objectsLocation[1]);	
+						nav.travelTo(objectsLocation[0], odo.getY(),true);	
+						nav.travelTo(odo.getX(), objectsLocation[1],true);	
 					}
 					//Else, travel to x, then to y
 					else
 					{
-						nav.travelTo(odo.getX(), objectsLocation[1]);	
-						nav.travelTo(objectsLocation[0], odo.getY());
+						nav.travelTo(odo.getX(), objectsLocation[1],true);	
+						nav.travelTo(objectsLocation[0], odo.getY(),true);
 					}
-
-					while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 
 					//identify object.
 					identifier.resumeThread();					
@@ -150,15 +148,15 @@ public class CaptureFlag extends Thread implements IObserver
 					//pause identifier
 					identifier.pauseThread();
 					
-					//grabber.doPickup();
-					//grabber.discardBlock();
+					grabber.doPickup();
+					grabber.discardBlock();
 					
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
-						nav.travelTo(odo.getX(), locationPreIdentifier[1]);
-						nav.travelTo(locationPreIdentifier[1], odo.getY());
-						nav.turnTo(90, true);
+						nav.travelTo(odo.getX(), locationPreIdentifier[1],true);
+						nav.travelTo(locationPreIdentifier[0], odo.getY(),true);
+						nav.turnTo(initialPosition[2], true);
 						
 						//reset saved location for next iteration
 						locationPreIdentifier = null;

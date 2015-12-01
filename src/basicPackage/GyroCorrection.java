@@ -49,4 +49,18 @@ public class GyroCorrection{
 		}
 		return angle+this.initialAngle;
 	}
+	/**
+	 * resets the gyroscope to zero 
+	 */
+	public void resetGyro(){
+		gyro.reset();
+	}
+	/**
+	 * 
+	 * @param angle the angle you want to set the intial gyroscope angle to.
+	 */
+	public void setGyro(double angle){
+		this.initialAngle = angle;
+		gyro.reset();
+	}
 }

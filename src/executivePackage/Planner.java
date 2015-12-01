@@ -63,20 +63,25 @@ public class Planner extends Thread implements IObserver {
 	private static int opponentHomeZoneHighY;
 	private static int dropZoneX;
 	private static int dropZoneY;
+	public final static int sizeOfBoard = 12;
 	
-	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) throws InterruptedException 
+	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) 
 	{
 		//recording all parameters.
-		startingCorner = startingCorner;
-		opponentHomeZoneLowX = opponentHomeZoneLowX;
-		opponentHomeZoneLowY = opponentHomeZoneLowY;
-		opponentHomeZoneHighX = opponentHomeZoneHighX;
-		opponentHomeZoneHighY = opponentHomeZoneHighY;
-		flagType = flagType;
-		dropZoneX = dropZoneX;
-		dropZoneY = dropZoneY;
+		Planner.startingCorner = startingCorner;
+		Planner.opponentHomeZoneLowX = opponentHomeZoneLowX;
+		Planner.opponentHomeZoneLowY = opponentHomeZoneLowY;
+		Planner.opponentHomeZoneHighX = opponentHomeZoneHighX;
+		Planner.opponentHomeZoneHighY = opponentHomeZoneHighY;
+		Planner.flagType = flagType;
+		Planner.dropZoneX = dropZoneX;
+		Planner.dropZoneY = dropZoneY;
 		
-		//initializing motors and various sensors for the trial run.
+		//function which sets all parameters to reflect the starting corner.
+		interpretCompParams();
+
+		
+		//initializing motors and various sensors
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3GyroSensor gyro = new EV3GyroSensor(SensorPort.S4);
@@ -106,16 +111,16 @@ public class Planner extends Thread implements IObserver {
 		odometryCorrecter.CORRECT=false;
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
-		this.sleepFor(50000);
-		//odometryCorrecter.CORRECT=true;
+
+		gyroCorrecter.setGyro(this.odo.getAng());
+		odometryCorrecter.CORRECT=true;
+		sleepFor(2000);
+		//should now be localized.
+		nav.travelTo(0.5*30.48, 0.5*30.48,true);
+		nav.turnTo(90, true);
 		
-		//will have to update this based on starting position.
-		//nav.travelTo(1.5*30.48, 1.5*30.48);
-		nav.travelTo(0, 0);
-		nav.turnTo(0, true);
-		this.sleepFor(5999999);
-		
-		this.pilot = new Pilot(this, nav, odo, uM, 1,1, 6,6);
+		//pilot to bottom corner of a tile.
+		this.pilot = new Pilot(this, nav, odo, uM, 1,1,opponentHomeZoneLowX-1,opponentHomeZoneLowY+2);
 		pilot.start();
 		
 
@@ -143,9 +148,9 @@ public class Planner extends Thread implements IObserver {
 //			float[] colorData = new float[colorValue.sampleSize()];
 			ColorDetection cD = new ColorDetection(colorSensor);
 			EV3LargeRegulatedMotor robotArmMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-			nav.travelTo((this.opponentHomeZoneLowX+1)*30.48, this.opponentHomeZoneLowY*30.48);
+			nav.travelTo(1,1,true);
 			nav.turnTo(90, true);
-			this.cF = new CaptureFlag(this.flagType, nav, odo, uM, cD, robotArmMotor);
+			this.cF = new CaptureFlag(flagType, nav, odo, uM, cD, robotArmMotor);
 			this.cF.start();
 		default:
 			System.out.println("UNPLANNED ClassID");
@@ -163,5 +168,64 @@ public class Planner extends Thread implements IObserver {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
+	/**
+	 * converts absolute parameters to relative parameters based on starting corner.
+	 */
+	private static void interpretCompParams(){
+		
+		switch (startingCorner){
+		// in first case do nothing, our relative and absolute position is the same.
+		case 1: 
+			break;
+		
+		//second case is bottom left corner
+		case 2:
+			int temp = opponentHomeZoneLowY;
+			opponentHomeZoneLowY = (sizeOfBoard-2) - opponentHomeZoneLowX;
+			opponentHomeZoneLowX = temp;
+			
+			temp = opponentHomeZoneHighY;
+			opponentHomeZoneHighY = (sizeOfBoard-2) - opponentHomeZoneHighX;
+			opponentHomeZoneHighX = temp;
+			
+			temp = dropZoneY;
+			dropZoneY = (sizeOfBoard-2) - dropZoneX;
+			dropZoneX = temp;
+			
+			break;
+			
+		//third case is top right corner
+		case 3:
+			opponentHomeZoneLowX = (sizeOfBoard-2) - opponentHomeZoneLowX;
+			opponentHomeZoneLowY = (sizeOfBoard-2) - opponentHomeZoneLowY;
+			
+			opponentHomeZoneHighX = (sizeOfBoard-2) - opponentHomeZoneHighX;
+			opponentHomeZoneHighY = (sizeOfBoard-2) - opponentHomeZoneHighY;
+			
+			dropZoneX = (sizeOfBoard-2) - dropZoneX;
+			dropZoneY = (sizeOfBoard-2) - dropZoneY;
+			
+			break;
+		case 4:
+			temp = opponentHomeZoneLowX;
+			opponentHomeZoneLowX = (sizeOfBoard-2) - opponentHomeZoneLowY;
+			opponentHomeZoneLowY = temp;
+			
+			temp = opponentHomeZoneHighY;
+			opponentHomeZoneHighY = opponentHomeZoneHighX;
+			opponentHomeZoneHighX = (sizeOfBoard-2) - temp;
+			
+			temp = dropZoneX;
+			dropZoneX = (sizeOfBoard-2) - dropZoneY;
+			dropZoneY = temp;
+			
+			
+			break;
+		default:
+			System.out.println("invalid corner input");
+			System.exit(3);
+		}
+	}
 }

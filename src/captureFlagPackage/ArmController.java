@@ -64,7 +64,8 @@ public class ArmController {
 	
 	/**
 	 * Raises the robotic arm
-	 */	public void bringArmUp(int x){
+	 */	
+	public void bringArmUp(int x){
 		if(!isUp){
 			aMotor.rotate(x);
 			isUp = true;

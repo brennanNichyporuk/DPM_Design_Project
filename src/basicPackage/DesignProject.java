@@ -59,30 +59,13 @@ public class DesignProject {
 //					int dropZone_Y = t.dropZone_Y;
 //					int flagType = t.flagType;
 //					int	opponentFlagType = t.opponentFlagType;
-//					
-//					
-//					
-//					try {
-//						Planner planner = new Planner(corner.getId(),opponentHomeZoneBL_X,opponentHomeZoneBL_Y,opponentHomeZoneTR_X,opponentHomeZoneTR_Y,dropZone_X,dropZone_Y,flagType);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					
-//				
+//					//starting corner, opponentHomeZoneLowX, opponentHomeZoneLowY, opponentHomeZoneHighX, opponentHomeZoneHighY, dropZoneX, dropZoneY, flagtype
+//					Planner planner = new Planner(corner.getId(),opponentHomeZoneBL_X,opponentHomeZoneBL_Y,opponentHomeZoneTR_X,opponentHomeZoneTR_Y,dropZone_X,dropZone_Y,flagType);
 //					conn.printTransmission();
 //				}
-				try {
-					//starting corner, opponentHomeZoneLowX, opponentHomeZoneLowY, opponentHomeZoneHighX, opponentHomeZoneHighY, dropZoneX, dropZoneY, flagtype
-					Planner planner = new Planner(1, 0, 0, 0, 0, 0, 0, 0);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		Planner planner = new Planner(1,4,4,6,6,8,4,1);
 				
-				
-				// stall until user decides to end program
-				Button.ESCAPE.waitForPress();
+				Button.waitForAnyPress();
 				System.exit(0);
 		 	}
 }

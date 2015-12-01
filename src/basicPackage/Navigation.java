@@ -79,13 +79,15 @@ public class Navigation extends Thread {
 			rightMotor.forward();
 	}
 
-	public void travelTo (double desiredX, double desiredY) {
+	public void travelTo (double desiredX, double desiredY, boolean useGyro) {
 		leftMotor.setAcceleration(2000);
 		rightMotor.setAcceleration(2000);
 		
-		double[] angleSet = {0,0,gyroCorrecter.correctOrientation()};
-		boolean[] update = {false,false,true};
-		odometer.setPosition(angleSet, update);
+		if(useGyro){
+			double[] angleSet = {0,0,gyroCorrecter.correctOrientation()};
+			boolean[] update = {false,false,true};
+			odometer.setPosition(angleSet, update);
+		}
 		
 		double[] position = odometer.getPosition();
 		double xError = desiredX - position[0];

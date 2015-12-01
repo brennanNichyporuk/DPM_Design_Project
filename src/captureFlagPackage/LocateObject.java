@@ -28,6 +28,7 @@ public class LocateObject extends Thread
 	//Depending on the position of the object
 	private boolean onSide = false;
 	
+	//stores the angle of the robot prior to starting this thread
 	private final double originalRobotAngle;
 
 	/**
@@ -53,11 +54,11 @@ public class LocateObject extends Thread
 		originalRobotAngle = odo.getAng();
 	}
 	
-	public void setOnSide(boolean onSide)
-	{
-		this.onSide = onSide;
-	}
-	
+	/**
+	 * returns true if the object detected is on the side of the robot. returns false if object is in front of the robot
+	 * on side is defined as the object being located at an angle inferior to 20 or greater than 170 relative to the robot
+	 * @return boolean whether or not the block is on the sides of the robot
+	 */
 	public boolean getOnSide()
 	{
 		return onSide;
@@ -104,6 +105,7 @@ public class LocateObject extends Thread
 	}
 	
 	
+	//sweeps the ultrasonic sensor in order to detect objects and calculate their position
 	private boolean sweep()
 	{		
 		us.rotateSensorToWait(-90.0);
@@ -118,9 +120,8 @@ public class LocateObject extends Thread
 						
 		//turn 180 degrees
 		while(us.getSensorAngle() < 90)
-		{
+		{			
 			us.rotateSensorToWait(us.getSensorAngle()+10);
-			
 			double distance = rotateAndScan(us.getSensorAngle());	
 			
 			//get distance value from us
@@ -135,7 +136,7 @@ public class LocateObject extends Thread
 				theta1 = (angle<0) ? (90-Math.abs(angle)) : (Math.abs(angle)+90);
 				
 				//block is angled positioned
-				if(theta1 < 20 || theta1 < 70)
+				if(theta1 < 20 || theta1 > 70)
 				{
 					onSide = true;
 				}
@@ -166,15 +167,13 @@ public class LocateObject extends Thread
 			
 			//reset for next iteration
 			previousDistance = currentDistance;
-			
-		//	try {Thread.sleep(200);} catch (InterruptedException e) {}		//FORMER!!
 		}
 		
 		us.rotateSensorToWait(0.0);
 		return false;
 	}
 	
-
+	//rotates the ultrasonic sensor and fetches distance values
 	private double rotateAndScan(int i) 
 	{
 		double distance;
@@ -193,6 +192,7 @@ public class LocateObject extends Thread
 		return distance;
 	}
 
+	//makes the robot sleep for t seconds
 	private void sleepFor(long t) {
 		try {
 			Thread.sleep(t);
@@ -202,7 +202,7 @@ public class LocateObject extends Thread
 		}
 	}
 		
-	
+	//calculates the location of the object
 	private double[] calculateObjectLocation(double[] a)
 	{
 		double x_mid,y_mid;
