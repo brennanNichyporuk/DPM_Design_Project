@@ -85,7 +85,7 @@ public class IdentifyObject extends Thread
 				{
 					if(justStartedRotating)
 					{
-						us.rotateSensorTo(-90);
+						us.rotateSensorToWait(-90);
 						justStartedRotating = false;
 					}
 					else
@@ -96,7 +96,7 @@ public class IdentifyObject extends Thread
 						{
 							captureFlag.update(ClassID.IDENTIFYOBJECT);
 							justStartedRotating = true;
-							us.rotateSensorTo(0);
+							us.rotateSensorToWait(0);
 							continue;
 						}
 					}
@@ -112,7 +112,7 @@ public class IdentifyObject extends Thread
 				if(objectID!=-1)
 				{
 					//notify CaptureFlag class
-					us.rotateSensorTo(0.0);
+					us.rotateSensorToWait(0.0);
 					didRead = false;
 					captureFlag.update(ClassID.IDENTIFYOBJECT);
 					try {Thread.sleep(500);} catch (InterruptedException e){}
