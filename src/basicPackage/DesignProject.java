@@ -66,6 +66,6 @@ public class DesignProject {
 //				
 //				Button.waitForAnyPress();
 //				System.exit(0);
-		Planner planner = new Planner(1,4,4,6,6,2,2,2);
+		Planner planner = new Planner(1,4,4,6,6,2,2,1);
 		 	}
 }

@@ -65,19 +65,18 @@ public class Planner extends Thread implements IObserver {
 	private static int dropZoneY;
 	public final static int sizeOfBoard = 8;
 	private static int[] goalPoint;
-	
 	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) 
 	{
 		//recording all parameters.
-		Planner.startingCorner = startingCorner;
-		Planner.opponentHomeZoneLowX = opponentHomeZoneLowX;
-		Planner.opponentHomeZoneLowY = opponentHomeZoneLowY;
-		Planner.opponentHomeZoneHighX = opponentHomeZoneHighX;
-		Planner.opponentHomeZoneHighY = opponentHomeZoneHighY;
-		Planner.flagType = flagType;
-		Planner.dropZoneX = dropZoneX;
-		Planner.dropZoneY = dropZoneY;
-		Planner.goalPoint = chooseGoal();
+		Planner.startingCorner = 1;
+		Planner.opponentHomeZoneLowX = 4;
+		Planner.opponentHomeZoneLowY = 4;
+		Planner.opponentHomeZoneHighX = 6;
+		Planner.opponentHomeZoneHighY = 6;
+		Planner.flagType = 2;
+		Planner.dropZoneX = 2;
+		Planner.dropZoneY = 2;
+		Planner.goalPoint = new int[] {5,4};
 		//function which sets all parameters to reflect the starting corner.
 		interpretCompParams();
 		
@@ -118,12 +117,13 @@ public class Planner extends Thread implements IObserver {
 		//odometryCorrecter.CORRECT=true;
 		//sleepFor(2000);
 		//should now be localized.
-		nav.travelTo(0.5*30.48, 0.5*30.48,true);
+		nav.travelTo(1.5*30.48, 1.5*30.48,true);
 		nav.turnTo(90, true);
 		
 		//pilot to bottom corner of a tile.
-		
-		this.pilot = new Pilot(this, nav, odo, uM, 1,1,goalPoint[0]+1,goalPoint[1]);
+		System.out.println(goalPoint[0]);
+		System.out.println(goalPoint[1]);
+		this.pilot = new Pilot(this, nav, odo, uM, 1,1,goalPoint[0],goalPoint[1]);
 		pilot.start();
 		
 
