@@ -107,14 +107,14 @@ public class CaptureFlag extends Thread implements IObserver
 					//If the object is not detected on the side, travel to y, then to x
 					if(!locator.getOnSide())
 					{
-						nav.travelTo(objectsLocation[0], odo.getY());	
-						nav.travelTo(odo.getX(), objectsLocation[1]);	
+						nav.travelTo(objectsLocation[0], odo.getY(),true);	
+						nav.travelTo(odo.getX(), objectsLocation[1],true);	
 					}
 					//Else, travel to x, then to y
 					else
 					{
-						nav.travelTo(odo.getX(), objectsLocation[1]);	
-						nav.travelTo(objectsLocation[0], odo.getY());
+						nav.travelTo(odo.getX(), objectsLocation[1],true);	
+						nav.travelTo(objectsLocation[0], odo.getY(),true);
 					}
 
 					//identify object.
@@ -154,8 +154,8 @@ public class CaptureFlag extends Thread implements IObserver
 					//navigate back to where you were prior to navigating towards object (check for null location. just to be safe)
 					if(locationPreIdentifier != null)
 					{
-						nav.travelTo(odo.getX(), locationPreIdentifier[1]);
-						nav.travelTo(locationPreIdentifier[0], odo.getY());
+						nav.travelTo(odo.getX(), locationPreIdentifier[1],true);
+						nav.travelTo(locationPreIdentifier[0], odo.getY(),true);
 						nav.turnTo(initialPosition[2], true);
 						
 						//reset saved location for next iteration

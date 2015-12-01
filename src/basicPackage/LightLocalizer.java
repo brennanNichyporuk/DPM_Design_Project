@@ -24,17 +24,7 @@ public class LightLocalizer {
 		// drive to location listed in tutorial
 		//System.out.println("initializePosition");
 		//this.initializePosition();
-		
-		
-		//System.out.println("refining odo");
 		this.refineOdometer();
-
-		// when done travel to (0,0) and turn to 0 degrees
-		
-		nav.travelTo(0.0, 0.0);
-		this.nav.turnTo(0.0, true);
-		this.sleep(5000);
-
 	}
 	/**
 	 * executes the circular motion for light localization in order to determine exact position and angle.
@@ -120,7 +110,7 @@ public class LightLocalizer {
 		
 		this.sleep(500);
 
-		nav.travelTo(6.0, 6.0);
+		nav.travelTo(6.0, 6.0,false);
 		nav.turnTo(90, true);
 	}
 

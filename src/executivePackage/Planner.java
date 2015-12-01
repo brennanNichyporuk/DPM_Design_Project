@@ -65,7 +65,7 @@ public class Planner extends Thread implements IObserver {
 	private static int dropZoneY;
 	public final static int sizeOfBoard = 12;
 	
-	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) throws InterruptedException 
+	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) 
 	{
 		//recording all parameters.
 		Planner.startingCorner = startingCorner;
@@ -81,7 +81,7 @@ public class Planner extends Thread implements IObserver {
 		interpretCompParams();
 
 		
-		//initializing motors and various sensors for the trial run.
+		//initializing motors and various sensors
 		EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 		EV3GyroSensor gyro = new EV3GyroSensor(SensorPort.S4);
@@ -111,10 +111,11 @@ public class Planner extends Thread implements IObserver {
 		odometryCorrecter.CORRECT=false;
 		Localization localizer = new Localization(odo, nav, uM, startingCorner, lineDetector);
 		localizer.doLocalization();
+		gyroCorrecter.setGyro(this.odo.getAng());
 		odometryCorrecter.CORRECT=true;
-		
-		//should not be localized.
-		nav.travelTo(0.5*30.48, 0.5*30.48);
+		sleepFor(2000);
+		//should now be localized.
+		nav.travelTo(0.5*30.48, 0.5*30.48,true);
 		nav.turnTo(90, true);
 		
 		//pilot to bottom corner of a tile.
@@ -146,9 +147,9 @@ public class Planner extends Thread implements IObserver {
 //			float[] colorData = new float[colorValue.sampleSize()];
 			ColorDetection cD = new ColorDetection(colorSensor);
 			EV3LargeRegulatedMotor robotArmMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-			nav.travelTo((this.opponentHomeZoneLowX+1)*30.48, this.opponentHomeZoneLowY*30.48);
+			nav.travelTo(1,1,true);
 			nav.turnTo(90, true);
-			this.cF = new CaptureFlag(this.flagType, nav, odo, uM, cD, robotArmMotor);
+			this.cF = new CaptureFlag(flagType, nav, odo, uM, cD, robotArmMotor);
 			this.cF.start();
 		default:
 			System.out.println("UNPLANNED ClassID");

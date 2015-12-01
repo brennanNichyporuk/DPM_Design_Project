@@ -67,7 +67,7 @@ public class PickupObject
 	void discardBlock()
 	{
 		//navigate to drop zone 
-		nav.travelTo(captureFlag.getLocationPreIdentifier()[0], captureFlag.getLocationPreIdentifier()[1]);
+		nav.travelTo(captureFlag.getLocationPreIdentifier()[0], captureFlag.getLocationPreIdentifier()[1],true);
 		
 		nav.moveForward();
 		try {Thread.sleep(nav.cm_to_seconds(10)*1000);} catch (InterruptedException e) {}
