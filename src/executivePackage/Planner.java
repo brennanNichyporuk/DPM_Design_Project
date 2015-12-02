@@ -63,7 +63,7 @@ public class Planner extends Thread implements IObserver {
 	private static int opponentHomeZoneHighY;
 	private static int dropZoneX;
 	private static int dropZoneY;
-	public final static int sizeOfBoard = 8;
+	public final static int sizeOfBoard = 12;
 	private static int[] goalPoint;
 	public Planner(int startingCorner, int opponentHomeZoneLowX, int opponentHomeZoneLowY, int opponentHomeZoneHighX,int opponentHomeZoneHighY, int dropZoneX, int dropZoneY,int flagType) 
 	{
