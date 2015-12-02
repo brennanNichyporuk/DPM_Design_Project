@@ -95,8 +95,8 @@ public class Planner extends Thread implements IObserver {
 		this.nav = new Navigation(odo, leftMotor, rightMotor, 4, 6,this.odo.leftRadius, this.odo.rightRadius, this.odo.width,gyroCorrecter,odometryCorrecter);
 		
 		//displays current location on odometer if not commented out.
-		LCDInfo lcd = new LCDInfo(odo);
-		lcd.timedOut();
+		//LCDInfo lcd = new LCDInfo(odo);
+		//lcd.timedOut();
 		
 		
 		//intializing the ultrasonic sensor module.

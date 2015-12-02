@@ -24,7 +24,7 @@ public class Mapper extends Thread {
 	private final int minDerivativeChange = 6;
 	private int scanBand = 90;
 	private final int scanIncrement = 5;
-	private final int mapSize = 8;
+	private final int mapSize = 12;
 	private boolean active;
 	private boolean objectDetected;
 	private boolean odd;
